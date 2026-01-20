@@ -217,7 +217,12 @@ class DataCollector:
         API: https://aqicn.org/api/
         """
         if cities is None:
-            cities = ["Paris", "Marseille", "Lyon", "Lille", "Toulouse", "Nice", "Nantes", "Strasbourg", "Bordeaux", "Rennes"]
+            cities = [
+                "Paris", "Marseille", "Lyon", "Lille", "Toulouse", 
+                "Nice", "Nantes", "Strasbourg", "Bordeaux", "Rennes",
+                "Montpellier", "Grenoble", "Rouen", "Clermont-Ferrand", "Nancy",
+                "Metz", "Tours", "Orleans", "Dijon", "Angers"
+            ]
 
         logger.info(f"💨 Collecte WAQI (Qualité air) pour {len(cities)} villes...")
         
