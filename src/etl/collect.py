@@ -1,6 +1,6 @@
 """
 COLLECT: Récupère données de 3 sources
-- Légifrance (API)
+- Code du Travail (Scraping CDTN)
 - INRS (Web scraping)
 - ARIA (Open data)
 - WAQI (API temps réel)
@@ -25,19 +25,35 @@ class DataCollector:
     
     # =========================================================================
     # SOURCE 1: CODE DU TRAVAIL NUMÉRIQUE (API CDTN)
-    # Remplaçant de Légifrance/PISTE qui sont bloqués/complexes
+    # Remplaçant de l'API précédente
     # =========================================================================
     
-    def collect_legifrance(self) -> pd.DataFrame:
+    def collect_code_travail(self) -> pd.DataFrame:
         """Récupère articles R4222 via Scraping Code du Travail Numérique (HTML)"""
         
         logger.info("📜 Collecte Articles (via Scraping code.travail.gouv.fr)...")
         
-        base_url = "https://code.travail.gouv.fr/code-du-travail"
+        base_url = self.settings.CDTN_BASE_URL
         
         articles_cibles = [
+            # Aération / Assainissement
             "R4222-1", "R4222-2", "R4222-3", "R4222-4", "R4222-5",
-            "R4222-6", "R4222-10", "R4222-11", "R4222-12", "R4222-13"
+            "R4222-6", "R4222-10", "R4222-11", "R4222-12", "R4222-13",
+            "R4222-14", "R4222-15", "R4222-16", "R4222-17", "R4222-18",
+            "R4222-19", "R4222-20", "R4222-21", "R4222-22", "R4222-23",
+            "R4222-24", "R4222-25", "R4222-26",
+            
+            # Ambiance physique (Lumière/Aération/Bruit lié aux locaux)
+            "R4212-1", "R4212-2", "R4212-3", "R4212-4", "R4212-5", "R4212-6", "R4212-7",
+
+            # Risques Chimiques & VLEP (Seuils)
+            "R4412-149", "R4412-150", "R4412-152", "R4412-154",
+            
+            # Poussières
+            "R4412-156", "R4412-157", "R4412-158", "R4412-159", "R4412-160",
+            
+            # Amiante
+            "R4412-97"
         ]
         
         data_collected = []
@@ -85,17 +101,17 @@ class DataCollector:
         df = pd.DataFrame(data_collected)
         
         if not df.empty:
-            df.to_csv(self.raw_dir / "legifrance.csv", index=False)
+            df.to_csv(self.raw_dir / "code_travail.csv", index=False)
             logger.info(f"✅ Code du Travail: {len(df)} articles collectés via CDTN Web\n")
         else:
             logger.warning("⚠️ Aucun article collecté via CDTN Web.\n")
         
         return df
 
-    # Méthodes obsolètes (supprimées ou gardées en comment si besoin, ici je remplace tout)
-    def _get_legifrance_token(self): pass
-    def _scrape_legifrance_fallback(self): pass
-    def _get_mock_legifrance_data(self): pass
+    # Méthodes obsolètes (supprimées)
+    # def _get_code_travail_token(self): pass
+    # def _scrape_code_travail_fallback(self): pass
+    # def _get_mock_code_travail_data(self): pass
 
     
     # =========================================================================
@@ -103,14 +119,19 @@ class DataCollector:
     # =========================================================================
     
     def collect_inrs(self) -> pd.DataFrame:
-        """Scrape guides INRS"""
+        """Récupère guides INRS via Web Scraping"""
         
-        logger.info("📚 Collecte INRS (Web Scraping)...")
+        logger.info("📚 Collecte Guides INRS (via Scraping)...")
         
         guides = []
+        base_url = self.settings.INRS_BASE_URL
+        
+        # URLs de départ pour la recherche de guides
         urls = [
-            "https://www.inrs.fr/risques/air-interieur/ce-qu-il-faut-retenir.html",
-            "https://www.inrs.fr/risques/air-interieur/identification-risques.html",
+            f"{base_url}/risques/aeration-assainissement-locaux-travail/ce-qu-il-faut-retenir.html",
+            f"{base_url}/risques/chimiques/ce-qu-il-faut-retenir.html",
+            f"{base_url}/risques/bruit/ce-qu-il-faut-retenir.html",
+            f"{base_url}/risques/biologiques/ce-qu-il-faut-retenir.html"
         ]
         
         headers = {'User-Agent': self.settings.SCRAPER_USER_AGENT}

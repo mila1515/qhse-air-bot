@@ -20,8 +20,8 @@ def main():
     try:
         collector = DataCollector()
         
-        # 1. Légifrance
-        collector.collect_legifrance()
+        # 1. Code du Travail
+        collector.collect_code_travail()
         
         # 2. INRS
         collector.collect_inrs()

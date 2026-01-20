@@ -2,8 +2,8 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, Float, Date
 from sqlalchemy.sql import func
 from src.db.session import Base
 
-class ArticleLegifrance(Base):
-    __tablename__ = "articles_legifrance"
+class ArticleCodeTravail(Base):
+    __tablename__ = "articles_code_travail"
 
     id = Column(Integer, primary_key=True, index=True)
     article_ref = Column(String, unique=True, index=True)

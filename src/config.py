@@ -12,10 +12,14 @@ class Settings(BaseSettings):
     SCRAPER_TIMEOUT: int = 10
     SCRAPER_DELAY: int = 2
     
+    # External URLs (Public)
+    CDTN_BASE_URL: str = "https://code.travail.gouv.fr/code-du-travail"
+    INRS_BASE_URL: str = "https://www.inrs.fr"
+    
     # API Keys & Tokens
-    LEGIFRANCE_API_KEY: str
-    LEGIFRANCE_CLIENT_ID: str
-    LEGIFRANCE_CLIENT_SECRET: str
+    # LEGIFRANCE_API_KEY: str # Obsolète - Remplacé par Scraping CDTN
+    # LEGIFRANCE_CLIENT_ID: str # Obsolète
+    # LEGIFRANCE_CLIENT_SECRET: str # Obsolète
     WAQI_API_TOKEN: str
 
     # Database

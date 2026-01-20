@@ -8,9 +8,8 @@ from src.config import get_settings
 import os
 
 settings = get_settings()
-print(f"Loaded LEGIFRANCE_API_KEY: {settings.LEGIFRANCE_API_KEY}")
-print(f"First 4 chars: {settings.LEGIFRANCE_API_KEY[:4]}")
-print(f"Is default? {settings.LEGIFRANCE_API_KEY == 'your_key_here'}")
+print(f"Loaded APP_NAME: {settings.APP_NAME}")
+print(f"Loaded CDTN_BASE_URL: {settings.CDTN_BASE_URL}")
 
 # Check if .env exists
 print(f".env exists: {os.path.exists('.env')}")

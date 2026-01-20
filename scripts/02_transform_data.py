@@ -21,7 +21,7 @@ def main():
         transformer = DataTransformer()
         
         # Exécution des transformations
-        transformer.transform_legifrance()
+        transformer.transform_code_travail()
         transformer.transform_inrs()
         transformer.transform_aria()
         transformer.transform_waqi()

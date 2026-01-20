@@ -26,7 +26,7 @@ def main():
         loader = DataLoader()
         
         # Exécution des chargements
-        loader.load_legifrance()
+        loader.load_code_travail()
         loader.load_inrs()
         loader.load_waqi()
         loader.load_aria()

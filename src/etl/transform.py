@@ -11,14 +11,14 @@ class DataTransformer:
         self.processed_dir = Path("data/processed")
         self.processed_dir.mkdir(parents=True, exist_ok=True)
         
-    def transform_legifrance(self) -> pd.DataFrame:
+    def transform_code_travail(self) -> pd.DataFrame:
         """Nettoie les articles du Code du Travail"""
-        input_file = self.raw_dir / "legifrance.csv"
+        input_file = self.raw_dir / "code_travail.csv"
         if not input_file.exists():
-            logger.warning("⚠️ Transform Légifrance impossible: Fichier brut manquant")
+            logger.warning("⚠️ Transform Code du Travail impossible: Fichier brut manquant")
             return pd.DataFrame()
             
-        logger.info("🛠️ Transformation Légifrance...")
+        logger.info("🛠️ Transformation Code du Travail...")
         df = pd.read_csv(input_file)
         
         # Nettoyage
@@ -29,9 +29,9 @@ class DataTransformer:
         df['type'] = "REGLEMENTATION"
         df['processed_at'] = pd.Timestamp.now()
         
-        output_file = self.processed_dir / "legifrance_cleaned.csv"
+        output_file = self.processed_dir / "code_travail_cleaned.csv"
         df.to_csv(output_file, index=False)
-        logger.info(f"✅ Légifrance nettoyé: {len(df)} articles -> {output_file}")
+        logger.info(f"✅ Code du Travail nettoyé: {len(df)} articles -> {output_file}")
         return df
 
     def transform_inrs(self) -> pd.DataFrame:
@@ -147,7 +147,7 @@ class DataTransformer:
 
 if __name__ == "__main__":
     transformer = DataTransformer()
-    transformer.transform_legifrance()
+    transformer.transform_code_travail()
     transformer.transform_inrs()
     transformer.transform_aria()
     transformer.transform_waqi()

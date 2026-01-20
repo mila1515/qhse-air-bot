@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 from sqlalchemy.orm import Session
 from src.db.session import SessionLocal, engine, Base
-from src.db.models import ArticleLegifrance, GuideINRS, AccidentARIA, MesureWAQI
+from src.db.models import ArticleCodeTravail, GuideINRS, AccidentARIA, MesureWAQI
 from src.monitoring.logger import logger
 
 class DataLoader:
@@ -14,18 +14,18 @@ class DataLoader:
         Base.metadata.create_all(bind=engine)
         self.db: Session = SessionLocal()
 
-    def load_legifrance(self):
-        """Charge les articles Légifrance"""
-        input_file = self.processed_dir / "legifrance_cleaned.csv"
+    def load_code_travail(self):
+        """Charge les articles Code du Travail"""
+        input_file = self.processed_dir / "code_travail_cleaned.csv"
         if not input_file.exists(): return
 
-        logger.info("💾 Chargement Légifrance en BDD...")
+        logger.info("💾 Chargement Code du Travail en BDD...")
         df = pd.read_csv(input_file)
         
         count = 0
         for _, row in df.iterrows():
             # Upsert (Insert ou Update si existe déjà)
-            existing = self.db.query(ArticleLegifrance).filter_by(article_ref=row['article_ref']).first()
+            existing = self.db.query(ArticleCodeTravail).filter_by(article_ref=row['article_ref']).first()
             
             data = {
                 "article_ref": row['article_ref'],
@@ -40,12 +40,12 @@ class DataLoader:
                 for key, value in data.items():
                     setattr(existing, key, value)
             else:
-                article = ArticleLegifrance(**data)
+                article = ArticleCodeTravail(**data)
                 self.db.add(article)
                 count += 1
         
         self.db.commit()
-        logger.info(f"✅ Légifrance: {count} nouveaux articles insérés (Total traité: {len(df)})")
+        logger.info(f"✅ Code du Travail: {count} nouveaux articles insérés (Total traité: {len(df)})")
 
     def load_inrs(self):
         """Charge les guides INRS"""
