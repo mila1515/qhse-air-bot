@@ -13,10 +13,28 @@ class Settings(BaseSettings):
     SCRAPER_DELAY: int = 2
     
     # API Keys & Tokens
-    LEGIFRANCE_API_KEY: str = "your_key_here"  # Token OAuth (access_token)
-    LEGIFRANCE_CLIENT_ID: str = ""
-    LEGIFRANCE_CLIENT_SECRET: str = ""
-    WAQI_API_TOKEN: str = "demo"
+    LEGIFRANCE_API_KEY: str
+    LEGIFRANCE_CLIENT_ID: str
+    LEGIFRANCE_CLIENT_SECRET: str
+    WAQI_API_TOKEN: str
+
+    # Database
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
+    POSTGRES_HOST: str = "localhost"
+    POSTGRES_PORT: str = "5432"
+
+    @property
+    def DATABASE_URL(self) -> str:
+        # Priorité à la variable d'environnement complète si elle existe
+        import os
+        env_url = os.getenv("DATABASE_URL")
+        if env_url:
+            return env_url
+            
+        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+
     
     # Paths
     BASE_DIR: Path = Path(__file__).resolve().parent.parent

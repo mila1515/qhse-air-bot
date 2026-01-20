@@ -24,105 +24,78 @@ class DataCollector:
         self.raw_dir.mkdir(parents=True, exist_ok=True)
     
     # =========================================================================
-    # SOURCE 1: LÉGIFRANCE API (PISTE)
+    # SOURCE 1: CODE DU TRAVAIL NUMÉRIQUE (API CDTN)
+    # Remplaçant de Légifrance/PISTE qui sont bloqués/complexes
     # =========================================================================
     
-    def _get_legifrance_token(self) -> str:
-        """Récupère le token OAuth PISTE"""
-        token_url = "https://oauth.piste.gouv.fr/api/oauth/token"
+    def collect_legifrance(self) -> pd.DataFrame:
+        """Récupère articles R4222 via Scraping Code du Travail Numérique (HTML)"""
         
-        data = {
-            "grant_type": "client_credentials",
-            "scope": "openid"
-        }
+        logger.info("📜 Collecte Articles (via Scraping code.travail.gouv.fr)...")
         
-        from requests.auth import HTTPBasicAuth
+        base_url = "https://code.travail.gouv.fr/code-du-travail"
         
-        try:
-            response = requests.post(
-                token_url, 
-                data=data, 
-                auth=HTTPBasicAuth(self.settings.LEGIFRANCE_CLIENT_ID, self.settings.LEGIFRANCE_CLIENT_SECRET),
-                timeout=self.settings.SCRAPER_TIMEOUT
-            )
-            response.raise_for_status()
-            return response.json().get("access_token")
-        except Exception as e:
-            # On log en warning car on a un fallback
-            logger.warning(f"⚠️ Authentification PISTE échouée: {e}")
-            return None
-
-    def _scrape_legifrance_fallback(self) -> pd.DataFrame:
-        """Fallback: Scrape ou simule les données si l'API échoue"""
-        logger.info("🕷️ Tentative de scraping direct (Fallback)...")
+        articles_cibles = [
+            "R4222-1", "R4222-2", "R4222-3", "R4222-4", "R4222-5",
+            "R4222-6", "R4222-10", "R4222-11", "R4222-12", "R4222-13"
+        ]
         
-        # URL de la section "Aération et assainissement"
-        url = "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000018485334/"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
+        data_collected = []
+        headers = {'User-Agent': self.settings.SCRAPER_USER_AGENT}
         
-        articles = []
-        try:
-            response = requests.get(url, headers=headers, timeout=self.settings.SCRAPER_TIMEOUT)
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.content, 'html.parser')
+        for art_ref in articles_cibles:
+            url = f"{base_url}/{art_ref.lower()}"
+            
+            try:
+                response = requests.get(url, headers=headers, timeout=self.settings.SCRAPER_TIMEOUT)
                 
-                # Recherche des liens vers les articles R4222-*
-                # Légifrance charge beaucoup en JS, mais les liens sont souvent dans le HTML initial
-                links = soup.find_all('a', href=True)
-                r4222_links = [l for l in links if 'R4222' in l.get_text()]
-                
-                if r4222_links:
-                    logger.info(f"✅ {len(r4222_links)} articles trouvés via scraping simple.")
-                    for link in r4222_links[:10]: # Limite à 10 pour le test
-                        text = link.get_text(strip=True)
-                        articles.append({
-                            "article_ref": text.split()[0] if ' ' in text else text, # Ex: "R4222-1"
-                            "titre": text,
-                            "source": "Légifrance (Scraping)",
-                            "contenu": f"Contenu de {text} (Nécessite navigation JS pour détail complet)",
+                if response.status_code == 200:
+                    soup = BeautifulSoup(response.content, 'html.parser')
+                    
+                    # Extraction du titre
+                    titre_tag = soup.find('h1')
+                    titre = titre_tag.get_text(strip=True) if titre_tag else f"Article {art_ref}"
+                    
+                    # Extraction du contenu (souvent dans une div spécifique sur CDTN)
+                    # CDTN structure change parfois, on cherche large
+                    content_div = soup.find('div', class_=lambda x: x and 'html' in x) or soup.find('main')
+                    
+                    if content_div:
+                        contenu = content_div.get_text(strip=True)[:1000] # On limite la taille
+                        
+                        data_collected.append({
+                            "article_ref": art_ref,
+                            "titre": titre,
+                            "contenu": contenu,
+                            "url": url,
+                            "source": "CDTN (Scraping Web)",
                             "date_collecte": pd.Timestamp.now()
                         })
+                        logger.info(f"  ✅ {art_ref} trouvé")
+                    else:
+                        logger.warning(f"  ⚠️ Contenu non trouvé pour {art_ref}")
                 else:
-                    logger.warning("⚠️ Aucun article trouvé dans le HTML statique.")
-                    # Pas de mock, on renvoie vide
-                    return pd.DataFrame()
-            else:
-                 logger.warning(f"⚠️ Scraping impossible: Status {response.status_code}")
-                 # Pas de mock, on renvoie vide
-                 return pd.DataFrame()
-                 
-        except Exception as e:
-            logger.error(f"❌ Erreur scraping: {e}")
-            # Pas de mock, on renvoie vide
-            return pd.DataFrame()
-            
-        return pd.DataFrame(articles)
+                    logger.warning(f"  ⚠️ Erreur {response.status_code} pour {url}")
+                    
+            except Exception as e:
+                logger.error(f"  ❌ Erreur {art_ref}: {e}")
+                
+            time.sleep(0.5)
 
-    def _get_mock_legifrance_data(self) -> pd.DataFrame:
-        """DEPRECATED: Données de secours désactivées à la demande de l'utilisateur."""
-        return pd.DataFrame()
+        df = pd.DataFrame(data_collected)
+        
+        if not df.empty:
+            df.to_csv(self.raw_dir / "legifrance.csv", index=False)
+            logger.info(f"✅ Code du Travail: {len(df)} articles collectés via CDTN Web\n")
+        else:
+            logger.warning("⚠️ Aucun article collecté via CDTN Web.\n")
+        
+        return df
 
-    def collect_legifrance(self) -> pd.DataFrame:
-        """Récupère articles R4222 via API Légifrance (PISTE) ou Fallback"""
-        
-        logger.info("📜 Collecte LÉGIFRANCE...")
-        
-        token = self._get_legifrance_token()
-        
-        # Si pas de token, on passe direct au fallback
-        if not token:
-            return self._scrape_legifrance_fallback()
-
-        # Si on a un token, on essaie l'API (Code existant simplifié)
-        # Pour l'instant, vu les problèmes API, on va juste logger le succès auth et passer au fallback
-        # ou simuler si l'auth marche.
-        
-        logger.info("✅ Authentification API PISTE réussie ! (Mais endpoint complexe)")
-        # On utilise quand même le fallback/mock pour avoir des données
-        # car l'implémentation API complète demande les CIDs précis.
-        return self._scrape_legifrance_fallback()
+    # Méthodes obsolètes (supprimées ou gardées en comment si besoin, ici je remplace tout)
+    def _get_legifrance_token(self): pass
+    def _scrape_legifrance_fallback(self): pass
+    def _get_mock_legifrance_data(self): pass
 
     
     # =========================================================================
@@ -217,29 +190,68 @@ class DataCollector:
     # SOURCE 4: WAQI (API Qualité Air)
     # =========================================================================
     
-    def collect_waqi(self, location: str = "Lille") -> Dict:
-        """Récupère qualité air temps réel"""
+    def collect_waqi(self, cities: List[str] = None) -> pd.DataFrame:
+        """
+        Récupère qualité air temps réel pour une liste de villes.
+        API: https://aqicn.org/api/
+        """
+        if cities is None:
+            cities = ["Paris", "Marseille", "Lyon", "Lille", "Toulouse", "Nice", "Nantes", "Strasbourg", "Bordeaux", "Rennes"]
+
+        logger.info(f"💨 Collecte WAQI (Qualité air) pour {len(cities)} villes...")
         
-        logger.info(f"💨 Collecte WAQI (Qualité air - {location})...")
+        data_collected = []
         
-        try:
-            url = f"https://api.waqi.info/feed/{location}/?token={self.settings.WAQI_API_TOKEN}"
-            response = requests.get(url, timeout=self.settings.SCRAPER_TIMEOUT)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("status") == "ok":
-                    logger.info(f"  ✅ AQI: {data['data']['aqi']} (Station: {data['data']['city']['name']})")
-                    return data['data']
+        for city in cities:
+            try:
+                # Utilisation du endpoint search pour trouver la station la plus pertinente ou feed direct
+                # Feed direct est plus simple: feed/:city/?token=:token
+                url = f"https://api.waqi.info/feed/{city}/?token={self.settings.WAQI_API_TOKEN}"
+                response = requests.get(url, timeout=self.settings.SCRAPER_TIMEOUT)
+                
+                if response.status_code == 200:
+                    res_json = response.json()
+                    if res_json.get("status") == "ok":
+                        data = res_json['data']
+                        
+                        # Extraction des polluants spécifiques (iaqi)
+                        iaqi = data.get('iaqi', {})
+                        
+                        entry = {
+                            "date_collecte": pd.Timestamp.now(),
+                            "ville_recherchee": city,
+                            "station_nom": data.get('city', {}).get('name'),
+                            "aqi": data.get('aqi'), # Indice global
+                            "pm25": iaqi.get('pm25', {}).get('v'),
+                            "pm10": iaqi.get('pm10', {}).get('v'),
+                            "no2": iaqi.get('no2', {}).get('v'),
+                            "o3": iaqi.get('o3', {}).get('v'),
+                            "so2": iaqi.get('so2', {}).get('v'),
+                            "url_source": data.get('city', {}).get('url'),
+                            "lat": data.get('city', {}).get('geo', [None, None])[0],
+                            "lon": data.get('city', {}).get('geo', [None, None])[1]
+                        }
+                        data_collected.append(entry)
+                        logger.info(f"  ✅ {city}: AQI={entry['aqi']}")
+                    else:
+                        logger.warning(f"  ⚠️ {city}: Erreur API ({res_json.get('data')})")
                 else:
-                    logger.warning(f"  ⚠️ Erreur API WAQI: {data.get('data')}")
-            else:
-                 logger.warning(f"  ⚠️ HTTP Error: {response.status_code}")
-                 
-        except Exception as e:
-            logger.error(f"  ❌ Erreur WAQI: {e}")
+                     logger.warning(f"  ⚠️ {city}: HTTP Error {response.status_code}")
+                
+                time.sleep(0.5) # Respect rate limits
+                     
+            except Exception as e:
+                logger.error(f"  ❌ Erreur WAQI {city}: {e}")
             
-        return {}
+        df = pd.DataFrame(data_collected)
+        
+        if not df.empty:
+            df.to_csv(self.raw_dir / "waqi.csv", index=False)
+            logger.info(f"✅ WAQI: Données collectées pour {len(df)} villes -> {self.raw_dir / 'waqi.csv'}\n")
+        else:
+            logger.warning("⚠️ Aucune donnée WAQI collectée.\n")
+            
+        return df
 
 if __name__ == "__main__":
     # Test rapide si exécuté directement

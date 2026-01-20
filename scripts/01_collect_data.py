@@ -29,8 +29,8 @@ def main():
         # 3. ARIA
         collector.collect_aria()
         
-        # 4. WAQI (Optionnel pour test)
-        # collector.collect_waqi()
+        # 4. WAQI (Qualité Air)
+        collector.collect_waqi()
         
         logger.info("🎉 Collecte terminée avec succès !")
         

@@ -19,7 +19,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copier le code source
 COPY src/ src/
 COPY scripts/ scripts/
-COPY .env .env 2>/dev/null || true
 
 # Créer répertoires de données et logs
 RUN mkdir -p data/raw data/processed data/cache logs
