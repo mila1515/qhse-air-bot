@@ -1,12 +1,11 @@
-from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-from typing import List
+from fastapi import FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
+from sqlalchemy import text
 
-from src.db.session import SessionLocal, engine
-from src.db.models import Base, ArticleCodeTravail, GuideINRS, AccidentARIA, MesureWAQI
-from src.api import models as schemas
+from src.db.session import engine, SessionLocal
+from src.db.models import Base
+from src.api import endpoints
+from src.monitoring.api_metrics import DB_CONNECTION_STATUS
 
 # Création des tables (si pas encore fait)
 Base.metadata.create_all(bind=engine)
@@ -18,18 +17,11 @@ app = FastAPI(
 )
 
 # Instrumentation Prometheus (Métriques API)
-print("DEBUG: Exposing metrics...")
 instrumentator = Instrumentator().instrument(app)
 instrumentator.expose(app, endpoint="/metrics", include_in_schema=True)
-print("DEBUG: Metrics exposed.")
 
-# Dépendance pour la session BDD
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Inclusion des routes
+app.include_router(endpoints.router)
 
 # --- Endpoints de Base ---
 
@@ -39,45 +31,18 @@ def read_root():
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok"}
-
-# --- Endpoints Métier (C5: API REST) ---
-
-@app.get("/articles/", response_model=List[schemas.ArticleRead])
-def read_articles(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """Récupère la liste des articles de loi (Code du Travail)"""
-    articles = db.query(ArticleCodeTravail).offset(skip).limit(limit).all()
-    return articles
-
-@app.get("/guides/", response_model=List[schemas.GuideRead])
-def read_guides(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """Récupère les guides INRS"""
-    guides = db.query(GuideINRS).offset(skip).limit(limit).all()
-    return guides
-
-@app.get("/accidents/", response_model=List[schemas.AccidentRead])
-def read_accidents(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """Récupère les accidents industriels (ARIA)"""
-    accidents = db.query(AccidentARIA).offset(skip).limit(limit).all()
-    return accidents
-
-@app.get("/waqi/", response_model=List[schemas.WaqiRead])
-def read_waqi(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """Récupère les mesures de qualité de l'air"""
-    measures = db.query(MesureWAQI).offset(skip).limit(limit).all()
-    return measures
-
-# --- Endpoint SQL Complexe (C2: Extraction SQL avancée) ---
-
-@app.get("/stats/risks", response_model=List[schemas.RiskStats])
-def get_risk_stats(db: Session = Depends(get_db)):
-    """
-    Agrégation SQL complexe : Compte le nombre de mesures par niveau de risque.
-    Equivalent SQL : SELECT niveau_risque, COUNT(*) FROM mesures_waqi GROUP BY niveau_risque;
-    """
-    results = db.query(
-        MesureWAQI.niveau_risque, 
-        func.count(MesureWAQI.id).label("count")
-    ).group_by(MesureWAQI.niveau_risque).all()
-    
-    return [{"niveau_risque": r[0], "count": r[1]} for r in results]
+    """Vérifie l'état de l'API et de la connexion BDD"""
+    try:
+        # Test de connexion DB simple (SELECT 1)
+        db = SessionLocal()
+        db.execute(text("SELECT 1"))
+        db.close()
+        
+        # Mise à jour de la métrique : 1 = OK
+        DB_CONNECTION_STATUS.set(1)
+        return {"status": "ok", "db": "connected"}
+        
+    except Exception as e:
+        # Mise à jour de la métrique : 0 = KO
+        DB_CONNECTION_STATUS.set(0)
+        return {"status": "degraded", "db": "disconnected", "error": str(e)}
