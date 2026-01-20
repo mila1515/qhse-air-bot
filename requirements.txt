@@ -1,0 +1,27 @@
+# Data Collection & Processing
+requests
+pandas
+pdfplumber
+validators
+openpyxl
+python-dotenv
+beautifulsoup4
+
+# API & Server
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+
+# Database
+sqlalchemy
+psycopg2-binary
+
+# Monitoring
+prometheus-client
+prometheus-fastapi-instrumentator
+loguru
+
+# Testing
+pytest
+httpx
