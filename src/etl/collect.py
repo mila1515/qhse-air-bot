@@ -218,10 +218,19 @@ class DataCollector:
         """
         if cities is None:
             cities = [
+                # Top 20 (Déjà présents)
                 "Paris", "Marseille", "Lyon", "Lille", "Toulouse", 
                 "Nice", "Nantes", "Strasbourg", "Bordeaux", "Rennes",
                 "Montpellier", "Grenoble", "Rouen", "Clermont-Ferrand", "Nancy",
-                "Metz", "Tours", "Orleans", "Dijon", "Angers"
+                "Metz", "Tours", "Orleans", "Dijon", "Angers",
+                
+                # +30 Villes supplémentaires (Total 50)
+                "Le Havre", "Brest", "Limoges", "Amiens", "Perpignan",
+                "Besancon", "Boulogne-Billancourt", "Annecy", "Saint-Denis", "Argenteuil",
+                "Mulhouse", "Montreuil", "Caen", "Saint-Paul", "Roubaix",
+                "Tourcoing", "Nanterre", "Avignon", "Vitry-sur-Seine", "Creteil",
+                "Poitiers", "Dunkerque", "Aubervilliers", "Versailles", "Colombes",
+                "Asnieres-sur-Seine", "Aulnay-sous-Bois", "Courbevoie", "Cherbourg", "Reims"
             ]
 
         logger.info(f"💨 Collecte WAQI (Qualité air) pour {len(cities)} villes...")
@@ -282,7 +291,7 @@ class DataCollector:
 if __name__ == "__main__":
     # Test rapide si exécuté directement
     collector = DataCollector()
-    collector.collect_legifrance()
+    collector.collect_code_travail()
     collector.collect_inrs()
     collector.collect_aria()
     collector.collect_waqi()

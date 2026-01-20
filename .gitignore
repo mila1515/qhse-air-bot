@@ -9,3 +9,4 @@ logs/
 data/
 !data/.gitkeep
 .DS_Store
+PROJECT_DETAILS.md
