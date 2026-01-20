@@ -13,6 +13,7 @@ sys.path.append(str(project_root))
 
 from src.etl.collect import DataCollector
 from src.monitoring.logger import logger
+from src.monitoring.metrics import push_metrics
 
 def main():
     logger.info("🚀 Démarrage du script de collecte...")
@@ -37,6 +38,8 @@ def main():
     except Exception as e:
         logger.error(f"❌ Erreur critique lors de la collecte : {e}")
         raise e
+    finally:
+        push_metrics()
 
 if __name__ == "__main__":
     main()

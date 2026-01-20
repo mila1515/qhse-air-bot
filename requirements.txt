@@ -19,6 +19,7 @@ psycopg2-binary
 
 # Monitoring
 prometheus-client
+prometheus-fastapi-instrumentator
 loguru
 
 # Testing

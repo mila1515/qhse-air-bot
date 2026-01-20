@@ -13,6 +13,7 @@ sys.path.append(str(project_root))
 
 from src.etl.transform import DataTransformer
 from src.monitoring.logger import logger
+from src.monitoring.metrics import push_metrics
 
 def main():
     logger.info("🚀 Démarrage du script de transformation...")
@@ -31,6 +32,8 @@ def main():
     except Exception as e:
         logger.error(f"❌ Erreur critique lors de la transformation : {e}")
         raise e
+    finally:
+        push_metrics()
 
 if __name__ == "__main__":
     main()

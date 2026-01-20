@@ -13,6 +13,7 @@ from typing import List, Dict
 from pathlib import Path
 from bs4 import BeautifulSoup
 from src.monitoring.logger import logger
+from src.monitoring.metrics import record_etl_error, record_processed_rows
 from src.config import get_settings
 
 class DataCollector:
@@ -90,11 +91,14 @@ class DataCollector:
                         logger.info(f"  ✅ {art_ref} trouvé")
                     else:
                         logger.warning(f"  ⚠️ Contenu non trouvé pour {art_ref}")
+                        record_etl_error('cdtn')
                 else:
                     logger.warning(f"  ⚠️ Erreur {response.status_code} pour {url}")
+                    record_etl_error('cdtn')
                     
             except Exception as e:
                 logger.error(f"  ❌ Erreur {art_ref}: {e}")
+                record_etl_error('cdtn')
                 
             time.sleep(0.5)
 
@@ -103,8 +107,10 @@ class DataCollector:
         if not df.empty:
             df.to_csv(self.raw_dir / "code_travail.csv", index=False)
             logger.info(f"✅ Code du Travail: {len(df)} articles collectés via CDTN Web\n")
+            record_processed_rows('cdtn', 'collect', len(df))
         else:
             logger.warning("⚠️ Aucun article collecté via CDTN Web.\n")
+            record_etl_error('cdtn_global')
         
         return df
 
@@ -154,9 +160,11 @@ class DataCollector:
                     logger.info(f"  ✅ {title_text[:50]}")
                 else:
                     logger.warning(f"  ⚠️ {url}: Status {response.status_code}")
+                    record_etl_error('inrs')
             
             except Exception as e:
                 logger.error(f"  ❌ {url}: {e}")
+                record_etl_error('inrs')
             
             time.sleep(self.settings.SCRAPER_DELAY)
         
@@ -164,8 +172,10 @@ class DataCollector:
         if not df.empty:
             df.to_csv(self.raw_dir / "inrs.csv", index=False)
             logger.info(f"✅ INRS: {len(df)} guides collectés\n")
+            record_processed_rows('inrs', 'collect', len(df))
         else:
             logger.warning("⚠️ Aucun guide INRS collecté\n")
+            record_etl_error('inrs_global')
             
         return df
     
@@ -197,8 +207,10 @@ class DataCollector:
                 # Encoding latin-1 pour gérer les accents
                 df = pd.read_csv(aria_raw_path, delimiter=';', skiprows=7, on_bad_lines='skip', encoding='latin-1')
                 logger.info(f"✅ ARIA: {len(df)} lignes chargées")
+                record_processed_rows('aria', 'collect', len(df))
             except Exception as e:
                 logger.error(f"❌ Erreur lecture ARIA: {e}")
+                record_etl_error('aria')
                 df = pd.DataFrame()
 
         if not df.empty:
@@ -229,7 +241,7 @@ class DataCollector:
                 "Besancon", "Boulogne-Billancourt", "Annecy", "Saint-Denis", "Argenteuil",
                 "Mulhouse", "Montreuil", "Caen", "Saint-Paul", "Roubaix",
                 "Tourcoing", "Nanterre", "Avignon", "Vitry-sur-Seine", "Creteil",
-                "Poitiers", "Dunkerque", "Aubervilliers", "Versailles", "Colombes",
+                "Poitiers", "Dunkerque", "Aubervilliers", "Le Mans", "Colombes",
                 "Asnieres-sur-Seine", "Aulnay-sous-Bois", "Courbevoie", "Cherbourg", "Reims"
             ]
 
@@ -270,21 +282,26 @@ class DataCollector:
                         logger.info(f"  ✅ {city}: AQI={entry['aqi']}")
                     else:
                         logger.warning(f"  ⚠️ {city}: Erreur API ({res_json.get('data')})")
+                        record_etl_error('waqi')
                 else:
                      logger.warning(f"  ⚠️ {city}: HTTP Error {response.status_code}")
+                     record_etl_error('waqi')
                 
                 time.sleep(0.5) # Respect rate limits
                      
             except Exception as e:
                 logger.error(f"  ❌ Erreur WAQI {city}: {e}")
+                record_etl_error('waqi')
             
         df = pd.DataFrame(data_collected)
         
         if not df.empty:
             df.to_csv(self.raw_dir / "waqi.csv", index=False)
             logger.info(f"✅ WAQI: Données collectées pour {len(df)} villes -> {self.raw_dir / 'waqi.csv'}\n")
+            record_processed_rows('waqi', 'collect', len(df))
         else:
             logger.warning("⚠️ Aucune donnée WAQI collectée.\n")
+            record_etl_error('waqi_global')
             
         return df
 

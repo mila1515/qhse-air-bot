@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.db.session import SessionLocal, engine
 from src.db.models import Base, ArticleCodeTravail, GuideINRS, AccidentARIA, MesureWAQI
@@ -15,6 +16,12 @@ app = FastAPI(
     description="API REST pour consulter les données QHSE (Qualité Air, Réglementation, Accidents)",
     version="1.0.0"
 )
+
+# Instrumentation Prometheus (Métriques API)
+print("DEBUG: Exposing metrics...")
+instrumentator = Instrumentator().instrument(app)
+instrumentator.expose(app, endpoint="/metrics", include_in_schema=True)
+print("DEBUG: Metrics exposed.")
 
 # Dépendance pour la session BDD
 def get_db():

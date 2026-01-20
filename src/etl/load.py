@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from src.db.session import SessionLocal, engine, Base
 from src.db.models import ArticleCodeTravail, GuideINRS, AccidentARIA, MesureWAQI
 from src.monitoring.logger import logger
+from src.monitoring.metrics import record_processed_rows, record_etl_success, update_aqi_gauge
 
 class DataLoader:
     """Charge les données transformées en base de données"""
@@ -46,6 +47,7 @@ class DataLoader:
         
         self.db.commit()
         logger.info(f"✅ Code du Travail: {count} nouveaux articles insérés (Total traité: {len(df)})")
+        record_processed_rows('cdtn', 'load', count)
 
     def load_inrs(self):
         """Charge les guides INRS"""
@@ -76,6 +78,7 @@ class DataLoader:
                 
         self.db.commit()
         logger.info(f"✅ INRS: {count} nouveaux guides insérés")
+        record_processed_rows('inrs', 'load', count)
 
     def load_aria(self):
         """Charge les accidents ARIA"""
@@ -117,6 +120,7 @@ class DataLoader:
         self.db.bulk_save_objects(objects)
         self.db.commit()
         logger.info(f"✅ ARIA: {len(objects)} accidents insérés (Batch)")
+        record_processed_rows('aria', 'load', len(objects))
 
     def load_waqi(self):
         """Charge les données WAQI"""
@@ -141,9 +145,13 @@ class DataLoader:
                 processed_at=pd.to_datetime(row['processed_at'])
             ))
             
+            # Mise à jour métrique AQI temps réel
+            update_aqi_gauge(row['ville_recherchee'], row['aqi'])
+            
         self.db.add_all(objects)
         self.db.commit()
         logger.info(f"✅ WAQI: {len(objects)} relevés insérés")
+        record_processed_rows('waqi', 'load', len(objects))
 
     def close(self):
         self.db.close()
@@ -151,9 +159,10 @@ class DataLoader:
 if __name__ == "__main__":
     loader = DataLoader()
     try:
-        loader.load_legifrance()
+        loader.load_code_travail() # Correction nom méthode
         loader.load_inrs()
         loader.load_waqi()
         loader.load_aria()
+        record_etl_success() # Métrique succès global
     finally:
         loader.close()

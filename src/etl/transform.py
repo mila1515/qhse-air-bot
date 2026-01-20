@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 from src.monitoring.logger import logger
+from src.monitoring.metrics import record_processed_rows
 import re
 
 class DataTransformer:
@@ -32,6 +33,7 @@ class DataTransformer:
         output_file = self.processed_dir / "code_travail_cleaned.csv"
         df.to_csv(output_file, index=False)
         logger.info(f"✅ Code du Travail nettoyé: {len(df)} articles -> {output_file}")
+        record_processed_rows('cdtn', 'transform', len(df))
         return df
 
     def transform_inrs(self) -> pd.DataFrame:
@@ -54,6 +56,7 @@ class DataTransformer:
         output_file = self.processed_dir / "inrs_cleaned.csv"
         df.to_csv(output_file, index=False)
         logger.info(f"✅ INRS nettoyé: {len(df)} guides -> {output_file}")
+        record_processed_rows('inrs', 'transform', len(df))
         return df
 
     def transform_aria(self) -> pd.DataFrame:
@@ -92,6 +95,7 @@ class DataTransformer:
             output_file = self.processed_dir / "aria_cleaned.csv"
             df.to_csv(output_file, index=False)
             logger.info(f"✅ ARIA nettoyé: {len(df)} accidents -> {output_file}")
+            record_processed_rows('aria', 'transform', len(df))
             return df
             
         except Exception as e:
@@ -143,6 +147,7 @@ class DataTransformer:
         output_file = self.processed_dir / "waqi_cleaned.csv"
         df.to_csv(output_file, index=False)
         logger.info(f"✅ WAQI nettoyé: {len(df)} relevés -> {output_file}")
+        record_processed_rows('waqi', 'transform', len(df))
         return df
 
 if __name__ == "__main__":

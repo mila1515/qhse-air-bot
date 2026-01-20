@@ -18,6 +18,7 @@ if sys.platform == "win32":
 
 from src.etl.load import DataLoader
 from src.monitoring.logger import logger
+from src.monitoring.metrics import push_metrics, record_etl_success
 
 def main():
     logger.info("🚀 Démarrage du script de chargement (Load)...")
@@ -31,12 +32,15 @@ def main():
         loader.load_waqi()
         loader.load_aria()
         
+        record_etl_success()
         loader.close()
         logger.info("🎉 Chargement terminé avec succès !")
         
     except Exception as e:
         logger.error(f"❌ Erreur critique lors du chargement : {e}")
         raise e
+    finally:
+        push_metrics()
 
 if __name__ == "__main__":
     main()
