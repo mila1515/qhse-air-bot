@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from evidently import Report
 from evidently.presets import DataSummaryPreset
+from evidently.ui.workspace import RemoteWorkspace
 
 # Configuration des chemins
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -32,11 +33,25 @@ def run_aria_quality():
     report_result = report.run(reference_data=None, current_data=current_data)
 
     # 5. Sauvegarde du rapport
-    os.makedirs(REPORT_DIR, exist_ok=True)
-    report_path = os.path.join(REPORT_DIR, "aria_quality_report.html")
-    report_result.save_html(report_path)
+    # os.makedirs(REPORT_DIR, exist_ok=True)
+    # report_path = os.path.join(REPORT_DIR, "aria_quality_report.html")
+    # report_result.save_html(report_path)
     
-    print(f"Rapport de qualité ARIA généré avec succès : {report_path}")
+    # print(f"Rapport de qualité ARIA généré avec succès : {report_path}")
+
+    # 6. Sauvegarde dans le Remote Workspace (Service Docker)
+    EVIDENTLY_SERVICE_URL = "http://localhost:8101"
+
+    ws = RemoteWorkspace(EVIDENTLY_SERVICE_URL)
+    project_name = "ARIA Monitoring"
+    existing_projects = ws.search_project(project_name)
+    if existing_projects:
+        project = existing_projects[0]
+    else:
+        project = ws.create_project(project_name)
+    
+    ws.add_run(project.id, report_result)
+    print(f"Rapport envoyé au service Evidently (Projet: '{project_name}') sur {EVIDENTLY_SERVICE_URL}")
 
 if __name__ == "__main__":
     run_aria_quality()

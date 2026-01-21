@@ -19,6 +19,24 @@ services:
     networks:
       - qhse_net
 
+  scheduler:
+    build: .
+    container_name: qhse_scheduler
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      - postgres
+      - evidently
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./src:/app/src
+    command: python src/scheduler.py
+    networks:
+      - qhse_net
+
   postgres:
     image: postgres:15-alpine
     container_name: qhse_postgres
@@ -64,6 +82,16 @@ services:
     container_name: qhse_pushgateway
     ports:
       - "9091:9091"
+    networks:
+      - qhse_net
+
+  evidently:
+    build:
+      context: .
+      dockerfile: src/data_monitoring/Dockerfile
+    container_name: qhse_evidently
+    ports:
+      - "8101:8000"
     networks:
       - qhse_net
 
