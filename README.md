@@ -34,19 +34,34 @@ docker-compose up -d --build
 | **Prometheus** | [http://localhost:9090](http://localhost:9090) | Explorer les métriques brutes |
 
 ## 🕵️‍♂️ Monitoring Qualité des Données (Evidently)
-Le projet intègre **Evidently AI** pour détecter la dérive des données (Drift) et valider leur qualité avant insertion en base ou périodiquement.
 
-*   **Rapports HTML** : Générés dans `src/data_monitoring/reports/`.
-*   **Scripts** :
-    *   `src/data_monitoring/drift/` : Détection de dérive (comparaison référence vs actuel).
-    *   `src/data_monitoring/quality/` : Analyse de la qualité (valeurs manquantes, stats).
+Le projet intègre **Evidently AI** pour assurer la fiabilité des données ingérées. Ce module est distinct du monitoring système (Prometheus/Grafana) et se concentre sur la *valeur* et la *qualité* de la donnée métier.
 
-**Génération des rapports :**
+### 📂 Structure du Module
+Le code se trouve dans `src/data_monitoring/` :
+*   `drift/` : Scripts de détection de dérive (Data Drift). Compare les nouvelles données (current) à un jeu de référence (reference) pour détecter les changements de distribution.
+*   `quality/` : Scripts de contrôle qualité (Data Quality). Vérifie les statistiques descriptives, les valeurs manquantes et la cohérence des données.
+*   `reports/` : Dossier de sortie contenant les rapports HTML générés automatiquement (ignorés par Git).
+
+### 🚦 Exécution des Rapports
+Les scripts peuvent être lancés manuellement ou intégrés au pipeline ETL (fin de l'étape Load).
+
+**Générer les rapports de dérive (Drift) :**
 ```bash
-# Exemple pour WAQI
-python src/data_monitoring/drift/waqi_drift.py
-python src/data_monitoring/quality/waqi_quality.py
+python src/data_monitoring/drift/waqi_drift.py  # Pour les données Qualité de l'Air
+python src/data_monitoring/drift/aria_drift.py  # Pour les données ARIA (Accidents)
 ```
+
+**Générer les rapports de qualité (Quality) :**
+```bash
+python src/data_monitoring/quality/waqi_quality.py
+python src/data_monitoring/quality/aria_quality.py
+```
+
+### 📊 Visualisation
+Les résultats sont générés sous forme de fichiers HTML interactifs dans `src/data_monitoring/reports/`.
+*   Ces rapports peuvent être ouverts directement dans un navigateur.
+*   Ils sont également conçus pour être intégrés dans **Grafana** via un plugin de visualisation HTML (ex: Ajax panel ou Text panel avec iframe), permettant aux équipes métier de consulter l'état des données directement depuis les dashboards de supervision.
 
 ## 🧪 Exécuter les Tests
 Pour valider le bon fonctionnement du code :
