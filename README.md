@@ -33,6 +33,21 @@ docker-compose up -d --build
 | **Grafana** | [http://localhost:3000](http://localhost:3000) | Visualiser les tableaux de bord | `admin` / `admin` |
 | **Prometheus** | [http://localhost:9090](http://localhost:9090) | Explorer les métriques brutes | - |
 
+## 🕵️‍♂️ Monitoring Qualité des Données (Evidently)
+Le projet intègre **Evidently AI** pour détecter la dérive des données (Drift) et valider leur qualité avant insertion en base ou périodiquement.
+
+*   **Rapports HTML** : Générés dans `src/data_monitoring/reports/`.
+*   **Scripts** :
+    *   `src/data_monitoring/drift/` : Détection de dérive (comparaison référence vs actuel).
+    *   `src/data_monitoring/quality/` : Analyse de la qualité (valeurs manquantes, stats).
+
+**Génération des rapports :**
+```bash
+# Exemple pour WAQI
+python src/data_monitoring/drift/waqi_drift.py
+python src/data_monitoring/quality/waqi_quality.py
+```
+
 ## 🧪 Exécuter les Tests
 Pour valider le bon fonctionnement du code :
 
