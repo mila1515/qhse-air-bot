@@ -192,8 +192,6 @@ cython_debug/
 cache/
 data/
 
-
-
 # Ruff stuff:
 .ruff_cache/
 
@@ -222,3 +220,33 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 *.log.*
+
+# --- Custom Project Rules ---
+
+src/monitoring/logs/
+
+# Evidently reports
+src/data_monitoring/reports/
+*.html
+
+# Data files
+*.csv
+*.json
+*.xlsx
+*.parquet
+
+# RAG vector stores & embeddings
+src/rag/vectorstore/
+src/rag/chunks/
+src/rag/embeddings/
+*.faiss
+*.pkl
+*.bin
+
+# Docker volumes
+docker-data/
+postgres_data/
+
+# System files
+.DS_Store
+Thumbs.db
