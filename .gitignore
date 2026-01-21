@@ -190,6 +190,8 @@ cython_debug/
 .vscode/
 .history/
 cache/
+data/
+
 
 
 # Ruff stuff:
