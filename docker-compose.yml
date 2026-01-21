@@ -13,6 +13,9 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - qhse_net
 
