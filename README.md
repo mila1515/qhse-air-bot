@@ -44,8 +44,4 @@ pip install -r requirements.txt
 pytest
 ```
 
-## 📚 Documentation Détaillée
-Pour comprendre l'architecture technique, le **Modèle Conceptuel de Données (MCD)** et le détail des scripts, veuillez vous référer à la documentation interne du projet.
-
----
 *Projet développé avec Python, FastAPI, PostgreSQL et Docker.*
