@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 
@@ -42,26 +42,22 @@ class WaqiBase(BaseModel):
 class ArticleRead(ArticleBase):
     id: int
     processed_at: Optional[datetime] = None
-    class Config:
-        from_attributes = True # Permet de convertir depuis l'objet ORM SQLAlchemy
+    model_config = ConfigDict(from_attributes=True)
 
 class GuideRead(GuideBase):
     id: int
     processed_at: Optional[datetime] = None
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class AccidentRead(AccidentBase):
     id: int
     processed_at: Optional[datetime] = None
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class WaqiRead(WaqiBase):
     id: int
     processed_at: Optional[datetime] = None
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # 3. Schémas pour les Statistiques (Complex SQL)
 class RiskStats(BaseModel):

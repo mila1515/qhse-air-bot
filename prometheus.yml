@@ -5,7 +5,7 @@ scrape_configs:
   - job_name: 'qhse-api'
     scrape_interval: 5s
     static_configs:
-      - targets: ['host.docker.internal:8000']  # Port 8000 pour l'API via Docker
+      - targets: ['api:8000']  # Communication interne Docker
 
   - job_name: 'pushgateway'
     scrape_interval: 5s

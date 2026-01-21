@@ -13,6 +13,8 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
+    networks:
+      - qhse_net
 
   postgres:
     image: postgres:15-alpine
@@ -27,6 +29,44 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - qhse_net
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: qhse_prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    networks:
+      - qhse_net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: qhse_grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - qhse_net
+
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: qhse_pushgateway
+    ports:
+      - "9091:9091"
+    networks:
+      - qhse_net
 
 volumes:
   postgres_data:
+
+networks:
+  qhse_net:
+    driver: bridge

@@ -5,7 +5,6 @@ Utilise uvicorn pour servir l'application FastAPI
 
 import uvicorn
 import sys
-import os
 from pathlib import Path
 
 # Ajout du dossier racine au path pour les imports

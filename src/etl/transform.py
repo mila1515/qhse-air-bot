@@ -2,7 +2,6 @@ import pandas as pd
 from pathlib import Path
 from src.monitoring.logger import logger
 from src.monitoring.metrics import record_processed_rows
-import re
 
 class DataTransformer:
     """Nettoyage et Transformation des données brutes"""
