@@ -27,11 +27,11 @@ docker-compose up -d --build
 *Cela démarre l'API, la Base de données, et toute la stack de monitoring.*
 
 ### 2. Accéder aux Interfaces
-| Service | URL | Description | Identifiants |
-| :--- | :--- | :--- | :--- |
-| **Documentation API** | [http://localhost:8000/docs](http://localhost:8000/docs) | Tester les endpoints en direct | - |
-| **Grafana** | [http://localhost:3000](http://localhost:3000) | Visualiser les tableaux de bord | `admin` / `admin` |
-| **Prometheus** | [http://localhost:9090](http://localhost:9090) | Explorer les métriques brutes | - |
+| Service | URL | Description |
+| :--- | :--- | :--- |
+| **Documentation API** | [http://localhost:8000/docs](http://localhost:8000/docs) | Tester les endpoints en direct |
+| **Grafana** | [http://localhost:3000](http://localhost:3000) | Visualiser les tableaux de bord |
+| **Prometheus** | [http://localhost:9090](http://localhost:9090) | Explorer les métriques brutes |
 
 ## 🕵️‍♂️ Monitoring Qualité des Données (Evidently)
 Le projet intègre **Evidently AI** pour détecter la dérive des données (Drift) et valider leur qualité avant insertion en base ou périodiquement.
