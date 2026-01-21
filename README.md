@@ -32,6 +32,7 @@ docker-compose up -d --build
 | **Documentation API** | [http://localhost:8000/docs](http://localhost:8000/docs) | Tester les endpoints en direct |
 | **Grafana** | [http://localhost:3000](http://localhost:3000) | Visualiser les tableaux de bord |
 | **Prometheus** | [http://localhost:9090](http://localhost:9090) | Explorer les métriques brutes |
+| **Evidently UI** | [http://localhost:8101](http://localhost:8101) | Dashboard Qualité des Données |
 
 ## 🕵️‍♂️ Monitoring Qualité des Données (Evidently)
 
@@ -41,27 +42,39 @@ Le projet intègre **Evidently AI** pour assurer la fiabilité des données ing�
 Le code se trouve dans `src/data_monitoring/` :
 *   `drift/` : Scripts de détection de dérive (Data Drift). Compare les nouvelles données (current) à un jeu de référence (reference) pour détecter les changements de distribution.
 *   `quality/` : Scripts de contrôle qualité (Data Quality). Vérifie les statistiques descriptives, les valeurs manquantes et la cohérence des données.
-*   `reports/` : Dossier de sortie contenant les rapports HTML générés automatiquement (ignorés par Git).
 
-### 🚦 Exécution des Rapports
-Les scripts peuvent être lancés manuellement ou intégrés au pipeline ETL (fin de l'étape Load).
+### 🔄 Automatisation (Pipeline Complet)
+Le projet utilise un **Scheduler automatique** intégré dans Docker.
+- Il tourne en tâche de fond dans le conteneur `qhse_scheduler`.
+- Il lance le pipeline complet (Collecte ➔ Load ➔ Monitoring) **tous les jours à 22:00**.
 
-**Générer les rapports de dérive (Drift) :**
+Vous n'avez rien à faire, tout est automatique.
+
+Pour lancer le pipeline manuellement (hors horaire prévu) :
 ```bash
-python src/data_monitoring/drift/waqi_drift.py  # Pour les données Qualité de l'Air
-python src/data_monitoring/drift/aria_drift.py  # Pour les données ARIA (Accidents)
+# Lancer le pipeline complet manuellement
+python src/etl/pipeline.py
 ```
 
-**Générer les rapports de qualité (Quality) :**
+### 🚦 Exécution Manuelle des Rapports (Optionnel)
+Les scripts peuvent aussi être lancés individuellement si nécessaire.
+
+**Exécuter les analyses (Drift & Quality) :**
 ```bash
+# Analyse de dérive (Drift)
+python src/data_monitoring/drift/waqi_drift.py
+python src/data_monitoring/drift/aria_drift.py
+
+# Analyse de qualité (Quality)
 python src/data_monitoring/quality/waqi_quality.py
 python src/data_monitoring/quality/aria_quality.py
 ```
 
 ### 📊 Visualisation
-Les résultats sont générés sous forme de fichiers HTML interactifs dans `src/data_monitoring/reports/`.
-*   Ces rapports peuvent être ouverts directement dans un navigateur.
-*   Ils sont également conçus pour être intégrés dans **Grafana** via un plugin de visualisation HTML (ex: Ajax panel ou Text panel avec iframe), permettant aux équipes métier de consulter l'état des données directement depuis les dashboards de supervision.
+Le projet utilise le **service Evidently** (mode serveur) pour centraliser les rapports.
+*   **Interface Web** : Accessible sur [http://localhost:8101](http://localhost:8101).
+*   **Fonctionnement** : Les scripts Python envoient les métriques via l'API du service Docker, sans générer de fichiers HTML locaux.
+*   **Intégration** : Le dashboard Evidently permet de suivre l'évolution de la qualité dans le temps (historisation des snapshots).
 
 ## 🧪 Exécuter les Tests
 Pour valider le bon fonctionnement du code :
