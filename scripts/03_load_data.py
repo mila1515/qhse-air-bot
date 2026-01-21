@@ -4,7 +4,6 @@ Utilise le module src.etl.load
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Ajout du dossier racine au path pour les imports

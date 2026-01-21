@@ -1,9 +1,6 @@
 # Data Collection & Processing
 requests
 pandas
-pdfplumber
-validators
-openpyxl
 python-dotenv
 beautifulsoup4
 
@@ -24,4 +21,3 @@ loguru
 
 # Testing
 pytest
-httpx
