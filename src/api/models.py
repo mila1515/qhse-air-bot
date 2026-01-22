@@ -63,3 +63,12 @@ class WaqiRead(WaqiBase):
 class RiskStats(BaseModel):
     niveau_risque: str
     count: int
+
+# 4. Schémas pour le RAG (Chatbot)
+class ChatQuery(BaseModel):
+    question: str
+
+class ChatResponse(BaseModel):
+    question: str
+    answer: str
+    timestamp: datetime = datetime.now()

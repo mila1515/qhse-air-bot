@@ -15,6 +15,7 @@ Ce projet centralise des données réglementaires et environnementales pour faci
     *   **Temps Réel** : Qualité de l'air et polluants (API WAQI).
 *   **🔌 API REST Performante** : Construite avec **FastAPI**, documentée automatiquement via Swagger UI.
 *   **📊 Observabilité Complète** : Stack de monitoring intégrée (Prometheus, Grafana, Pushgateway) pour surveiller la santé de l'app et les données.
+*   **🧠 Assistant IA (RAG)** : Moteur de recherche sémantique et de génération de réponses basé sur LangChain et OpenAI.
 
 ## 🛠️ Démarrage Rapide (Docker)
 
@@ -75,6 +76,31 @@ Le projet utilise le **service Evidently** (mode serveur) pour centraliser les r
 *   **Interface Web** : Accessible sur [http://localhost:8101](http://localhost:8101).
 *   **Fonctionnement** : Les scripts Python envoient les métriques via l'API du service Docker, sans générer de fichiers HTML locaux.
 *   **Intégration** : Le dashboard Evidently permet de suivre l'évolution de la qualité dans le temps (historisation des snapshots).
+
+## 🤖 Assistant RAG (Retrieval-Augmented Generation)
+
+Le projet intègre un module d'IA générative pour répondre aux questions des utilisateurs en se basant sur la documentation collectée (Code du Travail, INRS, ARIA).
+
+### ⚙️ Configuration
+Ajoutez votre clé API OpenAI dans le fichier `.env` :
+```properties
+OPENAI_API_KEY=sk-proj-...
+```
+
+### 🚀 Utilisation (CLI)
+Le module RAG s'utilise via la ligne de commande :
+
+1.  **Ingestion des données** (À lancer après l'ETL) :
+    Exporte les données de la BDD et crée l'index vectoriel (FAISS).
+    ```bash
+    python src/rag/main.py --ingest
+    ```
+
+2.  **Poser une question** :
+    Interroge l'assistant sur les données indexées.
+    ```bash
+    python src/rag/main.py --query "Quelles sont les obligations concernant l'aération des locaux ?"
+    ```
 
 ## 🧪 Exécuter les Tests
 Pour valider le bon fonctionnement du code :

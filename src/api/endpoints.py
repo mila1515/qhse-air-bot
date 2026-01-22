@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
+from datetime import datetime
 
 from src.db.session import get_db
 from src.db.models import ArticleCodeTravail, GuideINRS, AccidentARIA, MesureWAQI
 from src.api import models as schemas
+from src.rag.pipeline.rag_chain import rag_pipeline
 
 router = APIRouter()
 
@@ -49,3 +51,24 @@ def get_risk_stats(db: Session = Depends(get_db)):
     ).group_by(MesureWAQI.niveau_risque).all()
     
     return [{"niveau_risque": r[0], "count": r[1]} for r in results]
+
+# --- Endpoint RAG (Chatbot) ---
+
+@router.post("/rag/chat", response_model=schemas.ChatResponse)
+def chat_with_rag(query: schemas.ChatQuery):
+    """
+    Pose une question au module RAG (Retrieval-Augmented Generation).
+    Le système utilise :
+    1. Les données BDD (WAQI, ARIA, Code Travail)
+    2. Les documents PDF/TXT ingérés
+    3. Un fallback automatique OpenAI -> Local (HuggingFace)
+    """
+    try:
+        answer = rag_pipeline.query(query.question)
+        return {
+            "question": query.question,
+            "answer": answer,
+            "timestamp": datetime.now()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

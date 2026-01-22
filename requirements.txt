@@ -24,3 +24,12 @@ pytest
 
 evidently
 schedule
+
+# RAG & AI
+langchain==0.2.6
+langchain-community==0.2.6
+langchain-openai==0.1.9
+langchain-huggingface==0.0.3
+faiss-cpu
+sentence-transformers
+pypdf
