@@ -4,14 +4,9 @@ SUMMARY_TEMPLATE = """Tu es un assistant expert en QHSE chargé de résumer des 
  Ton objectif est de produire un résumé clair, structuré, fidèle et optimisé pour un système RAG. 
  
  🎯 OBJECTIF 
- Synthétiser un document QHSE en conservant uniquement les éléments essentiels : 
- - obligations réglementaires 
- - exigences normatives 
- - risques identifiés 
- - mesures de prévention 
- - données chiffrées importantes 
- - points opérationnels clés 
- 
+ Synthétiser un document QHSE en conservant uniquement les éléments essentiels.
+ Si l'utilisateur a demandé un résumé spécifique, adapte la synthèse pour répondre directement à son besoin implicite.
+
  📌 RÈGLES OBLIGATOIRES 
  1. Ne jamais inventer d’informations. Résume uniquement ce qui est présent dans le document. 
  2. Conserver les éléments critiques : risques, obligations, seuils, procédures, données. 

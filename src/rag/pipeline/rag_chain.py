@@ -127,10 +127,8 @@ class RAGPipeline:
             
         try:
             reformulation_prompt = get_reformulation_prompt()
-            # Création d'une mini-chaîne pour la reformulation
-            # invoke retourne un objet AIMessage, on veut le content
-            messages = reformulation_prompt.format_messages(input=question)
-            response = self.llm.invoke(messages)
+            formatted_prompt = reformulation_prompt.format(input=question)
+            response = self.llm.invoke(formatted_prompt)
             reformulated = response.content.strip()
             logger.info(f"🔄 Reformulation : '{question}' -> '{reformulated}'")
             return reformulated
@@ -150,10 +148,10 @@ class RAGPipeline:
             summary_keywords = ["résume", "resume", "synthèse", "synthese", "resumer", "résumer", "synthetiser", "synthétiser", "summary", "summarize"]
             is_summary = any(keyword in question.lower() for keyword in summary_keywords)
             
-            # 1. Reformulation (toujours appliquée selon demande utilisateur)
+            # 1. Reformulation (Réactivée)
             reformulated_question = self.reformulate_question(question)
             
-            # 2. Récupération des documents (Retrieval) avec la question reformulée
+            # 2. Récupération des documents (Retrieval) avec la question REFORMULÉE
             logger.info(f"🔍 Recherche vectorielle avec : '{reformulated_question}'")
             docs = self.retriever.invoke(reformulated_question)
             
