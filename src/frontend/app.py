@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from src.frontend.utils.session import init_session_state, logout
-from src.frontend.views import login, chat, conversations, notes
+from src.frontend.views import login, chat, conversations, notes, home
 
 # Configuration de la page
 st.set_page_config(
@@ -21,12 +21,29 @@ init_session_state()
 def main():
     # Gestion de la navigation interne (SPA)
     if "current_view" not in st.session_state:
-        st.session_state.current_view = "Chat"
+        # Par défaut, la première visite mène à l'accueil
+        st.session_state.current_view = "Home"
 
     if not st.session_state.token:
-        # Si pas connecté, afficher uniquement la vue Login
-        login.render_login()
+        # --- Utilisateur NON Connecté ---
+        if st.session_state.current_view == "Login":
+            login.render_login()
+        else:
+            # Par défaut (ou si "Home"), afficher la page d'accueil
+            home.render_home()
+            
     else:
+        # --- Utilisateur Connecté ---
+        # Si Login, rediriger vers Chat. Si Home, autoriser l'affichage.
+        if st.session_state.current_view == "Login":
+             st.session_state.current_view = "Chat"
+             st.rerun()
+
+        # Si l'utilisateur est sur Home, on affiche la Home (qui gérera l'état connecté)
+        if st.session_state.current_view == "Home":
+             home.render_home()
+             return # On arrête ici pour ne pas afficher la sidebar standard
+
         # Si connecté, afficher la Sidebar et le contenu
         with st.sidebar:
             st.title("🤖 QHSE Air Bot")

@@ -3,6 +3,11 @@ from src.frontend.services import auth_client
 from src.frontend.utils.session import save_token
 
 def render_login():
+    # Bouton retour accueil
+    if st.button("⬅️ Retour à l'accueil", type="secondary"):
+        st.session_state.current_view = "Home"
+        st.rerun()
+
     st.title("🔐 Authentification")
     
     tab1, tab2 = st.tabs(["Se connecter", "Créer un compte"])
