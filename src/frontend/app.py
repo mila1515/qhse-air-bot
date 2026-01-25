@@ -29,6 +29,11 @@ def apply_global_styles():
             color: #37474f;
         }
 
+        /* --- Global Background --- */
+        .stApp {
+            background-color: #F0F8FF; /* Bleu très très clair (AliceBlue) */
+        }
+
         /* --- Sidebar --- */
         [data-testid="stSidebar"] {
             background-color: #f8f9fa; /* Gris clair */
