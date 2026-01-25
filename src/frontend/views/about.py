@@ -65,41 +65,6 @@ def render_about():
         </div>
         """, unsafe_allow_html=True)
 
-        # Fonctionnalités Clés
-        st.markdown('<div class="about-section-title">⚡ Fonctionnalités Clés</div>', unsafe_allow_html=True)
-        
-        c1, c2, c3 = st.columns(3, gap="medium")
-        
-        with c1:
-            st.markdown("""
-            <div class="about-card" style="height: 100%;">
-                <div style="font-weight: 600; color: #2e7d32; margin-bottom: 0.5rem;">💨 Qualité de l'Air (WAQI)</div>
-                <div class="about-text">
-                    Accédez aux données en temps réel sur la qualité de l'air dans vos villes d'intervention. Surveillez les indices de pollution et protégez la santé de vos collaborateurs.
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        with c2:
-            st.markdown("""
-            <div class="about-card" style="height: 100%;">
-                <div style="font-weight: 600; color: #2e7d32; margin-bottom: 0.5rem;">📚 Base Réglementaire</div>
-                <div class="about-text">
-                    Interrogez instantanément le Code du Travail et les guides de l'INRS. Fini les recherches fastidieuses : posez votre question, obtenez la référence légale.
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with c3:
-            st.markdown("""
-            <div class="about-card" style="height: 100%;">
-                <div style="font-weight: 600; color: #2e7d32; margin-bottom: 0.5rem;">⚠️ Sécurité Industrielle (ARIA)</div>
-                <div class="about-text">
-                    Analysez les accidents passés grâce à la base de données ARIA. Apprenez des retours d'expérience pour prévenir les risques futurs dans vos installations.
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
         # Technologie & Confidentialité
         st.markdown('<div class="about-section-title">🔒 Technologie & Confidentialité</div>', unsafe_allow_html=True)
         st.markdown("""
