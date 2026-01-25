@@ -158,8 +158,8 @@ def render_home():
             with open(logo_path, "rb") as f:
                 logo_b64 = base64.b64encode(f.read()).decode()
             logo_html = f"""
-            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-                <img src="data:image/png;base64,{logo_b64}" style="max-width: 250px; height: auto;" alt="QHSE Air Bot Logo">
+            <div style="display: flex; justify-content: center; margin-bottom: 0.5rem; margin-top: -1rem;">
+                <img src="data:image/png;base64,{logo_b64}" style="max-width: 180px; height: auto;" alt="QHSE Air Bot Logo">
             </div>
             """
         
@@ -167,12 +167,12 @@ def render_home():
 
         # Sous-titre centré
         st.markdown("""
-        <div class="hero-subtitle" style="text-align: center; margin-left: auto; margin-right: auto; max-width: 800px;">
+        <div class="hero-subtitle" style="text-align: center; margin-left: auto; margin-right: auto; max-width: 800px; margin-bottom: 1rem;">
             Analysez vos documents, comprenez les normes et prenez des décisions éclairées.
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("<div style='margin-bottom: 2rem;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom: 1rem;'></div>", unsafe_allow_html=True)
         
         # Boutons d'action (Centrés)
         if not st.session_state.token:
