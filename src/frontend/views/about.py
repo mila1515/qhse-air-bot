@@ -68,7 +68,7 @@ def render_about():
         # Fonctionnalités Clés
         st.markdown('<div class="about-section-title">⚡ Fonctionnalités Clés</div>', unsafe_allow_html=True)
         
-        c1, c2 = st.columns(2, gap="medium")
+        c1, c2, c3 = st.columns(3, gap="medium")
         
         with c1:
             st.markdown("""
@@ -80,6 +80,7 @@ def render_about():
             </div>
             """, unsafe_allow_html=True)
             
+        with c2:
             st.markdown("""
             <div class="about-card" style="height: 100%;">
                 <div style="font-weight: 600; color: #2e7d32; margin-bottom: 0.5rem;">📚 Base Réglementaire</div>
@@ -89,21 +90,12 @@ def render_about():
             </div>
             """, unsafe_allow_html=True)
 
-        with c2:
+        with c3:
             st.markdown("""
             <div class="about-card" style="height: 100%;">
                 <div style="font-weight: 600; color: #2e7d32; margin-bottom: 0.5rem;">⚠️ Sécurité Industrielle (ARIA)</div>
                 <div class="about-text">
                     Analysez les accidents passés grâce à la base de données ARIA. Apprenez des retours d'expérience pour prévenir les risques futurs dans vos installations.
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown("""
-            <div class="about-card" style="height: 100%;">
-                <div style="font-weight: 600; color: #2e7d32; margin-bottom: 0.5rem;">🤖 Assistant IA Avancé</div>
-                <div class="about-text">
-                    Un moteur d'intelligence artificielle (RAG) qui combine vos documents internes et les sources officielles pour des réponses contextuelles et précises.
                 </div>
             </div>
             """, unsafe_allow_html=True)
