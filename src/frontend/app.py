@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from src.frontend.utils.session import init_session_state, logout
-from src.frontend.views import login, chat, conversations, notes, home
+from src.frontend.views import login, chat, conversations, notes, home, about
 
 # Configuration de la page
 st.set_page_config(
@@ -108,7 +108,7 @@ def main():
             # Si c'est une liste (anciennes versions parfois) ou string
             target_view = view_param if isinstance(view_param, str) else view_param[0]
             
-            if target_view in ["Home", "Login"]:
+            if target_view in ["Home", "Login", "About"]:
                 st.session_state.current_view = target_view
                 # Nettoyer l'URL pour éviter de rester bloqué sur ?view=...
                 # Note: On ne force pas le rerun immédiat car le rechargement de page l'a déjà fait
@@ -127,21 +127,26 @@ def main():
         # --- Utilisateur NON Connecté ---
         if st.session_state.current_view == "Login":
             login.render_login()
+        elif st.session_state.current_view == "About":
+            about.render_about()
         else:
             # Par défaut (ou si "Home"), afficher la page d'accueil
             home.render_home()
             
     else:
         # --- Utilisateur Connecté ---
-        # Si Login, rediriger vers Chat. Si Home, autoriser l'affichage.
+        # Si Login, rediriger vers Chat. Si Home ou About, autoriser l'affichage.
         if st.session_state.current_view == "Login":
              st.session_state.current_view = "Chat"
              st.rerun()
 
-        # Si l'utilisateur est sur Home, on affiche la Home (qui gérera l'état connecté)
+        # Si l'utilisateur est sur Home ou About, on affiche la vue publique
         if st.session_state.current_view == "Home":
              home.render_home()
              return # On arrête ici pour ne pas afficher la sidebar standard
+        elif st.session_state.current_view == "About":
+             about.render_about()
+             return
 
         # Si connecté, afficher la Sidebar et le contenu
         with st.sidebar:

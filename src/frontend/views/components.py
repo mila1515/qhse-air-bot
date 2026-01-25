@@ -38,7 +38,7 @@ def render_navbar():
             </div>
             <div style="display:flex; gap:30px;"> 
                 <a href="?view=Home" target="_self" style="text-decoration:none; color:{NAV_TEXT}; font-size:16px;">Accueil</a> 
-                <a href="#" style="text-decoration:none; color:{NAV_TEXT}; font-size:16px;">À propos</a> 
+                <a href="?view=About" target="_self" style="text-decoration:none; color:{NAV_TEXT}; font-size:16px;">À propos</a> 
                 <a href="?view=Login" target="_self" style="text-decoration:none; color:{NAV_TEXT}; font-size:16px;">Connexion</a> 
             </div> 
         </div> 
