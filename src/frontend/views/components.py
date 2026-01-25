@@ -20,7 +20,7 @@ def render_navbar():
     Affiche la barre de navigation du site avec le style demandé.
     Utilise des liens HTML avec query params pour la navigation.
     """
-    NAV_BG = "#F5F5F5"
+    NAV_BG = "#F0F8FF" # Bleu très très clair (AliceBlue) pour s'adapter au fond global
     NAV_TEXT = "#2E8B57"
     
     logo_b64 = get_base64_logo()
@@ -31,16 +31,33 @@ def render_navbar():
     
     st.markdown( 
         f""" 
-        <div style="background-color:{NAV_BG}; padding:10px 20px; border-radius:8px; display:flex; align-items:center; justify-content:space-between; margin-bottom: 2rem;"> 
-            <div style="display:flex; align-items:center;">
-                {logo_img_html}
-                <div style="font-weight:bold; font-size:20px; color:{NAV_TEXT};">QHSE Air Bot</div> 
+        <div style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 999999;
+            background-color: {NAV_BG};
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        "> 
+            <div style="
+                max-width: 1000px;
+                margin: 0 auto;
+                padding: 15px 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            ">
+                <div style="display:flex; align-items:center;">
+                    {logo_img_html}
+                    <div style="font-weight:bold; font-size:20px; color:{NAV_TEXT};">QHSE Air Bot</div> 
+                </div>
+                <div style="display:flex; gap:30px;"> 
+                    <a href="?view=Home" target="_self" style="text-decoration:none; color:{NAV_TEXT}; font-size:16px;">Accueil</a> 
+                    <a href="?view=About" target="_self" style="text-decoration:none; color:{NAV_TEXT}; font-size:16px;">À propos</a> 
+                    <a href="?view=Login" target="_self" style="text-decoration:none; color:{NAV_TEXT}; font-size:16px;">Connexion</a> 
+                </div> 
             </div>
-            <div style="display:flex; gap:30px;"> 
-                <a href="?view=Home" target="_self" style="text-decoration:none; color:{NAV_TEXT}; font-size:16px;">Accueil</a> 
-                <a href="?view=About" target="_self" style="text-decoration:none; color:{NAV_TEXT}; font-size:16px;">À propos</a> 
-                <a href="?view=Login" target="_self" style="text-decoration:none; color:{NAV_TEXT}; font-size:16px;">Connexion</a> 
-            </div> 
         </div> 
         """, 
         unsafe_allow_html=True 

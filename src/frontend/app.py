@@ -33,6 +33,17 @@ def apply_global_styles():
         .stApp {
             background-color: #F0F8FF; /* Bleu très très clair (AliceBlue) */
         }
+        
+        /* Cacher le header par défaut de Streamlit pour laisser place à notre Navbar */
+        header[data-testid="stHeader"] {
+            display: none;
+        }
+
+        /* Padding global pour éviter que le contenu soit caché sous la Navbar fixe */
+        .block-container {
+            padding-top: 6rem !important;
+            padding-bottom: 2rem !important;
+        }
 
         /* --- Sidebar --- */
         [data-testid="stSidebar"] {

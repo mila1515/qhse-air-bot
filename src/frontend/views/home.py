@@ -22,7 +22,7 @@ def render_home():
 
         /* Réduction drastique du padding haut de page */
         .block-container {
-            padding-top: 1rem !important;
+            padding-top: 6rem !important; /* Ajusté pour la navbar fixe */
             padding-bottom: 2rem !important;
             max-width: 1000px !important; /* Contenu plus compact */
         }
