@@ -4,7 +4,7 @@ from sqlalchemy import text
 
 from src.db.session import engine, SessionLocal
 from src.db.models import Base
-from src.api import endpoints
+from src.api import endpoints, auth, conversations, notes
 from src.monitoring.api_metrics import DB_CONNECTION_STATUS
 
 # Création des tables (si pas encore fait)
@@ -21,6 +21,9 @@ instrumentator = Instrumentator().instrument(app)
 instrumentator.expose(app, endpoint="/metrics", include_in_schema=True)
 
 # Inclusion des routes
+app.include_router(auth.router)
+app.include_router(conversations.router)
+app.include_router(notes.router)
 app.include_router(endpoints.router)
 
 # --- Endpoints de Base ---

@@ -19,6 +19,24 @@ services:
     networks:
       - qhse_net
 
+  frontend:
+    build: .
+    container_name: qhse_frontend
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      - API_URL=http://qhse_api:8000
+    depends_on:
+      - api
+    volumes:
+      - ./logs:/app/logs
+      - ./src:/app/src
+    command: streamlit run src/frontend/app.py --server.port 8501 --server.address 0.0.0.0
+    networks:
+      - qhse_net
+
   scheduler:
     build: .
     container_name: qhse_scheduler

@@ -7,6 +7,7 @@ WORKDIR /app
 # Installer dépendances système
 RUN apt-get update && apt-get install -y \
     gcc \
+    curl \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
@@ -14,7 +15,8 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 
 # Installer dépendances Python
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copier le code source
 COPY src/ src/

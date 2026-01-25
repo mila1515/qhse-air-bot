@@ -1,8 +1,60 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Optional, List
-from datetime import datetime
+from typing import Optional, List, Union
+from datetime import datetime, date
 
 # --- Schémas pour la documentation API (Swagger/OpenAPI) ---
+
+class MessageBase(BaseModel):
+    content: str
+    sender: str
+
+class MessageCreate(MessageBase):
+    pass
+
+class MessageRead(MessageBase):
+    id: int
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class ConversationBase(BaseModel):
+    title: str
+
+class ConversationCreate(ConversationBase):
+    pass
+
+class ConversationRead(ConversationBase):
+    id: int
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    model_config = ConfigDict(from_attributes=True)
+
+# 0. Auth & Users
+class UserBase(BaseModel):
+    email: str
+
+class UserCreate(UserBase):
+    password: str
+
+class UserRead(UserBase):
+    id: int
+    created_at: Optional[datetime] = None
+    model_config = ConfigDict(from_attributes=True)
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class NoteBase(BaseModel):
+    content: str
+
+class NoteCreate(NoteBase):
+    pass
+
+class NoteRead(NoteBase):
+    id: int
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    model_config = ConfigDict(from_attributes=True)
 
 # 1. Schémas de base (communs lecture/écriture)
 
@@ -19,7 +71,7 @@ class GuideBase(BaseModel):
     source: str
 
 class AccidentBase(BaseModel):
-    date_event: Optional[str] = None
+    date_event: Optional[Union[date, str]] = None
     commune: Optional[str] = None
     type_accident: Optional[str] = None
     matieres: Optional[str] = None

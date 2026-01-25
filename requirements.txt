@@ -7,12 +7,23 @@ beautifulsoup4
 # API & Server
 fastapi
 uvicorn
+python-multipart
 pydantic
 pydantic-settings
+
+# Frontend
+streamlit
+watchdog
+extra-streamlit-components
 
 # Database
 sqlalchemy
 psycopg2-binary
+
+# Security
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt==4.0.1
 
 # Monitoring
 prometheus-client

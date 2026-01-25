@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: str = "5432"
 
+    # Security
+    SECRET_KEY: str = "your-secret-key-should-be-in-env"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 heures (avant: 30 min)
+
     @property
     def DATABASE_URL(self) -> str:
         # Priorité à la variable d'environnement complète si elle existe

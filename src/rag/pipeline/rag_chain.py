@@ -1,5 +1,5 @@
 import os
-from langchain_openai import ChatOpenAI, AzureChatOpenAI
+from langchain_openai import AzureChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.retrieval import create_retrieval_chain
@@ -54,30 +54,14 @@ class RAGPipeline:
 
     def initialize_chain(self):
         """Initialise la chaîne RAG (LLM + Retriever)."""
-        openai_api_key = os.getenv("OPENAI_API_KEY")
         azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
         azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
         google_api_key = os.getenv("GOOGLE_API_KEY")
         
         self.llm = None
 
-        # 1. Tentative Google Gemini (Priorité si configuré)
-        if google_api_key:
-            try:
-                logger.info("🔷 Initialisation LLM : Google Gemini")
-                # On utilise gemini-flash-latest qui est confirmé comme fonctionnel
-                model_name = "gemini-flash-latest"
-                self.llm = ChatGoogleGenerativeAI(
-                    model=model_name,
-                    google_api_key=google_api_key,
-                    temperature=0
-                )
-                logger.info(f"✅ LLM Gemini initialisé avec succès ({model_name})")
-            except Exception as e:
-                logger.warning(f"⚠️ Erreur Google Gemini LLM : {e}")
-
-        # 2. Tentative Azure OpenAI
-        if not self.llm and azure_api_key and azure_endpoint:
+        # 1. Tentative Azure OpenAI (Priorité 1)
+        if azure_api_key and azure_endpoint:
             try:
                 logger.info("🔷 Initialisation LLM : Azure OpenAI")
                 self.llm = AzureChatOpenAI(
@@ -87,17 +71,28 @@ class RAGPipeline:
                     api_key=azure_api_key,
                     temperature=0
                 )
+                logger.info("✅ LLM Azure OpenAI initialisé avec succès")
             except Exception as e:
                 logger.warning(f"⚠️ Erreur Azure OpenAI LLM : {e}")
 
-        # 3. Tentative OpenAI Standard
-        if not self.llm and openai_api_key:
-            logger.info("🟢 Initialisation LLM : OpenAI Standard (gpt-4o-mini)")
-            # gpt-4o-mini est le modèle le plus économique et performant actuellement
-            self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=openai_api_key)
-            
+        # 2. Tentative Google Gemini (Priorité 2)
+        if not self.llm and google_api_key:
+            try:
+                logger.info("🔷 Initialisation LLM : Google Gemini")
+                # On utilise gemini-pro qui est le modèle standard et stable
+                model_name = "gemini-pro"
+                self.llm = ChatGoogleGenerativeAI(
+                    model=model_name,
+                    google_api_key=google_api_key,
+                    temperature=0
+                )
+                logger.info(f"✅ LLM Gemini initialisé avec succès ({model_name})")
+            except Exception as e:
+                logger.warning(f"⚠️ Erreur Google Gemini LLM : {e}")
+
+
         if not self.llm:
-            logger.error("❌ Aucune configuration LLM valide (Google, OpenAI ou Azure) trouvée.")
+            logger.error("❌ Aucune configuration LLM valide (Google ou Azure) trouvée.")
             # On ne lève pas d'erreur bloquante ici pour permettre le chargement du module, 
             # mais la méthode query échouera.
             raise ValueError("Configuration LLM manquante. Veuillez configurer GOOGLE_API_KEY, OPENAI_API_KEY ou les variables AZURE_OPENAI_...")
@@ -179,7 +174,7 @@ class RAGPipeline:
             return answer
         except Exception as e:
             logger.error(f"❌ Erreur lors de la requête RAG : {e}")
-            return "Désolé, une erreur est survenue lors du traitement de votre demande."
+            return f"Désolé, une erreur est survenue lors du traitement de votre demande. Détails : {str(e)}"
 
 # Instance globale pour usage facile
 rag_pipeline = RAGPipeline()

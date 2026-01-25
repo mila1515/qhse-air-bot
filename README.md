@@ -30,7 +30,8 @@ docker-compose up -d --build
 ### 2. Accéder aux Interfaces
 | Service | URL | Description |
 | :--- | :--- | :--- |
-| **Documentation API** | [http://localhost:8000/docs](http://localhost:8000/docs) | Tester les endpoints en direct |
+| **Frontend App** | [http://localhost:8501](http://localhost:8501) | Interface Utilisateur (Streamlit) |
+| **Documentation API** | [http://localhost:8100/docs](http://localhost:8100/docs) | Tester les endpoints en direct |
 | **Grafana** | [http://localhost:3000](http://localhost:3000) | Visualiser les tableaux de bord |
 | **Prometheus** | [http://localhost:9090](http://localhost:9090) | Explorer les métriques brutes |
 | **Evidently UI** | [http://localhost:8101](http://localhost:8101) | Dashboard Qualité des Données |

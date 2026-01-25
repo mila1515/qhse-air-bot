@@ -1,6 +1,54 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Float, Date
+from sqlalchemy import Column, Integer, String, Text, DateTime, Float, Date, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.db.session import Base
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relation avec les conversations
+    conversations = relationship("Conversation", back_populates="user")
+    notes = relationship("Note", back_populates="user")
+
+class Note(Base):
+    __tablename__ = "notes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    user = relationship("User", back_populates="notes")
+
+class Conversation(Base):
+    __tablename__ = "conversations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, default="Nouvelle conversation")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    user = relationship("User", back_populates="conversations")
+    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
+
+class Message(Base):
+    __tablename__ = "messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(Text)
+    sender = Column(String)  # 'user' ou 'assistant'
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    conversation_id = Column(Integer, ForeignKey("conversations.id"))
+
+    conversation = relationship("Conversation", back_populates="messages")
+
 
 class ArticleCodeTravail(Base):
     __tablename__ = "articles_code_travail"
