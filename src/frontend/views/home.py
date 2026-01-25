@@ -212,24 +212,24 @@ def render_home():
     with f_col1:
         st.markdown("""
         <div class="feature-card" style="margin-bottom: 1rem;">
-            <div class="feature-header">Optimisation du temps</div>
-            <div class="feature-text">Accès rapide à des réponses QHSE fiables via IA.</div>
+            <div class="feature-header">Qualité de l'Air (WAQI)</div>
+            <div class="feature-text">Suivi en temps réel des indices de qualité de l'air et alertes pollution.</div>
         </div>
         <div class="feature-card">
-            <div class="feature-header">Conformité simplifiée</div>
-            <div class="feature-text">Aide à la compréhension des normes et exigences légales.</div>
+            <div class="feature-header">Réglementation & Normes</div>
+            <div class="feature-text">Accès instantané au Code du Travail et guides INRS pour la conformité.</div>
         </div>
         """, unsafe_allow_html=True)
 
     with f_col2:
         st.markdown("""
         <div class="feature-card" style="margin-bottom: 1rem;">
-            <div class="feature-header">Sécurité & Confidentialité</div>
-            <div class="feature-text">Données et historiques protégés, aucun entraînement public.</div>
+            <div class="feature-header">Sécurité Industrielle</div>
+            <div class="feature-text">Analyse des accidents (Base ARIA) et retour d'expérience sécurité.</div>
         </div>
         <div class="feature-card">
-            <div class="feature-header">Support décisionnel</div>
-            <div class="feature-text">Analyses claires pour faciliter vos actions QHSE.</div>
+            <div class="feature-header">Assistance IA Experte</div>
+            <div class="feature-text">Un assistant intelligent pour vos analyses et prises de décision QHSE.</div>
         </div>
         """, unsafe_allow_html=True)
 
