@@ -2,7 +2,7 @@ import streamlit as st
 from src.frontend.services import conversations_client
 
 def render_conversations():
-    st.title("🗂️ Historique des Conversations")
+    st.markdown("## 🗂️ Historique des Conversations")
     
     # Bouton rafraîchir
     if st.button("Rafraîchir la liste"):

@@ -2,7 +2,7 @@ import streamlit as st
 from src.frontend.services import notes_client
 
 def render_notes():
-    st.title("📝 Mes Notes Personnelles")
+    st.markdown("## 📝 Mes Notes Personnelles")
     
     # Formulaire d'ajout
     with st.expander("➕ Ajouter une nouvelle note", expanded=False):

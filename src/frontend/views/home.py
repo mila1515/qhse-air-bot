@@ -1,4 +1,6 @@
 import streamlit as st
+import base64
+from pathlib import Path
 
 def render_home():
     """
@@ -9,303 +11,231 @@ def render_home():
     # --- CSS Personnalisé ---
     st.markdown("""
     <style>
-        /* Import Font (optionnel, sinon utilise font système) */
+        /* Import Font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         
-        /* Global Container Styles */
-        .main-container {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* Global Styles */
+        html, body, [class*="css"] {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
             color: #2c3e50;
         }
 
-        /* Réduction du padding par défaut de Streamlit en haut de page */
+        /* Réduction drastique du padding haut de page */
         .block-container {
-            padding-top: 2rem !important;
+            padding-top: 1rem !important;
             padding-bottom: 2rem !important;
+            max-width: 1000px !important; /* Contenu plus compact */
         }
 
-        /* Hero Section Text Styling */
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 800;
-            color: #1b5e20; /* Vert encore plus profond pour le contraste */
-            margin-bottom: 0.5rem;
-            line-height: 1.1;
-            text-align: left;
-        }
-        .hero-subtitle {
-            font-size: 1.5rem;
-            color: #2e7d32;
-            margin-bottom: 1rem;
-            font-weight: 600;
-            text-align: left;
-        }
-        .hero-desc {
-            font-size: 1.1rem;
-            color: #546e7a;
-            margin-bottom: 2rem;
-            line-height: 1.6;
-            text-align: left;
-            max-width: 90%;
-        }
-
-        /* Visual Placeholder in Right Column */
-        .hero-visual {
-            background: linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 100%);
-            border-radius: 20px;
-            padding: 2rem;
-            height: 100%;
-            min-height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            border: 1px solid #f1f8e9;
-        }
-        .hero-visual-text {
-            color: #2e7d32;
-            font-weight: 700;
-            font-size: 1.2rem;
+        /* Hero Section */
+        .hero-container {
             text-align: center;
-            opacity: 0.8;
+            padding: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-logo-container {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: center;
         }
         
-        /* Section Cards */
-        .section-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 2rem;
-            margin-top: 3rem;
+        .hero-logo-img {
+            max-height: 120px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .hero-title {
+            font-size: 3rem; /* H1 Equivalent */
+            font-weight: 800;
+            color: #2e7d32; /* Vert professionnel */
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
             text-align: center;
-            position: relative;
         }
-        .section-title::after {
-            content: '';
-            display: block;
-            width: 60px;
-            height: 4px;
-            background-color: #66bb6a;
-            margin: 10px auto 0;
-            border-radius: 2px;
-        }
-
-        .feature-card {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            border: 1px solid #f0f2f6;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            height: 100%;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0,0,0,0.05);
-            border-color: #81d4fa;
-        }
-        .feature-header {
+        
+        .hero-subtitle {
             font-size: 1.25rem;
-            font-weight: 700;
-            color: #0277bd;
-            margin-bottom: 1rem;
-        }
-        .feature-text {
-            color: #546e7a;
-            font-size: 1rem;
-            line-height: 1.6;
+            color: #37474f; /* Gris foncé professionnel */
+            margin-bottom: 2rem;
+            font-weight: 400;
+            text-align: center;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        /* Hack CSS pour forcer la couleur du bouton Primary (Connexion) en Vert Clair */
-        div.stButton > button[kind="primary"],
-        div.stButton button[kind="primary"],
-        button[kind="primary"] {
-            background-color: #66bb6a !important; /* Vert clair vibrant */
+        /* Boutons */
+        div.stButton > button[kind="primary"] {
+            background-color: #81c784 !important; /* Vert clair plus doux */
             color: white !important;
             border: none !important;
-            border-radius: 8px !important; /* Arrondi standard plus pro */
-            padding: 0.5rem 1.5rem !important;
-            font-size: 1rem !important;
+            border-radius: 6px !important;
+            padding: 0.5rem 2rem !important;
             font-weight: 600 !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-            transition: all 0.2s ease !important;
-            width: 100% !important; /* Prend la largeur de sa colonne */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+            width: 100%;
         }
-        div.stButton > button[kind="primary"]:hover,
-        div.stButton button[kind="primary"]:hover,
-        button[kind="primary"]:hover {
-            background-color: #4caf50 !important; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+        div.stButton > button[kind="primary"]:hover {
+            background-color: #66bb6a !important;
+        }
+
+        div.stButton > button[kind="secondary"] {
+            background-color: #e3f2fd !important; /* Bleu très clair */
+            color: #0277bd !important;
+            border: 1px solid #b3e5fc !important;
+            border-radius: 6px !important;
+            padding: 0.5rem 2rem !important;
+            font-weight: 600 !important;
+            width: 100%;
+        }
+        div.stButton > button[kind="secondary"]:hover {
+            background-color: #b3e5fc !important;
+        }
+
+        /* Features Section */
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 4rem 0 2rem 0;
+            text-align: center;
         }
         
-        /* Hack CSS pour le bouton Secondary (Créer un compte) */
-         div.stButton > button[kind="secondary"],
-         div.stButton button[kind="secondary"],
-         button[kind="secondary"] {
-            background-color: #e1f5fe !important; /* Fond bleu très pâle au lieu de transparent */
-            border: 1px solid #81d4fa !important;
-            color: #0277bd !important;
-            border-radius: 8px !important;
-            padding: 0.5rem 1.5rem !important;
-            font-size: 1rem !important;
-            font-weight: 600 !important;
-            transition: all 0.2s ease !important;
-            width: 100% !important;
-         }
-         div.stButton > button[kind="secondary"]:hover,
-         div.stButton button[kind="secondary"]:hover,
-         button[kind="secondary"]:hover {
-            border-color: #4fc3f7 !important;
-            color: #01579b !important;
-            background-color: #b3e5fc !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
-         }
+        .feature-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #f0f2f6;
+            height: 100%;
+            text-align: left;
+        }
+        .feature-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2e7d32; /* Vert cohérent */
+            margin-bottom: 0.5rem;
+        }
+        .feature-text {
+            font-size: 0.95rem;
+            color: #546e7a;
+            line-height: 1.5;
+        }
 
         /* Footer */
         .footer {
-            text-align: center;
-            padding: 3rem 0;
             margin-top: 4rem;
+            padding-top: 2rem;
             border-top: 1px solid #f0f2f6;
-            color: #90a4ae;
-            font-size: 0.85rem;
-        }
-        
-        /* Message connecté */
-        .connected-box {
-            background-color: #f1f8e9;
-            border: 1px solid #c5e1a5;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .connected-text {
-            color: #2e7d32;
-            font-weight: 600;
-            font-size: 1.1rem;
+            text-align: center;
+            color: #cfd8dc;
+            font-size: 0.8rem;
         }
     </style>
     """, unsafe_allow_html=True)
 
     # --- Container Principal ---
-    main_container = st.container()
+    # Centrage vertical global si peu de contenu, mais ici on veut surtout contrôler le haut
+    
+    # --- HEADER / NAVBAR ---
+    from src.frontend.views.components import render_navbar
+    render_navbar()
 
-    with main_container:
-        # --- Gestion Utilisateur Connecté ---
-        if st.session_state.token:
+    # --- MAIN CONTENT (Subtitle + Buttons) ---
+    # Centered Layout for content since logo is now in navbar
+    
+    col_main_space, col_main_content, col_main_space2 = st.columns([1, 6, 1])
+    
+    with col_main_content:
+        # --- LOGO CENTRAL ---
+        # Chargement du logo pour affichage central
+        logo_path = Path("src/frontend/assets/logo_home.png")
+        logo_html = ""
+        if logo_path.exists():
+            with open(logo_path, "rb") as f:
+                logo_b64 = base64.b64encode(f.read()).decode()
+            logo_html = f"""
+            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+                <img src="data:image/png;base64,{logo_b64}" style="max-width: 250px; height: auto;" alt="QHSE Air Bot Logo">
+            </div>
+            """
+        
+        st.markdown(logo_html, unsafe_allow_html=True)
+
+        # Sous-titre centré
+        st.markdown("""
+        <div class="hero-subtitle" style="text-align: center; margin-left: auto; margin-right: auto; max-width: 800px;">
+            Analysez vos documents, comprenez les normes et prenez des décisions éclairées.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<div style='margin-bottom: 2rem;'></div>", unsafe_allow_html=True)
+        
+        # Boutons d'action (Centrés)
+        if not st.session_state.token:
+            # Centering buttons using a single container via markdown/css hack or just wider columns
+            # Using wider columns for buttons to prevent wrapping
+            c_b_space1, c_b1, c_b2, c_b_space2 = st.columns([1, 3, 3, 1])
+            with c_b1:
+                if st.button("Connexion", type="primary", use_container_width=True):
+                    st.session_state.current_view = "Login"
+                    st.rerun()
+            with c_b2:
+                if st.button("Créer un compte", type="secondary", use_container_width=True):
+                    st.session_state.current_view = "Login"
+                    st.rerun()
+        else:
+            # Si connecté
             st.markdown("""
-            <div class="connected-box">
-                <div class="connected-text">👋 Bonjour ! Vous êtes déjà connecté.</div>
+            <div style="text-align: center; margin-bottom: 1rem; color: #2e7d32; font-weight: 600;">
+                👋 Vous êtes connecté
             </div>
             """, unsafe_allow_html=True)
-            
-            # Bouton d'accès direct au Chat (un peu isolé pour être clair)
-            col_action, _ = st.columns([1, 2])
-            with col_action:
+            # Center the button
+            c_b_space1, c_b1, c_b_space2 = st.columns([3, 2, 3])
+            with c_b1:
                 if st.button("Accéder au Chat", type="primary", use_container_width=True):
                     st.session_state.current_view = "Chat"
                     st.rerun()
-            
-            st.markdown("---") # Séparateur discret
 
-        # --- Section Hero (2 Colonnes) ---
-        col_hero_text, col_hero_visual = st.columns([1.2, 0.8], gap="large")
+    # (Suppression de l'ancien layout 2 colonnes avec logo à droite)
 
-        with col_hero_text:
-            # Titre H1
-            st.markdown('<div class="hero-title">QHSE Air Bot</div>', unsafe_allow_html=True)
-            # Sous-titre H2
-            st.markdown('<div class="hero-subtitle">Votre assistant intelligent pour la qualité de l’air</div>', unsafe_allow_html=True)
-            # Description
-            st.markdown('<div class="hero-desc">Analysez vos documents, comprenez les normes et prenez des décisions éclairées grâce à une IA spécialisée en conformité QHSE.</div>', unsafe_allow_html=True)
+    # --- SECTION FEATURES ---
+    st.markdown('<div class="section-title">Pourquoi QHSE Air Bot ?</div>', unsafe_allow_html=True)
 
-            # Boutons d'action (Si non connecté)
-            if not st.session_state.token:
-                col_btn_login, col_btn_register, _ = st.columns([1, 1, 0.1], gap="small")
-                
-                with col_btn_login:
-                    if st.button("Connexion", type="primary", use_container_width=True):
-                        st.session_state.current_view = "Login"
-                        st.rerun()
-                
-                with col_btn_register:
-                    if st.button("Créer un compte", type="secondary", use_container_width=True):
-                        st.session_state.current_view = "Login"
-                        st.rerun()
+    # Grille 2x2 compacte
+    f_col1, f_col2 = st.columns(2, gap="medium")
+    
+    with f_col1:
+        st.markdown("""
+        <div class="feature-card" style="margin-bottom: 1rem;">
+            <div class="feature-header">Optimisation du temps</div>
+            <div class="feature-text">Accès rapide à des réponses QHSE fiables via IA.</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-header">Conformité simplifiée</div>
+            <div class="feature-text">Aide à la compréhension des normes et exigences légales.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        with col_hero_visual:
-            # Image Logo + Texte
-            import os
-            # Chemin absolu vers l'image
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            logo_path = os.path.join(current_dir, "..", "assets", "logo_home.png")
-            
-            # Conteneur pour l'image
-            if os.path.exists(logo_path):
-                st.image(logo_path, use_container_width=True)
-            else:
-                st.warning("Image logo_home.png introuvable")
-
-            # Texte en dessous
-            st.markdown("""
-            <div class="hero-visual-text" style="margin-top: 1rem;">
-                Analyse • Conformité • Sécurité
-            </div>
-            """, unsafe_allow_html=True)
-
-        # --- Section "Pourquoi QHSE Air Bot ?" ---
-        st.markdown('<div class="section-title">Pourquoi QHSE Air Bot ?</div>', unsafe_allow_html=True)
-
-        row1_col1, row1_col2 = st.columns(2, gap="medium")
-        
-        with row1_col1:
-            st.markdown("""
-            <div class="feature-card">
-                <div class="feature-header">Optimisation du temps</div>
-                <div class="feature-text">
-                    Accédez instantanément à des réponses précises sur vos procédures et réglementations, sans perdre des heures à chercher dans vos documents.
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True) # Spacer
-
-            st.markdown("""
-            <div class="feature-card">
-                <div class="feature-header">Conformité simplifiée</div>
-                <div class="feature-text">
-                    Déchiffrez facilement les normes complexes (ISO 14001, 45001, etc.) et assurez-vous que vos opérations respectent les exigences légales.
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with row1_col2:
-            st.markdown("""
-            <div class="feature-card">
-                <div class="feature-header">Sécurité et confidentialité</div>
-                <div class="feature-text">
-                    Vos données sensibles restent protégées. Notre architecture garantit que vos documents internes ne servent pas à entraîner des modèles publics.
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True) # Spacer
-
-            st.markdown("""
-            <div class="feature-card">
-                <div class="feature-header">Support décisionnel</div>
-                <div class="feature-text">
-                    Transformez vos données brutes en plans d'action concrets. L'IA vous aide à prioriser les risques et à identifier les opportunités d'amélioration.
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+    with f_col2:
+        st.markdown("""
+        <div class="feature-card" style="margin-bottom: 1rem;">
+            <div class="feature-header">Sécurité & Confidentialité</div>
+            <div class="feature-text">Données et historiques protégés, aucun entraînement public.</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-header">Support décisionnel</div>
+            <div class="feature-text">Analyses claires pour faciliter vos actions QHSE.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # --- Footer ---
     st.markdown("""
     <div class="footer">
-        QHSE Air Bot — Plateforme Interne de Gestion QHSE<br>
-        © 2026 Tous droits réservés
+        QHSE Air Bot © 2026 — Assistant IA Professionnel
     </div>
     """, unsafe_allow_html=True)
