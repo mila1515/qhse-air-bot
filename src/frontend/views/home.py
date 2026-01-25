@@ -212,7 +212,7 @@ def render_home():
     with f_col1:
         st.markdown("""
         <div class="feature-card" style="margin-bottom: 1rem;">
-            <div class="feature-header">Qualité de l'Air (WAQI)</div>
+            <div class="feature-header">Qualité de l'Air</div>
             <div class="feature-text">Suivi en temps réel des indices de qualité de l'air et alertes pollution.</div>
         </div>
         <div class="feature-card">
@@ -225,7 +225,7 @@ def render_home():
         st.markdown("""
         <div class="feature-card" style="margin-bottom: 1rem;">
             <div class="feature-header">Sécurité Industrielle</div>
-            <div class="feature-text">Analyse des accidents (Base ARIA) et retour d'expérience sécurité.</div>
+            <div class="feature-text">Analyse des accidents et retour d'expérience sécurité.</div>
         </div>
         <div class="feature-card">
             <div class="feature-header">Assistance IA Experte</div>
