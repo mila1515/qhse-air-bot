@@ -36,7 +36,7 @@ def render_navbar():
             top: 0;
             left: 0;
             width: 100%;
-            z-index: 999999;
+            z-index: 1000001;
             background-color: {NAV_BG};
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         "> 

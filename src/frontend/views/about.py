@@ -71,14 +71,16 @@ def render_about():
         # 2. Notre Mission
         st.markdown('<div class="about-section-title">Notre Mission</div>', unsafe_allow_html=True)
         st.markdown("""
-        <div class="about-text">
-            <strong>QHSE Air Bot</strong> a pour mission de centraliser et simplifier l'accès à l'information critique :
+        <div class="about-card">
+            <div class="about-text">
+                QHSE Air Bot a pour mission de centraliser et simplifier l'accès à l'information critique :
+            </div>
+            <ul>
+                <li class="about-text">Assurer une veille réglementaire proactive et précise.</li>
+                <li class="about-text">Faciliter l'interprétation des textes officiels (Code du Travail, Guides INRS).</li>
+                <li class="about-text">Surveiller en temps réel les indicateurs de qualité de l'air pour la protection des collaborateurs.</li>
+            </ul>
         </div>
-        <ul>
-            <li class="about-text">Assurer une veille réglementaire proactive et précise.</li>
-            <li class="about-text">Faciliter l'interprétation des textes officiels (Code du Travail, Guides INRS).</li>
-            <li class="about-text">Surveiller en temps réel les indicateurs de qualité de l'air pour la protection des collaborateurs.</li>
-        </ul>
         """, unsafe_allow_html=True)
 
         st.divider()
@@ -139,26 +141,7 @@ def render_about():
         </div>
         """, unsafe_allow_html=True)
 
-        st.divider()
 
-        # 5. Engagement sur la Confidentialité
-        st.markdown('<div class="about-section-title">Engagement sur la Confidentialité</div>', unsafe_allow_html=True)
-        st.markdown("""
-        <div class="about-card" style="border-left: 5px solid #2e7d32;">
-            <div class="about-text">
-                La sécurité de vos données industrielles est une priorité absolue.
-            </div>
-            <div class="about-text">
-                <strong>Cloisonnement des données</strong> : Vos documents internes et historiques de conversations sont strictement isolés.
-            </div>
-            <div class="about-text">
-                <strong>Pas d'entraînement public</strong> : Aucune donnée client n'est utilisée pour l'entraînement des modèles de langage publics.
-            </div>
-            <div class="about-text">
-                <strong>Transparence</strong> : Nous appliquons des protocoles stricts de gestion des accès et de chiffrement.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
 
         # Footer About
         st.markdown("""

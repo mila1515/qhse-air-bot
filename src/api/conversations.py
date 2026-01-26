@@ -31,6 +31,14 @@ def get_conversations(db: Session = Depends(get_db), current_user: User = Depend
     """Récupère toutes les conversations de l'utilisateur connecté"""
     return db.query(Conversation).filter(Conversation.user_id == current_user.id).order_by(Conversation.updated_at.desc()).all()
 
+@router.get("/{conversation_id}", response_model=schemas.ConversationRead)
+def get_conversation(conversation_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Récupère les détails d'une conversation"""
+    conv = db.query(Conversation).filter(Conversation.id == conversation_id, Conversation.user_id == current_user.id).first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return conv
+
 @router.post("/", response_model=schemas.ConversationRead)
 def create_conversation(conversation: schemas.ConversationCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Crée une nouvelle conversation"""
@@ -50,6 +58,28 @@ def delete_conversation(conversation_id: int, db: Session = Depends(get_db), cur
     db.delete(conv)
     db.commit()
     return {"message": "Conversation deleted"}
+
+@router.patch("/{conversation_id}", response_model=schemas.ConversationRead)
+def update_conversation(
+    conversation_id: int, 
+    conversation_update: schemas.ConversationUpdate, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user)
+):
+    """Met à jour une conversation (titre ou statut)"""
+    conv = db.query(Conversation).filter(Conversation.id == conversation_id, Conversation.user_id == current_user.id).first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    if conversation_update.title is not None:
+        conv.title = conversation_update.title
+    if conversation_update.status is not None:
+        conv.status = conversation_update.status
+    
+    conv.updated_at = func.now()
+    db.commit()
+    db.refresh(conv)
+    return conv
 
 @router.get("/{conversation_id}/history", response_model=List[schemas.MessageRead])
 def get_conversation_history(conversation_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

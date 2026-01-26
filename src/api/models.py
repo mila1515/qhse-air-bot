@@ -18,9 +18,14 @@ class MessageRead(MessageBase):
 
 class ConversationBase(BaseModel):
     title: str
+    status: Optional[str] = "active"
 
 class ConversationCreate(ConversationBase):
     pass
+
+class ConversationUpdate(BaseModel):
+    title: Optional[str] = None
+    status: Optional[str] = None
 
 class ConversationRead(ConversationBase):
     id: int
@@ -45,6 +50,7 @@ class Token(BaseModel):
     token_type: str
 
 class NoteBase(BaseModel):
+    title: Optional[str] = None
     content: str
 
 class NoteCreate(NoteBase):

@@ -2,7 +2,7 @@ import streamlit as st
 from src.frontend.services import conversations_client
 
 def render_conversations():
-    st.markdown("## 🗂️ Historique des Conversations")
+    st.markdown("## Historique des Conversations")
     
     # Bouton rafraîchir
     if st.button("Rafraîchir la liste"):
@@ -23,19 +23,26 @@ def render_conversations():
                     
                     with col1:
                         title = conv.get("title", "Conversation sans titre")
+                        status = conv.get("status", "active")
                         date_str = conv.get("updated_at", conv.get("created_at", "N/A"))[:10]
-                        st.write(f"**{title}**")
-                        st.caption(f"📅 {date_str}")
+                        
+                        # Affichage du titre avec statut si différent de 'active'
+                        title_display = f"**{title}**"
+                        if status and status.lower() != "active":
+                            title_display += f" `[{status}]`"
+                            
+                        st.markdown(title_display)
+                        st.caption(f"Date: {date_str}")
                     
                     with col2:
-                        if st.button("Continuer ➡️", key=f"open_{conv['id']}", use_container_width=True):
+                        if st.button("Voir la conversation", key=f"open_{conv['id']}", use_container_width=True):
                             st.session_state.current_conversation_id = conv['id']
                             st.session_state.messages = [] # Reset messages local cache
                             st.session_state.current_view = "Chat"
                             st.rerun()
                     
                     with col3:
-                        if st.button("🗑️", key=f"del_{conv['id']}", help="Supprimer", use_container_width=True):
+                        if st.button("Suppr.", key=f"del_{conv['id']}", help="Supprimer", use_container_width=True):
                             del_resp = conversations_client.delete_conversation(conv['id'])
                             if del_resp and del_resp.status_code == 200:
                                 st.success("Supprimé")

@@ -6,12 +6,11 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from src.frontend.utils.session import init_session_state, logout
-from src.frontend.views import login, chat, conversations, notes, home, about
+from src.frontend.views import login, chat, conversations, notes, home, about, profile
 
 # Configuration de la page
 st.set_page_config(
     page_title="QHSE Air Bot",
-    page_icon="🤖",
     layout="wide"
 )
 
@@ -34,9 +33,53 @@ def apply_global_styles():
             background-color: #F0F8FF; /* Bleu très très clair (AliceBlue) */
         }
         
-        /* Cacher le header par défaut de Streamlit pour laisser place à notre Navbar */
+        /* --- Header & Sidebar Toggle --- */
+        /* On rend le header Streamlit transparent et au-dessus de notre navbar */
         header[data-testid="stHeader"] {
-            display: none;
+            background: transparent !important;
+            z-index: 1000000 !important; /* Au-dessus de la navbar (999999) */
+            pointer-events: none; /* Permet de cliquer sur la navbar en dessous */
+        }
+        
+        /* Désactiver les événements sur le conteneur principal du header pour ne pas bloquer la navbar */
+        header[data-testid="stHeader"] > div {
+            pointer-events: none;
+        }
+
+        /* Réactiver les événements UNIQUEMENT sur les éléments interactifs du header */
+        [data-testid="stSidebarCollapsedControl"],
+        [data-testid="stToolbar"],
+        [data-testid="stHeaderActionElements"],
+        [data-testid="stStatusWidget"] {
+            pointer-events: auto !important;
+        }
+
+        /* Style du bouton de contrôle de la sidebar (Flèche/Hamburger) */
+        [data-testid="stSidebarCollapsedControl"] {
+            color: #2E8B57 !important; /* Vert charte */
+            background-color: #ffffff !important; /* Fond blanc pour visibilité */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 0.5rem;
+            margin-left: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000002 !important; /* Au-dessus de la navbar (1000001) */
+            position: relative;
+        }
+        
+        /* Remplacement de l'icône flèche par "Trois lignes" (Hamburger) */
+        [data-testid="stSidebarCollapsedControl"] svg {
+            display: none !important;
+        }
+        [data-testid="stSidebarCollapsedControl"]::after {
+            content: "☰"; /* Symbole Hamburger */
+            font-size: 24px;
+            color: #2E8B57;
+            margin-top: -4px; /* Ajustement vertical fin */
         }
 
         /* Padding global pour éviter que le contenu soit caché sous la Navbar fixe */
@@ -119,10 +162,19 @@ def main():
             # Si c'est une liste (anciennes versions parfois) ou string
             target_view = view_param if isinstance(view_param, str) else view_param[0]
             
-            if target_view in ["Home", "Login", "About"]:
+            # FIX: Si l'utilisateur est déjà connecté et demande "Login", on le redirige vers "Chat"
+            # pour éviter une boucle de redirection ou de rester bloqué sur la page de login.
+            if target_view == "Login" and st.session_state.token:
+                # IMPORTANT : On nettoie le paramètre de l'URL pour éviter qu'il ne force la redirection à chaque rechargement
+                if "view" in st.query_params:
+                    del st.query_params["view"]
+                
+                # On ne force le Chat que si on était effectivement sur Login (ou si on vient d'arriver)
+                # Si l'utilisateur est déjà dans une navigation interne (ex: Conversations), on ne touche à rien
+                if st.session_state.current_view == "Login":
+                    st.session_state.current_view = "Chat"
+            elif target_view in ["Home", "Login", "About"]:
                 st.session_state.current_view = target_view
-                # Nettoyer l'URL pour éviter de rester bloqué sur ?view=...
-                # Note: On ne force pas le rerun immédiat car le rechargement de page l'a déjà fait
     except:
         pass
 
@@ -162,7 +214,7 @@ def main():
         # Si connecté, afficher la Sidebar et le contenu
         with st.sidebar:
             # En-tête Sidebar
-            st.markdown("### 🤖 QHSE Air Bot")
+            st.markdown("### QHSE Air Bot")
             
             # User Card
             if st.session_state.user:
@@ -178,32 +230,50 @@ def main():
             st.markdown('<div style="margin-bottom: 0.5rem; font-weight: 600; color: #90a4ae; font-size: 0.8rem;">NAVIGATION</div>', unsafe_allow_html=True)
             
             # Options avec icônes
-            nav_options = {"Chat": "💬 Discussion", "Conversations": "🗂️ Historique", "Notes": "📝 Mes Notes"}
+            nav_options = {
+                "Chat": "Discussion", 
+                "Conversations": "Historique", 
+                "Notes": "Mes Notes",
+                "Profile": "Profil"
+            }
             
-            # Trouver l'index actuel
-            try:
-                current_index = list(nav_options.keys()).index(st.session_state.current_view)
-            except ValueError:
-                current_index = 0
+            # --- Navigation Robuste avec Callback ---
             
-            selected_label = st.radio(
+            # 1. Synchroniser le widget Radio avec la vue actuelle (current_view)
+            # Cela permet de mettre à jour le radio si la vue change par code (ex: redirect après login)
+            current_label = nav_options.get(st.session_state.current_view, "Discussion")
+            
+            # Important : Forcer la mise à jour du widget si la vue a changé par code
+            # (pour éviter que le bouton reste sur l'ancien état et ne déclenche pas on_change au clic)
+            if "nav_radio" not in st.session_state or st.session_state.nav_radio != current_label:
+                st.session_state.nav_radio = current_label
+            
+            # 2. Callback de changement
+            def on_nav_change():
+                selected_label = st.session_state.nav_radio
+                # Trouver la clé (View Name) correspondant au label
+                new_view = next((k for k, v in nav_options.items() if v == selected_label), "Chat")
+                st.session_state.current_view = new_view
+                
+                # Nettoyer les query params pour éviter les conflits avec la navigation URL
+                if "view" in st.query_params:
+                    del st.query_params["view"]
+            
+            # 3. Widget Radio
+            st.radio(
                 "Menu Navigation",
                 options=list(nav_options.values()),
-                index=current_index,
-                label_visibility="collapsed"
+                key="nav_radio",
+                on_change=on_nav_change,
+                label_visibility="collapsed",
+                index=list(nav_options.values()).index(current_label) if current_label in nav_options.values() else 0
             )
             
-            # Mise à jour de la vue
-            new_view = [k for k, v in nav_options.items() if v == selected_label][0]
-            if new_view != st.session_state.current_view:
-                st.session_state.current_view = new_view
-                st.rerun()
-
             st.markdown("<br>" * 5, unsafe_allow_html=True) # Espaceur visuel
             st.divider()
             
             # Bouton de déconnexion (Rouge discret via style global ou simple secondaire)
-            if st.button("🚪 Se déconnecter", type="secondary", use_container_width=True):
+            if st.button("Se déconnecter", type="secondary", use_container_width=True):
                 logout()
 
         # Rendu de la vue sélectionnée
@@ -213,6 +283,8 @@ def main():
             conversations.render_conversations()
         elif st.session_state.current_view == "Notes":
             notes.render_notes()
+        elif st.session_state.current_view == "Profile":
+            profile.render_profile()
 
 if __name__ == "__main__":
     main()

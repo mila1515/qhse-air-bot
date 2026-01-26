@@ -32,7 +32,7 @@ def read_notes(db: Session = Depends(get_db), current_user: User = Depends(get_c
 @router.post("/", response_model=schemas.NoteRead)
 def create_note(note: schemas.NoteCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Crée une nouvelle note"""
-    new_note = Note(content=note.content, user_id=current_user.id)
+    new_note = Note(title=note.title, content=note.content, user_id=current_user.id)
     db.add(new_note)
     db.commit()
     db.refresh(new_note)

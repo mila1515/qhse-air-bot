@@ -106,23 +106,36 @@ def render_home():
         }
         
         .feature-card {
-            background-color: white;
-            padding: 1.5rem;
+            background-color: #ffffff; /* Fond blanc propre */
+            padding: 2rem;
             border-radius: 8px;
-            border: 1px solid #f0f2f6;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             height: 100%;
-            text-align: left;
+            min-height: 180px; /* Hauteur minimale uniforme */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.2s ease-in-out;
+        }
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-color: #b0bec5;
         }
         .feature-header {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             font-weight: 700;
-            color: #2e7d32; /* Vert cohérent */
-            margin-bottom: 0.5rem;
+            color: #2e7d32; /* Vert professionnel */
+            margin-bottom: 0.75rem;
+            border-bottom: 2px solid #e8f5e9;
+            padding-bottom: 0.5rem;
+            width: 100%;
         }
         .feature-text {
             font-size: 0.95rem;
             color: #546e7a;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         /* Footer */
@@ -182,10 +195,16 @@ def render_home():
             with c_b1:
                 if st.button("Connexion", type="primary", use_container_width=True):
                     st.session_state.current_view = "Login"
+                    st.session_state.auth_mode = "login"
+                    st.session_state.auth_nav_radio = "Se connecter"
+                    st.query_params["view"] = "Login"
                     st.rerun()
             with c_b2:
                 if st.button("Créer un compte", type="secondary", use_container_width=True):
                     st.session_state.current_view = "Login"
+                    st.session_state.auth_mode = "register"
+                    st.session_state.auth_nav_radio = "Créer un compte"
+                    st.query_params["view"] = "Login"
                     st.rerun()
         else:
             # Si connecté
@@ -201,32 +220,45 @@ def render_home():
                     st.session_state.current_view = "Chat"
                     st.rerun()
 
-    # (Suppression de l'ancien layout 2 colonnes avec logo à droite)
-
     # --- SECTION FEATURES ---
     st.markdown('<div class="section-title">Pourquoi QHSE Air Bot ?</div>', unsafe_allow_html=True)
 
-    # Grille 2x2 compacte
-    f_col1, f_col2 = st.columns(2, gap="medium")
+    # Grille 2x2 organisée avec st.columns
+    # Ligne 1 : Qualité de l'Air | Sécurité Industrielle
+    c1, c2 = st.columns(2, gap="medium")
     
-    with f_col1:
+    with c1:
         st.markdown("""
-        <div class="feature-card" style="margin-bottom: 1rem;">
+        <div class="feature-card">
             <div class="feature-header">Qualité de l'Air</div>
             <div class="feature-text">Suivi en temps réel des indices de qualité de l'air et alertes pollution.</div>
         </div>
+        """, unsafe_allow_html=True)
+        
+    with c2:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-header">Sécurité Industrielle</div>
+            <div class="feature-text">Analyse des accidents et retour d'expérience sécurité.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Espace entre les lignes
+    st.markdown("<div style='margin-bottom: 1.5rem;'></div>", unsafe_allow_html=True)
+
+    # Ligne 2 : Réglementation & Normes | Assistance IA Experte
+    c3, c4 = st.columns(2, gap="medium")
+    
+    with c3:
+        st.markdown("""
         <div class="feature-card">
             <div class="feature-header">Réglementation & Normes</div>
             <div class="feature-text">Accès instantané au Code du Travail et guides INRS pour la conformité.</div>
         </div>
         """, unsafe_allow_html=True)
 
-    with f_col2:
+    with c4:
         st.markdown("""
-        <div class="feature-card" style="margin-bottom: 1rem;">
-            <div class="feature-header">Sécurité Industrielle</div>
-            <div class="feature-text">Analyse des accidents et retour d'expérience sécurité.</div>
-        </div>
         <div class="feature-card">
             <div class="feature-header">Assistance IA Experte</div>
             <div class="feature-text">Un assistant intelligent pour vos analyses et prises de décision QHSE.</div>

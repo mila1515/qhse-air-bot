@@ -5,7 +5,7 @@ def render_chat():
     # Header Section
     col_header, col_action = st.columns([3, 1])
     with col_header:
-        st.markdown("## 💬 Assistant QHSE")
+        st.markdown("## Assistant QHSE")
     
     # Gestion de la conversation active
     if not st.session_state.current_conversation_id:
@@ -17,11 +17,11 @@ def render_chat():
             st.markdown("""
             <div style="text-align: center; margin-top: 2rem; margin-bottom: 2rem;">
                 <h3 style="color: #546e7a;">Bonjour !</h3>
-                <p style="color: #78909c;">Je suis prêt à vous aider sur vos questions QHSE.</p>
+                <p style="color: #78909c;">Je suis prêt à vous aider sur vos questions.</p>
             </div>
             """, unsafe_allow_html=True)
             
-            if st.button("➕ Démarrer une nouvelle conversation", type="primary", use_container_width=True):
+            if st.button("Démarrer une nouvelle conversation", type="primary", use_container_width=True):
                 resp = conversations_client.create_conversation("Nouvelle discussion")
                 if resp and resp.status_code in [200, 201]:
                     conv = resp.json()
@@ -36,12 +36,32 @@ def render_chat():
                     st.error(f"Impossible de créer une conversation ({resp.status_code if resp else 'N/A'}): {err}")
     else:
         # Conversation active
+        
+        # Récupérer les détails de la conversation (statut)
+        conv_status = "active"
+        resp = conversations_client.get_conversation(st.session_state.current_conversation_id)
+        if resp and resp.status_code == 200:
+            conv_data = resp.json()
+            conv_status = conv_data.get("status", "active")
+
         with col_action:
-            # Bouton de retour/fermeture aligné à droite du titre
-            if st.button("Fermer la discussion", type="secondary", use_container_width=True):
-                st.session_state.current_conversation_id = None
-                st.session_state.messages = []
-                st.rerun()
+            # Boutons d'action : Clôturer et Retour
+            c_act1, c_act2 = st.columns(2)
+            with c_act1:
+                if conv_status != "clos":
+                    if st.button("Clôturer", key="close_conv_btn", help="Marquer comme terminée", use_container_width=True):
+                        conversations_client.update_conversation(st.session_state.current_conversation_id, status="clos")
+                        st.toast("Conversation marquée comme close", icon="✅")
+                        st.rerun()
+                else:
+                    st.markdown(f"<div style='text-align: center; color: #4CAF50; font-weight: bold; padding-top: 8px; border: 1px solid #4CAF50; border-radius: 4px;'>CLOS</div>", unsafe_allow_html=True)
+            
+            with c_act2:
+                # Bouton de retour/fermeture aligné à droite du titre
+                if st.button("Retour", type="secondary", use_container_width=True):
+                    st.session_state.current_conversation_id = None
+                    st.session_state.messages = []
+                    st.rerun()
         
         st.divider()
 
@@ -67,7 +87,9 @@ def render_chat():
                     st.markdown(msg["content"])
     
         # Input utilisateur
-        if prompt := st.chat_input("Posez votre question QHSE..."):
+        if conv_status == "clos":
+            st.info("Cette conversation est close. Vous ne pouvez plus envoyer de messages.")
+        elif prompt := st.chat_input("Posez votre question QHSE..."):
             # Afficher message user
             st.session_state.messages.append({"role": "user", "content": prompt})
             with chat_container: # Force scroll down via rerun usually, but here we append visually

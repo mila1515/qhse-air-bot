@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import extra_streamlit_components as stx
+from datetime import datetime, timedelta
 
 # Configuration de l'API
 # En local : http://localhost:8000
@@ -56,10 +57,10 @@ def save_token(token):
     st.session_state.token = token
     # Utiliser l'instance stockée dans session_state pour éviter de recréer le widget
     cookie_manager = st.session_state.cookie_manager
-    # Expire dans 1 jour (en secondes)
-    # Note: stx.CookieManager.set ne gère pas toujours expires_at proprement selon versions,
-    # mais par défaut c'est session ou persistant.
-    cookie_manager.set("access_token", token)
+    
+    # Expire dans 7 jours
+    expires_at = datetime.now() + timedelta(days=7)
+    cookie_manager.set("access_token", token, expires_at=expires_at)
 
 def get_api_headers():
     """Retourne les headers HTTP avec le token JWT si disponible."""
