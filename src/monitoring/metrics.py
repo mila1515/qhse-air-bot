@@ -38,6 +38,19 @@ AIR_QUALITY_INDEX = Gauge(
     registry=registry
 )
 
+# 4. Métriques RAG (Performance & Fallback)
+RAG_QUERY_LATENCY = Gauge(
+    'rag_query_latency_seconds',
+    'Temps de réponse du RAG en secondes',
+    registry=registry
+)
+
+RAG_FALLBACK_COUNT = Counter(
+    'rag_fallback_activation_total',
+    'Nombre de bascules sur le LLM de secours',
+    registry=registry
+)
+
 def push_metrics():
     """Pousse les métriques vers la Pushgateway (si configurée)"""
     # URL de la Pushgateway (par défaut localhost:9091)

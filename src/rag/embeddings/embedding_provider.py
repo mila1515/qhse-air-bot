@@ -53,13 +53,13 @@ def get_embeddings():
             # On initialise le modèle. Note: Cela ne valide pas la clé instantanément,
             # mais c'est l'intention qui compte ici. L'erreur surviendra à l'utilisation si la clé est mauvaise.
             embeddings = OpenAIEmbeddings(
-                model="text-embedding-3-small",
+                model="text-embedding-3-large",
                 api_key=openai_api_key
             )
             # Validation de la clé avec une requête légère
             embeddings.embed_query("test") 
             
-            logger.info("✅ Mode Embeddings : OPENAI (text-embedding-3-small)")
+            logger.info("✅ Mode Embeddings : OPENAI (text-embedding-3-large)")
             return embeddings, "openai"
             
         except Exception as e:
