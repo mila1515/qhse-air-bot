@@ -41,9 +41,22 @@ jobs:
         
     - name: Run Tests
       env:
+        # Database Config (Matches services above)
         DATABASE_URL: postgresql://user:password@localhost:5432/qhse_db
+        POSTGRES_USER: user
+        POSTGRES_PASSWORD: password
+        POSTGRES_DB: qhse_db
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
+        
+        # API Keys & Secrets
         AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
         AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+        AZURE_OPENAI_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
+        AZURE_OPENAI_CHAT_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_CHAT_DEPLOYMENT }}
+        AZURE_OPENAI_EMBEDDING_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_EMBEDDING_DEPLOYMENT }}
+        WAQI_API_TOKEN: ${{ secrets.WAQI_API_TOKEN }}
+        SECRET_KEY: "test_secret_key" # Dummy key for tests
       run: |
         pytest tests/
       
