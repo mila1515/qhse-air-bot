@@ -239,7 +239,9 @@ src/data_monitoring/reports/
 # RAG vector stores & embeddings
 src/rag/vectorstore/
 src/rag/chunks/
-src/rag/embeddings/
+# Only ignore data/cache files in embeddings, not source code
+src/rag/embeddings/*.pkl
+src/rag/embeddings/*.bin
 *.faiss
 *.pkl
 *.bin
