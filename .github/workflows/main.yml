@@ -53,7 +53,8 @@ jobs:
         AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
         AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
         AZURE_OPENAI_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
-        AZURE_OPENAI_CHAT_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_CHAT_DEPLOYMENT }}
+        AZURE_OPENAI_EMBEDDING_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_EMBEDDING_DEPLOYMENT }}
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         # Force Local Embeddings (HuggingFace) for tests as Azure Embedding is not available yet
         RAG_EMBEDDING_PROVIDER: local
         WAQI_API_TOKEN: ${{ secrets.WAQI_API_TOKEN }}
