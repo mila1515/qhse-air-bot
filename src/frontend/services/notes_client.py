@@ -9,11 +9,10 @@ def get_notes():
     except requests.exceptions.RequestException as e:
         return None
 
-def create_note(content):
+def create_note(title, content):
     """Crée une nouvelle note."""
     try:
-        # Note: L'API attend 'content' uniquement (pas de titre)
-        payload = {"content": content}
+        payload = {"title": title, "content": content}
         response = requests.post(f"{API_URL}/notes/", headers=get_api_headers(), json=payload)
         return response
     except requests.exceptions.RequestException as e:

@@ -15,10 +15,14 @@ def login_user(email, password):
         st.error(f"Erreur de connexion API (Login): {e}")
         return None
 
-def register_user(email, password):
+def register_user(email, password, username=None):
     """Crée un nouveau compte utilisateur."""
     try:
-        response = requests.post(f"{API_URL}/auth/register", json={"email": email, "password": password})
+        payload = {"email": email, "password": password}
+        # Note: L'API actuelle ne semble pas encore stocker le username, mais on le passe au cas où
+        # Si l'API évolue pour accepter le username, il faudra l'ajouter ici.
+        # Pour l'instant, on garde la signature compatible avec l'appel frontend.
+        response = requests.post(f"{API_URL}/auth/register", json=payload)
         return response
     except requests.exceptions.RequestException as e:
         st.error(f"Erreur de connexion API (Register): {e}")

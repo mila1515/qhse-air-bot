@@ -19,6 +19,7 @@ class Note(Base):
     __tablename__ = "notes"
 
     id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=True)
     content = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
@@ -31,6 +32,7 @@ class Conversation(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, default="Nouvelle conversation")
+    status = Column(String, default="active")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     user_id = Column(Integer, ForeignKey("users.id"))
