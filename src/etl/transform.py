@@ -22,8 +22,8 @@ class DataTransformer:
         df = pd.read_csv(input_file)
         
         # Nettoyage
-        df['titre'] = df['titre'].astype(str).str.strip()
-        df['contenu'] = df['contenu'].astype(str).str.strip()
+        df['titre'] = df['titre'].fillna('').astype(str).str.strip()
+        df['contenu'] = df['contenu'].fillna('').astype(str).str.strip()
         
         # Ajout métadonnées
         df['type'] = "REGLEMENTATION"
@@ -86,6 +86,10 @@ class DataTransformer:
             text_cols = [c for c in df.columns if df[c].dtype == 'object']
             for col in text_cols:
                 df[col] = df[col].astype(str).str.strip()
+            
+            # Normalisation Commune (pour jointure future)
+            if 'commune' in df.columns:
+                df['commune'] = df['commune'].astype(str).str.upper().str.strip()
 
             # Ajout métadonnées
             df['type'] = "ACCIDENT_RETEX"
@@ -117,6 +121,14 @@ class DataTransformer:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
         
+        # Normalisation Ville (pour jointure future)
+        if 'city' in df.columns:
+             # L'API renvoie 'city' -> map vers 'ville'
+             df.rename(columns={'city': 'ville'}, inplace=True)
+        
+        if 'ville' in df.columns:
+             df['ville'] = df['ville'].astype(str).str.upper().str.strip()
+
         # Ajout niveau de risque (Logique simple basée sur AQI)
         # 0-50: Bon, 51-100: Modéré, 101-150: Mauvais pour sensibles, 150+: Mauvais
         def get_risk_level(aqi):

@@ -54,6 +54,10 @@ class RAGPipeline:
 
     def initialize_chain(self):
         """Initialise la chaîne RAG (LLM + Retriever)."""
+        # Recharger les variables d'environnement au cas où elles auraient changé
+        from dotenv import load_dotenv
+        load_dotenv(override=True)
+        
         azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
         azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
         google_api_key = os.getenv("GOOGLE_API_KEY")
@@ -65,8 +69,8 @@ class RAGPipeline:
             try:
                 logger.info("🔷 Initialisation LLM : Azure OpenAI")
                 self.llm = AzureChatOpenAI(
-                    azure_deployment=os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "gpt-35-turbo"),
-                    openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2023-05-15"),
+                    azure_deployment=os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "gpt-4.1-mini"),
+                    openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-12-01-preview"),
                     azure_endpoint=azure_endpoint,
                     api_key=azure_api_key,
                     temperature=0
