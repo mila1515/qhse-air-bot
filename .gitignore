@@ -255,3 +255,7 @@ postgres_data/
 Thumbs.db
 
 # Documentation
+RAPPORT_*.md
+RECOMMANDATIONS_SOUTENANCE.md
+projectdetails.md
+
