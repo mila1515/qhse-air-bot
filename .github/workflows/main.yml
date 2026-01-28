@@ -57,7 +57,8 @@ jobs:
           pip install pytest httpx pytest-asyncio bandit safety
       
       - name: Security Check - Bandit
-        run: bandit -r src/ -f custom --msg-template "{abspath}:{line}: {test_id}[bandit]: {msg}"
+        run: |
+          bandit -r src/ -f custom --msg-template "{abspath}:{line}: {test_id}[bandit]: {msg}"
         continue-on-error: true
         
       - name: Security Check - Safety
