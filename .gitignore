@@ -37,6 +37,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
+tests/evaluation/
 htmlcov/
 .tox/
 .nox/
@@ -236,9 +237,11 @@ src/data_monitoring/reports/
 *.parquet
 
 # RAG vector stores & embeddings
-src/rag/vectorstore/
+# src/rag/vectorstore/  <-- COMMENTED OUT because it contains code (vector_store.py), not data
 src/rag/chunks/
-src/rag/embeddings/
+# Only ignore data/cache files in embeddings, not source code
+src/rag/embeddings/*.pkl
+src/rag/embeddings/*.bin
 *.faiss
 *.pkl
 *.bin
@@ -250,3 +253,10 @@ postgres_data/
 # System files
 .DS_Store
 Thumbs.db
+
+# Documentation
+RAPPORT_*.md
+RECOMMANDATIONS_SOUTENANCE.md
+projectdetails.md
+MONITORING.md
+
