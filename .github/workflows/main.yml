@@ -83,6 +83,8 @@ jobs:
     name: Build & Push
     needs: tests-and-security
     runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
     strategy:
       matrix:
         include:
