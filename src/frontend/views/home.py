@@ -271,3 +271,102 @@ def render_home():
         QHSE Air Bot © 2026 — Assistant IA Professionnel
     </div>
     """, unsafe_allow_html=True)
+
+def render_dashboard():
+    """
+    Affiche le tableau de bord utilisateur connecté (SaaS Style).
+    Carte blanche centrée avec 'Bonjour !' et bouton d'action.
+    """
+    # Style spécifique pour le dashboard
+    st.markdown("""
+    <style>
+        .dashboard-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60vh;
+        }
+        .dashboard-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 3rem;
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid #e2e8f0;
+        }
+        .dashboard-title {
+            color: #2c5282; /* Bleu demandé */
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .dashboard-subtitle {
+            color: #4a5568; /* Gris demandé */
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+        }
+        div.stButton > button[kind="primary"] {
+            background-color: #48bb78 !important; /* Vert demandé */
+            border-radius: 8px !important;
+            padding: 0.75rem 2rem !important;
+            font-size: 1.1rem !important;
+            font-weight: 600 !important;
+            border: none !important;
+            transition: all 0.2s;
+        }
+        div.stButton > button[kind="primary"]:hover {
+            background-color: #38a169 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.2) !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Conteneur centré
+    st.markdown('<div class="dashboard-container">', unsafe_allow_html=True)
+    
+    # On utilise st.columns pour centrer le contenu "Carte" (ou juste un conteneur markdown)
+    # Mais on veut un bouton Streamlit interactif DEDANS.
+    # Astuce : On crée la structure visuelle "Card" autour, et on place les éléments dedans.
+    
+    # Pour centrer parfaitement avec un bouton interactif, on utilise des colonnes vides
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        # Début Carte Visuelle
+        st.markdown("""
+        <div class="dashboard-card">
+            <div class="dashboard-title">Bonjour !</div>
+            <div class="dashboard-subtitle">Je suis prêt à vous aider sur vos questions.</div>
+        """, unsafe_allow_html=True)
+        
+        # Bouton (Centré via colonnes internes ou CSS flex si possible, mais le bouton est un widget)
+        # On ferme temporairement la div pour insérer le bouton, ou on le met juste après
+        # Streamlit insère les widgets séquentiellement.
+        
+        # Pour que le bouton soit DANS la carte visuellement, c'est dur car st.button crée son propre bloc.
+        # Solution : On fait tout en Markdown SAUF le bouton, et on essaie de l'intégrer.
+        # OU : On utilise un st.container avec un style CSS appliqué via class.
+        
+        # Méthode Container
+        with st.container():
+             # On applique une classe à ce container via un hack CSS qui cible le parent ? Difficile.
+             # On continue avec l'approche "Sandwich Markdown"
+             pass
+             
+        # Fin de la partie haute de la carte
+        # Bouton
+        if st.button("Démarrer une nouvelle conversation", type="primary", use_container_width=True):
+             st.session_state.current_view = "Chat"
+             # Reset conversation ID if needed?
+             # st.session_state.conversation_id = None 
+             st.rerun()
+             
+        # Fin Carte
+        st.markdown("""
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
