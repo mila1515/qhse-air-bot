@@ -59,7 +59,7 @@ class RAGPipeline:
         """Initialise la chaîne RAG (LLM + Retriever)."""
         # Recharger les variables d'environnement au cas où elles auraient changé
         from dotenv import load_dotenv
-        load_dotenv(override=True)
+        load_dotenv() # Ne pas utiliser override=True pour ne pas écraser les variables CI/CD
         
         azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
         azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")

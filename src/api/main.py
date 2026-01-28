@@ -8,7 +8,12 @@ from src.api import endpoints, auth, conversations, notes
 from src.monitoring.api_metrics import DB_CONNECTION_STATUS
 
 # Création des tables (si pas encore fait)
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    # On loggue juste un warning pour ne pas bloquer les tests si la DB n'est pas là
+    from src.monitoring.logger import logger
+    logger.warning(f"⚠️ Impossible de créer les tables au démarrage (DB inaccessible ?) : {e}")
 
 app = FastAPI(
     title="QHSE Air Bot API",
