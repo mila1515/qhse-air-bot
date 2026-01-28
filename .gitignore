@@ -237,7 +237,7 @@ src/data_monitoring/reports/
 *.parquet
 
 # RAG vector stores & embeddings
-src/rag/vectorstore/
+# src/rag/vectorstore/  <-- COMMENTED OUT because it contains code (vector_store.py), not data
 src/rag/chunks/
 # Only ignore data/cache files in embeddings, not source code
 src/rag/embeddings/*.pkl
