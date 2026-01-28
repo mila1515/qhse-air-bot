@@ -5,7 +5,7 @@ def render_chat():
     # Header Section
     col_header, col_action = st.columns([3, 1])
     with col_header:
-        st.markdown("## Assistant QHSE")
+        st.markdown("## Mon Assistant ")
     
     # Gestion de la conversation active
     if not st.session_state.current_conversation_id:
@@ -15,11 +15,11 @@ def render_chat():
         c1, c2, c3 = st.columns([1, 2, 1])
         with c2:
             st.markdown("""
-            <div style="text-align: center; margin-top: 2rem; margin-bottom: 2rem;">
-                <h3 style="color: #546e7a;">Bonjour !</h3>
-                <p style="color: #78909c;">Je suis prêt à vous aider sur vos questions.</p>
-            </div>
-            """, unsafe_allow_html=True)
+<div style="text-align: center; margin-top: 2rem; margin-bottom: 2rem;">
+    <h3 style="color: #546e7a;">Bonjour !</h3>
+    <p style="color: #78909c;">Je suis prêt à vous aider sur vos questions.</p>
+</div>
+""", unsafe_allow_html=True)
             
             if st.button("Démarrer une nouvelle conversation", type="primary", use_container_width=True):
                 resp = conversations_client.create_conversation("Nouvelle discussion")
@@ -106,6 +106,15 @@ def render_chat():
                             answer = data.get("content") or data.get("answer") or data.get("response") or "Pas de réponse."
                             st.markdown(answer)
                             st.session_state.messages.append({"role": "assistant", "content": answer})
+                        elif resp and resp.status_code == 503:
+                            # Maintenance / Index en cours
+                            try:
+                                maintenance_msg = resp.json().get("detail", "Maintenance en cours.")
+                            except:
+                                maintenance_msg = "Maintenance en cours."
+                            
+                            st.warning(maintenance_msg, icon="⚠️")
+                            st.session_state.messages.append({"role": "assistant", "content": maintenance_msg})
                         else:
                             if resp:
                                 try:

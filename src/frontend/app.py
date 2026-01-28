@@ -32,13 +32,13 @@ def apply_global_styles():
 
         /* --- Global Background --- */
         .stApp {
-            background-color: #eff5f6; /* Bleu-Gris très pâle (Choix utilisateur) */
+            background-color: #f0f8f8 !important; /* Aqua-Mist très léger (Choix utilisateur) */
         }
         
         /* --- Header & Sidebar Hide --- */
         /* Masquer complètement la Sidebar native et son bouton */
         [data-testid="stSidebar"] {
-            display: none;
+            display: none !important;
         }
         [data-testid="stSidebarCollapsedControl"] {
             display: none;

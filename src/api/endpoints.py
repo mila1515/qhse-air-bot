@@ -71,4 +71,16 @@ def chat_with_rag(query: schemas.ChatQuery):
             "timestamp": datetime.now()
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        error_msg = str(e)
+        # Gestion élégante de l'absence d'index (en cours de construction)
+        if "Index FAISS introuvable" in error_msg or "FileNotFoundError" in str(type(e)):
+            friendly_msg = (
+                "⚠️ **Maintenance en cours** : Mon assistant est en train d'être mis à jour "
+                "pour intégrer les dernières données réglementaires et environnementales. "
+                "Cette opération garantit la précision de mes réponses. "
+                "Veuillez réessayer dans environ 10 à 20 minutes."
+            )
+            # On retourne une 503 pour signaler l'indisponibilité temporaire
+            raise HTTPException(status_code=503, detail=friendly_msg)
+            
+        raise HTTPException(status_code=500, detail=error_msg)

@@ -22,45 +22,46 @@ def render_home():
 
         /* Réduction drastique du padding haut de page */
         .block-container {
-            padding-top: 6rem !important; /* Ajusté pour la navbar fixe */
+            padding-top: 3rem !important; /* Très réduit pour remonter le contenu */
             padding-bottom: 2rem !important;
-            max-width: 1000px !important; /* Contenu plus compact */
+            max-width: 1000px !important; 
         }
 
         /* Hero Section */
         .hero-container {
             text-align: center;
-            padding: 2rem 0;
+            padding: 0 !important;
+            margin-top: -2.5rem; /* Remonte fortement le contenu */
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         .hero-logo-container {
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem; /* Réduit drastiquement l'espace sous le logo */
             display: flex;
             justify-content: center;
         }
         
         .hero-logo-img {
-            max-height: 120px;
+            max-height: 100px; /* Logo un peu plus discret */
             width: auto;
             object-fit: contain;
         }
 
         .hero-title {
-            font-size: 3rem; /* H1 Equivalent */
+            font-size: 2.5rem; /* Titre plus compact */
             font-weight: 800;
-            color: #2e7d32; /* Vert professionnel */
-            margin-bottom: 0.5rem;
-            line-height: 1.2;
+            color: #2e7d32;
+            margin-bottom: 0.25rem; /* Collé au sous-titre */
+            line-height: 1.1;
             text-align: center;
         }
         
         .hero-subtitle {
-            font-size: 1.25rem;
-            color: #37474f; /* Gris foncé professionnel */
-            margin-bottom: 2rem;
+            font-size: 1.15rem;
+            color: #37474f;
+            margin-bottom: 1.5rem; /* Rapproche les boutons */
             font-weight: 400;
             text-align: center;
             max-width: 700px;
@@ -154,8 +155,27 @@ def render_home():
     # Centrage vertical global si peu de contenu, mais ici on veut surtout contrôler le haut
     
     # --- HEADER / NAVBAR ---
-    from src.frontend.views.components import render_navbar
-    render_navbar()
+    # Navbar gérée globalement dans app.py, on ne l'appelle plus ici pour éviter les doublons.
+    
+    # --- Defensive Routing ---
+    # Si par erreur app.py route un utilisateur connecté vers render_home, on redirige vers la bonne vue.
+    if st.session_state.get("token"):
+        current = st.session_state.get("current_view", "Home")
+        if current == "Chat":
+            from src.frontend.views import chat
+            chat.render_chat()
+        elif current == "Conversations":
+            from src.frontend.views import conversations
+            conversations.render_conversations()
+        elif current == "Notes":
+            from src.frontend.views import notes
+            notes.render_notes()
+        elif current == "Profile":
+            from src.frontend.views import profile
+            profile.render_profile()
+        else:
+            render_dashboard()
+        return
 
     # --- MAIN CONTENT (Subtitle + Buttons) ---
     # Centered Layout for content since logo is now in navbar
@@ -171,54 +191,40 @@ def render_home():
             with open(logo_path, "rb") as f:
                 logo_b64 = base64.b64encode(f.read()).decode()
             logo_html = f"""
-            <div style="display: flex; justify-content: center; margin-bottom: 0.5rem; margin-top: -1rem;">
-                <img src="data:image/png;base64,{logo_b64}" style="max-width: 180px; height: auto;" alt="QHSE Air Bot Logo">
-            </div>
-            """
+<div style="display: flex; justify-content: center; margin-bottom: 0.5rem; margin-top: -1rem;">
+    <img src="data:image/png;base64,{logo_b64}" style="max-width: 180px; height: auto;" alt="QHSE Air Bot Logo">
+</div>
+"""
         
         st.markdown(logo_html, unsafe_allow_html=True)
 
         # Sous-titre centré
         st.markdown("""
-        <div class="hero-subtitle" style="text-align: center; margin-left: auto; margin-right: auto; max-width: 800px; margin-bottom: 1rem;">
-            Analysez vos documents, comprenez les normes et prenez des décisions éclairées.
-        </div>
-        """, unsafe_allow_html=True)
+<div class="hero-subtitle" style="text-align: center; margin-left: auto; margin-right: auto; max-width: 800px; margin-bottom: 1rem;">
+    Analysez vos documents, comprenez les normes et prenez des décisions éclairées.
+</div>
+""", unsafe_allow_html=True)
         
         st.markdown("<div style='margin-bottom: 1rem;'></div>", unsafe_allow_html=True)
         
         # Boutons d'action (Centrés)
-        if not st.session_state.token:
-            # Centering buttons using a single container via markdown/css hack or just wider columns
-            # Using wider columns for buttons to prevent wrapping
-            c_b_space1, c_b1, c_b2, c_b_space2 = st.columns([1, 3, 3, 1])
-            with c_b1:
-                if st.button("Connexion", type="primary", use_container_width=True):
-                    st.session_state.current_view = "Login"
-                    st.session_state.auth_mode = "login"
-                    st.session_state.auth_nav_radio = "Se connecter"
-                    st.query_params["view"] = "Login"
-                    st.rerun()
-            with c_b2:
-                if st.button("Créer un compte", type="secondary", use_container_width=True):
-                    st.session_state.current_view = "Login"
-                    st.session_state.auth_mode = "register"
-                    st.session_state.auth_nav_radio = "Créer un compte"
-                    st.query_params["view"] = "Login"
-                    st.rerun()
-        else:
-            # Si connecté
-            st.markdown("""
-            <div style="text-align: center; margin-bottom: 1rem; color: #2e7d32; font-weight: 600;">
-                👋 Vous êtes connecté
-            </div>
-            """, unsafe_allow_html=True)
-            # Center the button
-            c_b_space1, c_b1, c_b_space2 = st.columns([3, 2, 3])
-            with c_b1:
-                if st.button("Accéder au Chat", type="primary", use_container_width=True):
-                    st.session_state.current_view = "Chat"
-                    st.rerun()
+        # Centering buttons using a single container via markdown/css hack or just wider columns
+        # Using wider columns for buttons to prevent wrapping
+        c_b_space1, c_b1, c_b2, c_b_space2 = st.columns([1, 3, 3, 1])
+        with c_b1:
+            if st.button("Connexion", type="primary", use_container_width=True):
+                st.session_state.current_view = "Login"
+                st.session_state.auth_mode = "login"
+                st.session_state.auth_nav_radio = "Se connecter"
+                st.query_params["view"] = "Login"
+                st.rerun()
+        with c_b2:
+            if st.button("Créer un compte", type="secondary", use_container_width=True):
+                st.session_state.current_view = "Login"
+                st.session_state.auth_mode = "register"
+                st.session_state.auth_nav_radio = "Créer un compte"
+                st.query_params["view"] = "Login"
+                st.rerun()
 
     # --- SECTION FEATURES ---
     st.markdown('<div class="section-title">Pourquoi QHSE Air Bot ?</div>', unsafe_allow_html=True)
@@ -250,27 +256,13 @@ def render_home():
     c3, c4 = st.columns(2, gap="medium")
     
     with c3:
-        st.markdown("""
-        <div class="feature-card">
-            <div class="feature-header">Réglementation & Normes</div>
-            <div class="feature-text">Accès instantané au Code du Travail et guides INRS pour la conformité.</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("""<div class="feature-card"><div class="feature-header">Réglementation & Normes</div><div class="feature-text">Accès instantané au Code du Travail et guides INRS pour la conformité.</div></div>""", unsafe_allow_html=True)
 
     with c4:
-        st.markdown("""
-        <div class="feature-card">
-            <div class="feature-header">Assistance IA Experte</div>
-            <div class="feature-text">Un assistant intelligent pour vos analyses et prises de décision QHSE.</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("""<div class="feature-card"><div class="feature-header">Assistance IA Experte</div><div class="feature-text">Un assistant intelligent pour vos analyses et prises de décision QHSE.</div></div>""", unsafe_allow_html=True)
 
     # --- Footer ---
-    st.markdown("""
-    <div class="footer">
-        QHSE Air Bot © 2026 — Assistant IA Professionnel
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""<div class="footer">QHSE Air Bot © 2026 — Assistant IA Professionnel</div>""", unsafe_allow_html=True)
 
 def render_dashboard():
     """
@@ -307,19 +299,25 @@ def render_dashboard():
             font-size: 1.25rem;
             margin-bottom: 2.5rem;
         }
-        div.stButton > button[kind="primary"] {
-            background-color: #48bb78 !important; /* Vert demandé */
-            border-radius: 8px !important;
-            padding: 0.75rem 2rem !important;
-            font-size: 1.1rem !important;
-            font-weight: 600 !important;
-            border: none !important;
+        .dashboard-btn {
+            background-color: #48bb78;
+            color: white;
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
             transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        div.stButton > button[kind="primary"]:hover {
-            background-color: #38a169 !important;
+        .dashboard-btn:hover {
+            background-color: #38a169;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.2) !important;
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.2);
+            color: white;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -327,46 +325,10 @@ def render_dashboard():
     # Conteneur centré
     st.markdown('<div class="dashboard-container">', unsafe_allow_html=True)
     
-    # On utilise st.columns pour centrer le contenu "Carte" (ou juste un conteneur markdown)
-    # Mais on veut un bouton Streamlit interactif DEDANS.
-    # Astuce : On crée la structure visuelle "Card" autour, et on place les éléments dedans.
-    
-    # Pour centrer parfaitement avec un bouton interactif, on utilise des colonnes vides
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
-        # Début Carte Visuelle
-        st.markdown("""
-        <div class="dashboard-card">
-            <div class="dashboard-title">Bonjour !</div>
-            <div class="dashboard-subtitle">Je suis prêt à vous aider sur vos questions.</div>
-        """, unsafe_allow_html=True)
-        
-        # Bouton (Centré via colonnes internes ou CSS flex si possible, mais le bouton est un widget)
-        # On ferme temporairement la div pour insérer le bouton, ou on le met juste après
-        # Streamlit insère les widgets séquentiellement.
-        
-        # Pour que le bouton soit DANS la carte visuellement, c'est dur car st.button crée son propre bloc.
-        # Solution : On fait tout en Markdown SAUF le bouton, et on essaie de l'intégrer.
-        # OU : On utilise un st.container avec un style CSS appliqué via class.
-        
-        # Méthode Container
-        with st.container():
-             # On applique une classe à ce container via un hack CSS qui cible le parent ? Difficile.
-             # On continue avec l'approche "Sandwich Markdown"
-             pass
-             
-        # Fin de la partie haute de la carte
-        # Bouton
-        if st.button("Démarrer une nouvelle conversation", type="primary", use_container_width=True):
-             st.session_state.current_view = "Chat"
-             # Reset conversation ID if needed?
-             # st.session_state.conversation_id = None 
-             st.rerun()
-             
-        # Fin Carte
-        st.markdown("""
-        </div>
-        """, unsafe_allow_html=True)
-
+        # Carte complète en Markdown avec lien HTML stylé comme un bouton
+        st.markdown("""<div class="dashboard-card"><div class="dashboard-title">Bonjour !</div><div class="dashboard-subtitle">Je suis prêt à vous aider sur vos questions.</div><a href="?view=Chat" target="_self" class="dashboard-btn">Démarrer une nouvelle conversation</a></div>""", unsafe_allow_html=True)
+    
     st.markdown('</div>', unsafe_allow_html=True)

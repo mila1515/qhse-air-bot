@@ -80,7 +80,13 @@ def logout():
     # Utiliser l'instance stockée dans session_state
     if "cookie_manager" in st.session_state:
         cookie_manager = st.session_state.cookie_manager
-        cookie_manager.delete("access_token")
+        try:
+            # Vérifier si le cookie existe avant de supprimer pour éviter KeyError
+            if cookie_manager.get("access_token"):
+                cookie_manager.delete("access_token")
+        except Exception:
+            # En cas d'erreur (ex: KeyError interne au composant), on ignore
+            pass
     
     # Rerun pour appliquer les changements
     st.rerun()

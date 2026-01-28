@@ -20,24 +20,59 @@ class VectorStoreManager:
         self.index_name = "qhse_faiss_index"
 
     def create_vectorstore(self, chunks: List[Document]):
-        """Crée l'index FAISS à partir des chunks et le sauvegarde localement."""
+        """Crée l'index FAISS à partir des chunks et le sauvegarde localement (avec batching)."""
+        import time
+
         if not chunks:
             logger.warning("⚠️ Aucun chunk à indexer.")
             return
 
+        BATCH_SIZE = 50  # Réduit pour éviter le Rate Limit
+        DELAY_SECONDS = 1 # Pause entre les batchs
+
         try:
             logger.info(f"🧠 Création du VectorStore (FAISS) en mode {self.mode.upper()}...")
-            vectorstore = FAISS.from_documents(chunks, self.embeddings)
+            logger.info(f"📊 Total chunks: {len(chunks)}. Batch size: {BATCH_SIZE}")
             
-            # Sauvegarde
-            if not os.path.exists(self.vectorstore_dir):
-                os.makedirs(self.vectorstore_dir)
+            vectorstore = None
+            total_batches = (len(chunks) + BATCH_SIZE - 1) // BATCH_SIZE
+
+            for i in range(0, len(chunks), BATCH_SIZE):
+                batch = chunks[i:i + BATCH_SIZE]
+                batch_num = (i // BATCH_SIZE) + 1
                 
-            vectorstore.save_local(self.vectorstore_dir, self.index_name)
-            logger.info(f"💾 Index FAISS sauvegardé dans {self.vectorstore_dir}")
+                logger.info(f"   - Traitement batch {batch_num}/{total_batches} ({len(batch)} chunks)...")
+                
+                try:
+                    if vectorstore is None:
+                        vectorstore = FAISS.from_documents(batch, self.embeddings)
+                    else:
+                        vectorstore.add_documents(batch)
+                    
+                    # Pause pour rate limit
+                    time.sleep(DELAY_SECONDS)
+                    
+                except Exception as e:
+                    logger.warning(f"⚠️ Erreur sur le batch {batch_num} (tentative de reprise): {e}")
+                    time.sleep(5) # Attente plus longue en cas d'erreur
+                    if vectorstore is None:
+                        vectorstore = FAISS.from_documents(batch, self.embeddings)
+                    else:
+                        vectorstore.add_documents(batch)
+
+            # Sauvegarde
+            if vectorstore:
+                if not os.path.exists(self.vectorstore_dir):
+                    os.makedirs(self.vectorstore_dir)
+                    
+                vectorstore.save_local(self.vectorstore_dir, self.index_name)
+                logger.info(f"💾 Index FAISS sauvegardé dans {self.vectorstore_dir}")
+            else:
+                logger.error("❌ Aucun vectorstore créé (tous les batchs ont échoué ?)")
             
         except Exception as e:
             logger.error(f"❌ Erreur création VectorStore : {e}")
+            raise e
 
     def get_retriever(self, k: int = 4):
         """Charge l'index local et retourne un retriever."""
