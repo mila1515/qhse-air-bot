@@ -1,5 +1,6 @@
 name: CI/CD Pipeline
 
+# Trigger a new build to generate workflow graph
 on:
   push:
     branches: [ "main", "doc" ]
