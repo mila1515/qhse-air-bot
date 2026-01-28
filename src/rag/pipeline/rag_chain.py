@@ -21,6 +21,7 @@ class RAGPipeline:
         self.llm = None
         self.retriever = None
         self.combine_docs_chain = None
+        self.fallback_docs_chain = None
         self.summary_chain = None
 
     def ingest_data(self):
