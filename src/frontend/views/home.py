@@ -20,9 +20,9 @@ def render_home():
             color: #2c3e50;
         }
 
-        /* Réduction drastique du padding haut de page */
-        .block-container {
-            padding-top: 3rem !important; /* Très réduit pour remonter le contenu */
+        /* Réduction du padding haut de page pour Home */
+        div.block-container {
+            padding-top: 4rem !important; /* Ajusté pour coller à la navbar (70px) */
             padding-bottom: 2rem !important;
             max-width: 1000px !important; 
         }
@@ -31,14 +31,14 @@ def render_home():
         .hero-container {
             text-align: center;
             padding: 0 !important;
-            margin-top: -2.5rem; /* Remonte fortement le contenu */
+            margin-top: 0; 
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         .hero-logo-container {
-            margin-bottom: 0.5rem; /* Réduit drastiquement l'espace sous le logo */
+            margin-bottom: 0.5rem;
             display: flex;
             justify-content: center;
         }
@@ -191,7 +191,7 @@ def render_home():
             with open(logo_path, "rb") as f:
                 logo_b64 = base64.b64encode(f.read()).decode()
             logo_html = f"""
-<div style="display: flex; justify-content: center; margin-bottom: 0.5rem; margin-top: -1rem;">
+<div style="display: flex; justify-content: center; margin-bottom: 0.5rem; margin-top: -3rem;">
     <img src="data:image/png;base64,{logo_b64}" style="max-width: 180px; height: auto;" alt="QHSE Air Bot Logo">
 </div>
 """
@@ -267,68 +267,279 @@ def render_home():
 def render_dashboard():
     """
     Affiche le tableau de bord utilisateur connecté (SaaS Style).
-    Carte blanche centrée avec 'Bonjour !' et bouton d'action.
+    Design professionnel, épuré, avec accès rapide aux fonctionnalités.
     """
-    # Style spécifique pour le dashboard
+    # Récupération du nom de l'utilisateur
+    user = st.session_state.get("user", {})
+    email = user.get("email", "")
+    if email:
+        # Extraction propre du nom (ex: jean.dupont -> Jean Dupont)
+        raw_name = email.split("@")[0]
+        name = " ".join([n.capitalize() for n in raw_name.replace(".", " ").replace("_", " ").split()])
+    else:
+        name = "Utilisateur"
+
+    # --- CSS Spécifique Dashboard ---
     st.markdown("""
     <style>
-        .dashboard-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 60vh;
+        /* Container Global Dashboard */
+        .dashboard-wrapper {
+            max_width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
         }
-        .dashboard-card {
+
+        /* Header Section */
+        .dash-header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dash-welcome h1 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin: 0 0 0.5rem 0;
+            letter-spacing: -0.5px;
+        }
+        
+        .dash-welcome p {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .dash-date {
+            text-align: right;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Grid Cards */
+        .action-card {
             background-color: white;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            padding: 3rem;
-            text-align: center;
-            max-width: 800px;
-            width: 100%;
+            padding: 2rem;
             border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: default; /* Les boutons font l'action */
         }
-        .dashboard-title {
-            color: #2c5282; /* Bleu demandé */
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
+        
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
+            border-color: #cbd5e1;
         }
-        .dashboard-subtitle {
-            color: #4a5568; /* Gris demandé */
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #38b2ac; /* Teal */
+            background: #e6fffa;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+        
+        .card-title {
             font-size: 1.25rem;
-            margin-bottom: 2.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.75rem;
         }
-        .dashboard-btn {
-            background-color: #48bb78;
-            color: white;
-            border-radius: 8px;
-            padding: 0.75rem 2rem;
-            font-size: 1.1rem;
+        
+        .card-desc {
+            font-size: 0.95rem;
+            color: #718096;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+
+        /* Stats Section */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #38b2ac;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             font-weight: 600;
-            border: none;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .dashboard-btn:hover {
-            background-color: #38a169;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.2);
-            color: white;
+        
+        /* Section Titles */
+        .section-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #4a5568;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
+        .section-header::after {
+            content: "";
+            flex-grow: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
     </style>
     """, unsafe_allow_html=True)
 
-    # Conteneur centré
-    st.markdown('<div class="dashboard-container">', unsafe_allow_html=True)
+    from datetime import datetime
+    import locale
     
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Date du jour (Format FR si possible, sinon simple)
+    date_str = datetime.now().strftime("%d %B %Y")
     
+    # --- UI STRUCTURE ---
+    
+    # 1. Header Welcome
+    st.markdown(f"""
+    <div class="dash-header">
+        <div class="dash-welcome">
+            <h1>Bonjour, {name}</h1>
+            <p>Heureux de vous revoir. Votre espace QHSE est prêt.</p>
+        </div>
+        <div class="dash-date">
+            {date_str}<br>
+            <span style="color: #38b2ac;">• En ligne</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 2. Quick Stats (Mockup pour l'immersion pro)
+    # Dans un vrai cas, on ferait des requêtes DB pour avoir les vrais chiffres
+    st.markdown('<div class="section-header">VUE D\'ENSEMBLE</div>', unsafe_allow_html=True)
+    
+    c_stat1, c_stat2, c_stat3, c_stat4 = st.columns(4)
+    with c_stat1:
+        st.markdown("""
+        <div class="stat-card" style="border-left-color: #4299e1;">
+            <div class="stat-value">12</div>
+            <div class="stat-label">Conversations</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with c_stat2:
+        st.markdown("""
+        <div class="stat-card" style="border-left-color: #48bb78;">
+            <div class="stat-value">85%</div>
+            <div class="stat-label">Conformité</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with c_stat3:
+        st.markdown("""
+        <div class="stat-card" style="border-left-color: #ed8936;">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Notes actives</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with c_stat4:
+        st.markdown("""
+        <div class="stat-card" style="border-left-color: #9f7aea;">
+            <div class="stat-value">IA</div>
+            <div class="stat-label">Assistant Prêt</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<div style='margin-bottom: 3rem;'></div>", unsafe_allow_html=True)
+
+    # 3. Actions Grid
+    st.markdown('<div class="section-header">ACCÈS RAPIDE</div>', unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3, gap="large")
+
+    # Card 1: Chat
+    with col1:
+        st.markdown("""
+        <div class="action-card">
+            <div>
+                <div class="card-icon">💬</div>
+                <div class="card-title">Assistant QHSE</div>
+                <div class="card-desc">
+                    Interrogez vos documents, analysez les risques et obtenez des réponses normatives immédiates.
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        # Bouton séparé pour la gestion d'état Streamlit
+        if st.button("Nouvelle conversation", key="btn_chat", type="primary", use_container_width=True):
+            st.session_state.current_view = "Chat"
+            st.rerun()
+
+    # Card 2: Historique
     with col2:
-        # Carte complète en Markdown avec lien HTML stylé comme un bouton
-        st.markdown("""<div class="dashboard-card"><div class="dashboard-title">Bonjour !</div><div class="dashboard-subtitle">Je suis prêt à vous aider sur vos questions.</div><a href="?view=Chat" target="_self" class="dashboard-btn">Démarrer une nouvelle conversation</a></div>""", unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="action-card">
+            <div>
+                <div class="card-icon">📂</div>
+                <div class="card-title">Mes Dossiers</div>
+                <div class="card-desc">
+                    Retrouvez l'historique de vos échanges, reprenez vos analyses et exportez vos rapports.
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Voir l'historique", key="btn_history", use_container_width=True):
+            st.session_state.current_view = "Conversations"
+            st.rerun()
+
+    # Card 3: Notes & Outils
+    with col3:
+        st.markdown("""
+        <div class="action-card">
+            <div>
+                <div class="card-icon">📝</div>
+                <div class="card-title">Bloc-Notes & Profil</div>
+                <div class="card-desc">
+                    Gérez vos notes personnelles et configurez vos préférences utilisateur.
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        # Double boutons pour cette carte
+        c_btn1, c_btn2 = st.columns(2)
+        with c_btn1:
+            if st.button("Notes", key="btn_notes", use_container_width=True):
+                st.session_state.current_view = "Notes"
+                st.rerun()
+        with c_btn2:
+            if st.button("Profil", key="btn_profile", use_container_width=True):
+                st.session_state.current_view = "Profile"
+                st.rerun()

@@ -48,9 +48,8 @@ def login_for_access_token(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.get("/me", response_model=schemas.UserRead)
-def read_users_me(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
-    """Récupère l'utilisateur courant via le token JWT"""
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
+    """Récupère l'utilisateur courant via le token JWT (Dépendance réutilisable)"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -68,3 +67,8 @@ def read_users_me(token: Annotated[str, Depends(oauth2_scheme)], db: Session = D
     if user is None:
         raise credentials_exception
     return user
+
+@router.get("/me", response_model=schemas.UserRead)
+def read_users_me(current_user: User = Depends(get_current_user)):
+    """Récupère l'utilisateur courant via le token JWT"""
+    return current_user

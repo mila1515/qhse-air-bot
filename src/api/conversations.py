@@ -5,26 +5,11 @@ from typing import List
 from src.db.session import get_db
 from src.db.models import Conversation, Message, User
 from src.api import models as schemas
-from src.api.auth import oauth2_scheme
-from src.api.security import jwt, SECRET_KEY, ALGORITHM
+from src.api.auth import get_current_user
 from sqlalchemy.sql import func
 from src.rag.pipeline.rag_chain import rag_pipeline
 
 router = APIRouter(prefix="/conversations", tags=["Conversations"])
-
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
-            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-    except Exception:
-        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-    
-    user = db.query(User).filter(User.email == email).first()
-    if user is None:
-        raise HTTPException(status_code=401, detail="User not found")
-    return user
 
 @router.get("/", response_model=List[schemas.ConversationRead])
 def get_conversations(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
