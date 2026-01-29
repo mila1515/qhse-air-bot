@@ -5,11 +5,6 @@ def render_about():
     Affiche la page "À propos" de l'application QHSE Air Bot.
     """
     
-    # --- HEADER / NAVBAR ---
-    # La navbar doit être affichée même ici pour la cohérence de navigation
-    from src.frontend.views.components import render_navbar
-    render_navbar()
-
     # --- Contenu Principal ---
     st.markdown("""
     <style>

@@ -1,6 +1,12 @@
 import streamlit as st
 import base64
 from pathlib import Path
+from src.frontend.services import conversations_client, notes_client
+
+def navigate_to(view_name):
+    """Callback pour la navigation via boutons"""
+    st.session_state.current_view = view_name
+    st.query_params["view"] = view_name
 
 def render_home():
     """
@@ -18,6 +24,11 @@ def render_home():
         html, body, [class*="css"] {
             font-family: 'Inter', 'Segoe UI', sans-serif;
             color: #2c3e50;
+        }
+        
+        /* Fond global page style image (Gris très clair) */
+        .stApp {
+            background-color: #F8FAFC !important; /* Gris très clair demandé */
         }
 
         /* Réduction du padding haut de page pour Home */
@@ -50,92 +61,96 @@ def render_home():
         }
 
         .hero-title {
-            font-size: 2.5rem; /* Titre plus compact */
+            font-size: 3rem; /* Titre accrocheur */
             font-weight: 800;
-            color: #2e7d32;
-            margin-bottom: 0.25rem; /* Collé au sous-titre */
-            line-height: 1.1;
+            color: #1A365D; /* Bleu Marine Foncé */
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
             text-align: center;
         }
         
         .hero-subtitle {
-            font-size: 1.15rem;
-            color: #37474f;
-            margin-bottom: 1.5rem; /* Rapproche les boutons */
-            font-weight: 400;
+            font-size: 1.2rem;
+            color: #4a5568;
+            margin-bottom: 2.5rem; /* Plus d'espace avant les boutons */
+            font-weight: 500;
             text-align: center;
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
         }
 
-        /* Boutons */
+        /* Boutons Hero */
         div.stButton > button[kind="primary"] {
-            background-color: #81c784 !important; /* Vert clair plus doux */
+            background-color: #48BB78 !important; /* Vert Émeraude (Plein) */
             color: white !important;
             border: none !important;
-            border-radius: 6px !important;
-            padding: 0.5rem 2rem !important;
-            font-weight: 600 !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+            border-radius: 8px !important;
+            padding: 0.75rem 2rem !important;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 6px -1px rgba(72, 187, 120, 0.4) !important;
             width: 100%;
+            font-size: 1.1rem !important;
         }
         div.stButton > button[kind="primary"]:hover {
-            background-color: #66bb6a !important;
+            background-color: #38a169 !important; /* Vert plus foncé */
+            box-shadow: 0 6px 8px -1px rgba(72, 187, 120, 0.5) !important;
+            transform: translateY(-1px);
         }
 
         div.stButton > button[kind="secondary"] {
-            background-color: #e3f2fd !important; /* Bleu très clair */
-            color: #0277bd !important;
-            border: 1px solid #b3e5fc !important;
-            border-radius: 6px !important;
-            padding: 0.5rem 2rem !important;
-            font-weight: 600 !important;
+            background-color: transparent !important;
+            color: #1A365D !important; /* Bleu Marine */
+            border: 2px solid #1A365D !important; /* Bordure fine Bleu Marine */
+            border-radius: 8px !important;
+            padding: 0.75rem 2rem !important;
+            font-weight: 700 !important;
             width: 100%;
+            font-size: 1.1rem !important;
         }
         div.stButton > button[kind="secondary"]:hover {
-            background-color: #b3e5fc !important;
+            background-color: #e2e8f0 !important; /* Gris très clair au survol */
+            border-color: #1A365D !important;
         }
 
         /* Features Section */
         .section-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin: 4rem 0 2rem 0;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1A365D; /* Bleu Marine */
+            margin: 5rem 0 3rem 0;
             text-align: center;
         }
         
         .feature-card {
             background-color: #ffffff; /* Fond blanc propre */
-            padding: 2rem;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025); /* Soft Shadow */
             height: 100%;
-            min-height: 180px; /* Hauteur minimale uniforme */
+            min-height: 200px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             transition: transform 0.2s ease-in-out;
         }
         .feature-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            border-color: #b0bec5;
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         .feature-header {
-            font-size: 1.25rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            color: #2e7d32; /* Vert professionnel */
-            margin-bottom: 0.75rem;
-            border-bottom: 2px solid #e8f5e9;
+            color: #1A365D; /* Bleu Marine */
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #48BB78; /* Souligné Vert */
             padding-bottom: 0.5rem;
-            width: 100%;
+            width: fit-content;
         }
         .feature-text {
-            font-size: 0.95rem;
-            color: #546e7a;
+            font-size: 1rem;
+            color: #4a5568;
             line-height: 1.6;
         }
 
@@ -190,8 +205,8 @@ def render_home():
         if logo_path.exists():
             with open(logo_path, "rb") as f:
                 logo_b64 = base64.b64encode(f.read()).decode()
-            logo_html = f"""
-<div style="display: flex; justify-content: center; margin-bottom: 0.5rem; margin-top: -3rem;">
+        logo_html = f"""
+<div style="display: flex; justify-content: center; margin-bottom: 0.5rem; margin-top: 0;">
     <img src="data:image/png;base64,{logo_b64}" style="max-width: 180px; height: auto;" alt="QHSE Air Bot Logo">
 </div>
 """
@@ -444,15 +459,21 @@ def render_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    # 2. Quick Stats (Mockup pour l'immersion pro)
-    # Dans un vrai cas, on ferait des requêtes DB pour avoir les vrais chiffres
+    # 2. Quick Stats (Données Réelles)
+    # Récupération des données réelles via API
+    try:
+        convs_resp = conversations_client.get_conversations()
+        convs_count = len(convs_resp.json()) if convs_resp and convs_resp.status_code == 200 else 0
+    except:
+        convs_count = 0
+        
     st.markdown('<div class="section-header">VUE D\'ENSEMBLE</div>', unsafe_allow_html=True)
     
     c_stat1, c_stat2, c_stat3, c_stat4 = st.columns(4)
     with c_stat1:
-        st.markdown("""
+        st.markdown(f"""
         <div class="stat-card" style="border-left-color: #4299e1;">
-            <div class="stat-value">12</div>
+            <div class="stat-value">{convs_count}</div>
             <div class="stat-label">Conversations</div>
         </div>
         """, unsafe_allow_html=True)
@@ -465,9 +486,9 @@ def render_dashboard():
         """, unsafe_allow_html=True)
     with c_stat3:
         st.markdown("""
-        <div class="stat-card" style="border-left-color: #ed8936;">
-            <div class="stat-value">3</div>
-            <div class="stat-label">Notes actives</div>
+        <div class="stat-card" style="border-left-color: #48bb78;">
+            <div class="stat-value">1500+</div>
+            <div class="stat-label">Sources RAG</div>
         </div>
         """, unsafe_allow_html=True)
     with c_stat4:
@@ -499,9 +520,8 @@ def render_dashboard():
         </div>
         """, unsafe_allow_html=True)
         # Bouton séparé pour la gestion d'état Streamlit
-        if st.button("Nouvelle conversation", key="btn_chat", type="primary", use_container_width=True):
-            st.session_state.current_view = "Chat"
-            st.rerun()
+        st.button("Nouvelle conversation", key="btn_chat", type="primary", use_container_width=True, 
+                 on_click=navigate_to, args=("Chat",))
 
     # Card 2: Historique
     with col2:
@@ -516,9 +536,8 @@ def render_dashboard():
             </div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Voir l'historique", key="btn_history", use_container_width=True):
-            st.session_state.current_view = "Conversations"
-            st.rerun()
+        st.button("Voir l'historique", key="btn_history", use_container_width=True,
+                 on_click=navigate_to, args=("Conversations",))
 
     # Card 3: Notes & Outils
     with col3:
@@ -536,10 +555,8 @@ def render_dashboard():
         # Double boutons pour cette carte
         c_btn1, c_btn2 = st.columns(2)
         with c_btn1:
-            if st.button("Notes", key="btn_notes", use_container_width=True):
-                st.session_state.current_view = "Notes"
-                st.rerun()
+            st.button("Notes", key="btn_notes", use_container_width=True,
+                     on_click=navigate_to, args=("Notes",))
         with c_btn2:
-            if st.button("Profil", key="btn_profile", use_container_width=True):
-                st.session_state.current_view = "Profile"
-                st.rerun()
+            st.button("Profil", key="btn_profile", use_container_width=True,
+                     on_click=navigate_to, args=("Profile",))

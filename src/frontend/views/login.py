@@ -30,11 +30,16 @@ def render_login():
             color: #2c3e50;
         }
 
+        /* Masquer le Header Streamlit Natif pour gagner de l'espace */
+        header[data-testid="stHeader"] {
+            display: none !important;
+        }
+
         /* Conteneur principal plus large pour la navbar */
         .block-container {
-            padding-top: 6rem !important; /* Ajusté pour la navbar fixe */
+            padding-top: 0 !important; /* On supprime le padding car la Navbar ajoute déjà un spacer de 70px */
             padding-bottom: 2rem !important;
-            max-width: 1000px !important; /* Largeur augmentée pour la navbar */
+            max-width: 1000px !important; 
             background-color: transparent;
         }
 
@@ -45,6 +50,7 @@ def render_login():
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             border: 1px solid #f0f2f6;
+            margin-top: -2rem; /* Remonte encore un peu la carte pour compenser d'éventuels espaces */
         }
 
         /* Titre principal */
@@ -62,8 +68,8 @@ def render_login():
             font-size: 1.8rem;
             font-weight: 700;
             color: #1b5e20;
-            margin-bottom: 2rem;
-            margin-top: 1rem;
+            margin-bottom: 1rem; /* Espace réduit */
+            margin-top: 0; /* Espace réduit */
         }
 
         /* Style des inputs */
@@ -117,8 +123,7 @@ def render_login():
     """, unsafe_allow_html=True)
 
     # --- HEADER / NAVBAR ---
-    from src.frontend.views.components import render_navbar
-    render_navbar()
+    # Navbar gérée globalement dans app.py, on ne l'appelle plus ici pour éviter les doublons.
 
     # --- Callbacks pour le changement de mode ---
     def switch_to_register():
