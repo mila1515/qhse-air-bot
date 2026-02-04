@@ -35,14 +35,6 @@ def render_login():
             display: none !important;
         }
 
-        /* Conteneur principal plus large pour la navbar */
-        .block-container {
-            padding-top: 0 !important; /* On supprime le padding car la Navbar ajoute déjà un spacer de 70px */
-            padding-bottom: 2rem !important;
-            max-width: 1000px !important; 
-            background-color: transparent;
-        }
-
         /* Card Effect */
         .auth-card {
             background-color: white;
@@ -50,26 +42,19 @@ def render_login():
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             border: 1px solid #f0f2f6;
-            margin-top: -2rem; /* Remonte encore un peu la carte pour compenser d'éventuels espaces */
+            margin-top: 2rem; /* Espace réduit */
         }
 
         /* Titre principal */
-        .hero-title {
-            font-size: 3rem; /* H1 Equivalent */
-            font-weight: 800;
-            color: #2e7d32; /* Vert professionnel */
-            margin-bottom: 0.5rem;
-            line-height: 1.2;
-            text-align: center;
-        }
-
         .auth-title {
             text-align: center;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #1b5e20;
-            margin-bottom: 1rem; /* Espace réduit */
-            margin-top: 0; /* Espace réduit */
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #000000;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: 2rem;
+            margin-top: 0;
         }
 
         /* Style des inputs */
@@ -222,12 +207,15 @@ def render_login():
                                     # st.session_state.auth_mode = "login"
                                     # st.session_state.auth_nav_radio = "Se connecter"
                                     # st.rerun()
+                                elif response is None:
+                                    # L'erreur a déjà été affichée par auth_client
+                                    pass
                                 else:
                                     try:
                                         err_data = response.json()
                                         st.error(f"Erreur : {err_data.get('detail', 'Impossible de créer le compte.')}")
-                                    except:
-                                        st.error("Une erreur est survenue lors de la création du compte.")
+                                    except Exception as e:
+                                        st.error(f"Une erreur est survenue (Status: {response.status_code}). Détails : {response.text[:200]}")
                     else:
                         st.warning("Veuillez remplir tous les champs.")
 

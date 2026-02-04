@@ -2,8 +2,10 @@ services:
   api:
     build: .
     container_name: qhse_api
-    ports:
-      - "8100:8000"
+    # Ports exposés uniquement pour le réseau interne Docker (Frontend -> API)
+    # On ne mappe pas le port sur l'hôte pour la sécurité (accès externe bloqué)
+    # ports:
+    #   - "8100:8000"
     env_file:
       - .env
     environment:

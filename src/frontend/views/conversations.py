@@ -39,6 +39,7 @@ def render_conversations():
                             st.session_state.current_conversation_id = conv['id']
                             st.session_state.messages = [] # Reset messages local cache
                             st.session_state.current_view = "Chat"
+                            st.query_params["view"] = "Chat" # Force update URL to avoid overwrite by app.py routing
                             st.rerun()
                     
                     with col3:

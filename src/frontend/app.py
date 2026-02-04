@@ -32,7 +32,7 @@ def apply_global_styles():
 
         /* --- Global Background --- */
         .stApp {
-            background-color: #f0f8f8 !important; /* Aqua-Mist très léger (Choix utilisateur) */
+            background-color: #F8FAFC !important; /* Gris très clair (SaaS) */
         }
         
         /* --- Header & Sidebar Hide --- */
@@ -53,9 +53,9 @@ def apply_global_styles():
             display: none;
         }
 
-        /* Padding global pour éviter que le contenu soit caché sous la Navbar fixe (70px) */
+        /* Padding global pour éviter que le contenu soit caché sous la Navbar fixe */
         .block-container {
-            padding-top: 6rem !important; /* 70px navbar + padding */
+            padding-top: 2rem !important;
             padding-bottom: 2rem !important;
             max-width: 1200px;
         }

@@ -11,9 +11,11 @@ def render_about():
         .about-header {
             font-size: 2.5rem;
             font-weight: 800;
-            color: #2e7d32;
+            color: #000000;
             text-align: center;
             margin-bottom: 3rem;
+            letter-spacing: -1px;
+            line-height: 1.2;
         }
         .about-section-title {
             font-size: 1.5rem;
@@ -31,7 +33,7 @@ def render_about():
         }
         .about-card {
             background-color: white;
-            padding: 2rem;
+            padding: 2.5rem;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             border: 1px solid #f0f2f6;

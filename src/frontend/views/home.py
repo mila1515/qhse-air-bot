@@ -2,6 +2,7 @@ import streamlit as st
 import base64
 from pathlib import Path
 from src.frontend.services import conversations_client, notes_client
+from src.frontend.views.components import get_base64_logo
 
 def navigate_to(view_name):
     """Callback pour la navigation via boutons"""
@@ -26,18 +27,6 @@ def render_home():
             color: #2c3e50;
         }
         
-        /* Fond global page style image (Gris très clair) */
-        .stApp {
-            background-color: #F8FAFC !important; /* Gris très clair demandé */
-        }
-
-        /* Réduction du padding haut de page pour Home */
-        div.block-container {
-            padding-top: 4rem !important; /* Ajusté pour coller à la navbar (70px) */
-            padding-bottom: 2rem !important;
-            max-width: 1000px !important; 
-        }
-
         /* Hero Section */
         .hero-container {
             text-align: center;
@@ -48,211 +37,169 @@ def render_home():
             align-items: center;
         }
 
-        .hero-logo-container {
-            margin-bottom: 0.5rem;
-            display: flex;
-            justify-content: center;
-        }
-        
-        .hero-logo-img {
-            max-height: 100px; /* Logo un peu plus discret */
-            width: auto;
-            object-fit: contain;
-        }
-
         .hero-title {
-            font-size: 3rem; /* Titre accrocheur */
+            font-size: 2.5rem; 
             font-weight: 800;
-            color: #1A365D; /* Bleu Marine Foncé */
-            margin-bottom: 0.5rem;
+            color: #000000; /* Noir Professionnel */
+            margin-bottom: 1rem;
             line-height: 1.2;
             text-align: center;
+            letter-spacing: -1px;
         }
         
         .hero-subtitle {
-            font-size: 1.2rem;
-            color: #4a5568;
-            margin-bottom: 2.5rem; /* Plus d'espace avant les boutons */
-            font-weight: 500;
+            font-size: 1.25rem;
+            color: #64748b; /* Slate 500 */
+            margin-bottom: 2.5rem;
+            font-weight: 400;
             text-align: center;
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
+            line-height: 1.6;
         }
 
         /* Boutons Hero */
         div.stButton > button[kind="primary"] {
-            background-color: #48BB78 !important; /* Vert Émeraude (Plein) */
+            background-color: #48BB78 !important; /* Vert Émeraude */
             color: white !important;
             border: none !important;
             border-radius: 8px !important;
             padding: 0.75rem 2rem !important;
-            font-weight: 700 !important;
+            font-weight: 600 !important;
             box-shadow: 0 4px 6px -1px rgba(72, 187, 120, 0.4) !important;
             width: 100%;
-            font-size: 1.1rem !important;
+            font-size: 1rem !important;
+            transition: all 0.2s ease;
         }
         div.stButton > button[kind="primary"]:hover {
-            background-color: #38a169 !important; /* Vert plus foncé */
-            box-shadow: 0 6px 8px -1px rgba(72, 187, 120, 0.5) !important;
-            transform: translateY(-1px);
+            background-color: #38a169 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(72, 187, 120, 0.5) !important;
         }
 
         div.stButton > button[kind="secondary"] {
-            background-color: transparent !important;
-            color: #1A365D !important; /* Bleu Marine */
-            border: 2px solid #1A365D !important; /* Bordure fine Bleu Marine */
+            background-color: white !important;
+            color: #334155 !important;
+            border: 1px solid #cbd5e1 !important;
             border-radius: 8px !important;
             padding: 0.75rem 2rem !important;
-            font-weight: 700 !important;
+            font-weight: 600 !important;
             width: 100%;
-            font-size: 1.1rem !important;
+            font-size: 1rem !important;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+            transition: all 0.2s ease;
         }
         div.stButton > button[kind="secondary"]:hover {
-            background-color: #e2e8f0 !important; /* Gris très clair au survol */
-            border-color: #1A365D !important;
+            background-color: #f8fafc !important;
+            border-color: #94a3b8 !important;
+            color: #0f172a !important;
+            transform: translateY(-2px);
         }
 
         /* Features Section */
         .section-title {
             font-size: 2rem;
             font-weight: 800;
-            color: #1A365D; /* Bleu Marine */
-            margin: 5rem 0 3rem 0;
+            color: #0f172a;
+            margin: 4rem 0 3rem 0;
             text-align: center;
+            letter-spacing: -0.5px;
         }
         
         .feature-card {
-            background-color: #ffffff; /* Fond blanc propre */
-            padding: 2.5rem;
+            background-color: #ffffff;
+            padding: 2rem;
             border-radius: 12px;
-            border: none;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025); /* Soft Shadow */
+            border: 1px solid #e2e8f0; /* Bordure épurée */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); /* Ombre douce */
             height: 100%;
-            min-height: 200px;
+            min-height: 180px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            transition: transform 0.2s ease-in-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        /* Animation au survol sans passer sous la navbar (grâce au z-index navbar élevé) */
         .feature-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-5px);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: #cbd5e1;
         }
         .feature-header {
-            font-size: 1.4rem;
+            font-size: 1.25rem;
             font-weight: 700;
-            color: #1A365D; /* Bleu Marine */
-            margin-bottom: 1rem;
-            border-bottom: 2px solid #48BB78; /* Souligné Vert */
-            padding-bottom: 0.5rem;
-            width: fit-content;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+            /* Pas d'emojis demandés */
         }
         .feature-text {
-            font-size: 1rem;
-            color: #4a5568;
-            line-height: 1.6;
+            font-size: 0.95rem;
+            color: #64748b;
+            line-height: 1.5;
         }
 
         /* Footer */
         .footer {
-            margin-top: 4rem;
+            margin-top: 5rem;
             padding-top: 2rem;
-            border-top: 1px solid #f0f2f6;
+            border-top: 1px solid #e2e8f0;
             text-align: center;
-            color: #cfd8dc;
-            font-size: 0.8rem;
+            color: #94a3b8;
+            font-size: 0.875rem;
         }
     </style>
     """, unsafe_allow_html=True)
 
-    # --- Container Principal ---
-    # Centrage vertical global si peu de contenu, mais ici on veut surtout contrôler le haut
-    
-    # --- HEADER / NAVBAR ---
-    # Navbar gérée globalement dans app.py, on ne l'appelle plus ici pour éviter les doublons.
-    
-    # --- Defensive Routing ---
-    # Si par erreur app.py route un utilisateur connecté vers render_home, on redirige vers la bonne vue.
-    if st.session_state.get("token"):
-        current = st.session_state.get("current_view", "Home")
-        if current == "Chat":
-            from src.frontend.views import chat
-            chat.render_chat()
-        elif current == "Conversations":
-            from src.frontend.views import conversations
-            conversations.render_conversations()
-        elif current == "Notes":
-            from src.frontend.views import notes
-            notes.render_notes()
-        elif current == "Profile":
-            from src.frontend.views import profile
-            profile.render_profile()
-        else:
-            render_dashboard()
-        return
-
-    # --- MAIN CONTENT (Subtitle + Buttons) ---
-    # Centered Layout for content since logo is now in navbar
-    
-    col_main_space, col_main_content, col_main_space2 = st.columns([1, 6, 1])
-    
-    with col_main_content:
-        # --- LOGO CENTRAL ---
-        # Chargement du logo pour affichage central
-        logo_path = Path("src/frontend/assets/logo_home.png")
-        logo_html = ""
-        if logo_path.exists():
-            with open(logo_path, "rb") as f:
-                logo_b64 = base64.b64encode(f.read()).decode()
-        logo_html = f"""
-<div style="display: flex; justify-content: center; margin-bottom: 0.5rem; margin-top: 0;">
-    <img src="data:image/png;base64,{logo_b64}" style="max-width: 180px; height: auto;" alt="QHSE Air Bot Logo">
-</div>
-"""
+    # --- MAIN CONTENT ---
+    # Utilisez des containers Streamlit pour isoler les sections
+    with st.container():
+        # Utilisation de colonnes pour centrer le logo et le texte proprement
+        _, center_col, _ = st.columns([1, 4, 1])
         
-        st.markdown(logo_html, unsafe_allow_html=True)
-
-        # Sous-titre centré
-        st.markdown("""
-<div class="hero-subtitle" style="text-align: center; margin-left: auto; margin-right: auto; max-width: 800px; margin-bottom: 1rem;">
-    Analysez vos documents, comprenez les normes et prenez des décisions éclairées.
-</div>
-""", unsafe_allow_html=True)
-        
-        st.markdown("<div style='margin-bottom: 1rem;'></div>", unsafe_allow_html=True)
-        
-        # Boutons d'action (Centrés)
-        # Centering buttons using a single container via markdown/css hack or just wider columns
-        # Using wider columns for buttons to prevent wrapping
-        c_b_space1, c_b1, c_b2, c_b_space2 = st.columns([1, 3, 3, 1])
-        with c_b1:
-            if st.button("Connexion", type="primary", use_container_width=True):
-                st.session_state.current_view = "Login"
-                st.session_state.auth_mode = "login"
-                st.session_state.auth_nav_radio = "Se connecter"
-                st.query_params["view"] = "Login"
-                st.rerun()
-        with c_b2:
-            if st.button("Créer un compte", type="secondary", use_container_width=True):
-                st.session_state.current_view = "Login"
-                st.session_state.auth_mode = "register"
-                st.session_state.auth_nav_radio = "Créer un compte"
-                st.query_params["view"] = "Login"
-                st.rerun()
+        with center_col:
+            logo_b64 = get_base64_logo()
+            if logo_b64:
+                st.markdown(f"""
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <img src="data:image/png;base64,{logo_b64}" style="max-width: 160px; height: auto;">
+                        <h1 class="hero-title">QHSE Air Bot</h1>
+                        <p class="hero-subtitle">
+                            Analysez vos documents, comprenez les normes et prenez des décisions éclairées grâce à notre assistant intelligent.
+                        </p>
+                    </div>
+                """, unsafe_allow_html=True)
+            
+            # Boutons d'action (Centrés)
+            c_b1, c_b2 = st.columns(2, gap="medium")
+            with c_b1:
+                if st.button("Connexion", type="primary", use_container_width=True):
+                    st.session_state.current_view = "Login"
+                    st.session_state.auth_mode = "login"
+                    st.session_state.auth_nav_radio = "Se connecter"
+                    st.query_params["view"] = "Login"
+                    st.rerun()
+            with c_b2:
+                if st.button("Créer un compte", type="secondary", use_container_width=True):
+                    st.session_state.current_view = "Login"
+                    st.session_state.auth_mode = "register"
+                    st.session_state.auth_nav_radio = "Créer un compte"
+                    st.query_params["view"] = "Login"
+                    st.rerun()
 
     # --- SECTION FEATURES ---
+    st.markdown("<div style='margin-top: 2rem;'></div>", unsafe_allow_html=True)
     st.markdown('<div class="section-title">Pourquoi QHSE Air Bot ?</div>', unsafe_allow_html=True)
 
     # Grille 2x2 organisée avec st.columns
-    # Ligne 1 : Qualité de l'Air | Sécurité Industrielle
-    c1, c2 = st.columns(2, gap="medium")
+    # Ligne 1
+    c1, c2 = st.columns(2, gap="large")
     
     with c1:
         st.markdown("""
         <div class="feature-card">
             <div class="feature-header">Qualité de l'Air</div>
-            <div class="feature-text">Suivi en temps réel des indices de qualité de l'air et alertes pollution.</div>
+            <div class="feature-text">Suivez en temps réel les indices de qualité de l'air et recevez des alertes pollution proactives.</div>
         </div>
         """, unsafe_allow_html=True)
         
@@ -260,24 +207,24 @@ def render_home():
         st.markdown("""
         <div class="feature-card">
             <div class="feature-header">Sécurité Industrielle</div>
-            <div class="feature-text">Analyse des accidents et retour d'expérience sécurité.</div>
+            <div class="feature-text">Analysez les rapports d'accidents et bénéficiez d'un retour d'expérience structuré pour améliorer la sécurité.</div>
         </div>
         """, unsafe_allow_html=True)
 
     # Espace entre les lignes
-    st.markdown("<div style='margin-bottom: 1.5rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom: 2rem;'></div>", unsafe_allow_html=True)
 
-    # Ligne 2 : Réglementation & Normes | Assistance IA Experte
-    c3, c4 = st.columns(2, gap="medium")
+    # Ligne 2
+    c3, c4 = st.columns(2, gap="large")
     
     with c3:
-        st.markdown("""<div class="feature-card"><div class="feature-header">Réglementation & Normes</div><div class="feature-text">Accès instantané au Code du Travail et guides INRS pour la conformité.</div></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="feature-card"><div class="feature-header">Réglementation & Normes</div><div class="feature-text">Accédez instantanément aux articles du Code du Travail et aux guides INRS pour garantir votre conformité.</div></div>""", unsafe_allow_html=True)
 
     with c4:
-        st.markdown("""<div class="feature-card"><div class="feature-header">Assistance IA Experte</div><div class="feature-text">Un assistant intelligent pour vos analyses et prises de décision QHSE.</div></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="feature-card"><div class="feature-header">Assistance IA Experte</div><div class="feature-text">Posez vos questions techniques à un assistant intelligent spécialisé dans le domaine QHSE.</div></div>""", unsafe_allow_html=True)
 
     # --- Footer ---
-    st.markdown("""<div class="footer">QHSE Air Bot © 2026 — Assistant IA Professionnel</div>""", unsafe_allow_html=True)
+    st.markdown("""<div class="footer">© 2026 QHSE Air Bot — Sécurité, Qualité et Environnement augmentés par l'IA.</div>""", unsafe_allow_html=True)
 
 def render_dashboard():
     """

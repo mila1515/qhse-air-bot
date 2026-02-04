@@ -35,17 +35,25 @@ def render_notes():
     # Vue Liste (Par défaut)
     st.markdown("## Mes Notes Personnelles")
     
+    # Init form key
+    if "note_form_key" not in st.session_state:
+        st.session_state.note_form_key = 0
+
     # Formulaire d'ajout
     with st.expander("Ajouter une nouvelle note", expanded=False):
-        with st.form("add_note_form"):
+        # On utilise une clé dynamique pour forcer le reset des widgets
+        with st.form(key=f"add_note_form_{st.session_state.note_form_key}", clear_on_submit=True):
             new_title = st.text_input("Titre")
             new_content = st.text_area("Contenu")
             submitted = st.form_submit_button("Sauvegarder")
+            
             if submitted:
                 if new_content:
                     resp = notes_client.create_note(new_title, new_content)
                     if resp and resp.status_code in [200, 201]:
                         st.success("Note créée !")
+                        # Incrémenter la clé pour réinitialiser le formulaire au prochain rendu
+                        st.session_state.note_form_key += 1
                         st.rerun()
                     else:
                         st.error("Erreur lors de la création.")
