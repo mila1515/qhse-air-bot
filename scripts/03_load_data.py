@@ -4,6 +4,7 @@ Utilise le module src.etl.load
 """
 
 import sys
+import io
 from pathlib import Path
 
 # Ajout du dossier racine au path pour les imports
@@ -12,8 +13,10 @@ sys.path.append(str(project_root))
 
 # Force l'encodage UTF-8 pour la console Windows
 if sys.platform == "win32":
-    sys.stdout.reconfigure(encoding='utf-8')
-    sys.stderr.reconfigure(encoding='utf-8')
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+    if hasattr(sys.stderr, 'reconfigure'):
+        sys.stderr.reconfigure(encoding='utf-8')
 
 from src.etl.load import DataLoader
 from src.monitoring.logger import logger

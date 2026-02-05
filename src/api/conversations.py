@@ -57,9 +57,9 @@ def update_conversation(
         raise HTTPException(status_code=404, detail="Conversation not found")
     
     if conversation_update.title is not None:
-        conv.title = conversation_update.title
+        setattr(conv, 'title', conversation_update.title)
     if conversation_update.status is not None:
-        conv.status = conversation_update.status
+        setattr(conv, 'status', conversation_update.status)
     
     conv.updated_at = func.now()
     db.commit()

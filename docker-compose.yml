@@ -2,21 +2,19 @@ services:
   api:
     build: .
     container_name: qhse_api
-    # Ports exposés uniquement pour le réseau interne Docker (Frontend -> API)
-    # On ne mappe pas le port sur l'hôte pour la sécurité (accès externe bloqué)
-    # ports:
-    #   - "8100:8000"
+    ports:
+      - "8100:8000"
     env_file:
       - .env
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - SERVICE_NAME=api
     depends_on:
       - postgres
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
       - ./src:/app/src
-      - ./scripts:/app/scripts
     command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - qhse_net
@@ -30,6 +28,7 @@ services:
       - .env
     environment:
       - API_URL=http://qhse_api:8000
+      - SERVICE_NAME=frontend
     depends_on:
       - api
     volumes:
@@ -46,6 +45,8 @@ services:
       - .env
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - SERVICE_NAME=scheduler
+      - EVIDENTLY_SERVICE_URL=http://qhse_evidently_proxy:80
     depends_on:
       - postgres
       - evidently
@@ -112,6 +113,18 @@ services:
     container_name: qhse_evidently
     ports:
       - "8101:8000"
+    networks:
+      - qhse_net
+
+  evidently_proxy:
+    image: nginx:alpine
+    container_name: qhse_evidently_proxy
+    depends_on:
+      - evidently
+    volumes:
+      - ./src/data_monitoring/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8102:80"
     networks:
       - qhse_net
 

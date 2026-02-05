@@ -43,9 +43,9 @@ def render_navbar():
             width: 100% !important; 
             height: 70px !important; 
             z-index: 9999 !important; 
-            background-color: #FFFFFF !important; 
-            border-bottom: 1px solid #e2e8f0 !important; 
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05) !important; 
+            background: linear-gradient(90deg, #80CBC4 0%, #B2DFDB 100%) !important; /* Lighter Mint Gradient */
+            border-bottom: 1px solid #4DB6AC !important; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; 
             padding: 0.5rem 2rem !important; 
             display: flex !important; 
             align-items: center !important; 
@@ -79,27 +79,27 @@ def render_navbar():
             border: none !important;
             box-shadow: none !important;
             font-family: 'Inter', sans-serif !important;
-            font-weight: 600 !important;
+            font-weight: 500 !important;
             transition: all 0.2s ease !important;
             background-color: transparent !important;
-            color: #0f172a !important; /* Texte Noir / Dark Slate */
+            color: #102027 !important; /* Texte Bleu Nuit pour lisibilité */
             white-space: nowrap !important; /* Empêche le retour à la ligne */
-            padding-left: 0.5rem !important;
-            padding-right: 0.5rem !important;
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
         }
 
         div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button:hover {
-            background-color: #f1f5f9 !important;
-            color: #48BB78 !important; /* Vert au survol */
+            background-color: rgba(255, 255, 255, 0.5) !important; /* Fond blanc semi-transparent au survol */
+            color: #000000 !important; /* Noir au survol */
         }
         
         /* Force le style même pour les boutons Primary (qui sont blancs par défaut) */
         div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button[kind="primary"] {
-            color: #0f172a !important;
+            color: #102027 !important;
             background-color: transparent !important;
         }
         div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button[kind="primary"]:hover {
-            color: #48BB78 !important;
+            color: #00796B !important; /* Darker Teal au survol pour lisibilité */
             background-color: #f1f5f9 !important;
         }
 
@@ -125,9 +125,9 @@ def render_navbar():
         logo_b64 = get_base64_logo() 
         if logo_b64: 
             st.markdown(f""" 
-            <div style="display: flex; align-items: center; gap: 10px; height: 40px; cursor: pointer;"> 
-                <img src="data:image/png;base64,{logo_b64}" style="height: 32px; width: auto;"> 
-                <span style="font-weight: 700; font-size: 18px; color: #0f172a; letter-spacing: -0.5px;">QHSE Air Bot</span> 
+            <div style="display: flex; align-items: center; gap: 14px; height: 60px; cursor: pointer; transform: translateY(-12px);"> 
+                <img src="data:image/png;base64,{logo_b64}" style="height: 58px; width: auto;"> 
+                <span style="font-weight: 700; font-size: 24px; color: #000000; letter-spacing: -0.5px;">QHSE Air Bot</span> 
             </div> 
             """, unsafe_allow_html=True) 
         else: 

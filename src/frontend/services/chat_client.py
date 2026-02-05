@@ -8,8 +8,9 @@ def send_chat_message(conversation_id, question):
         response = requests.post(
             f"{API_URL}/conversations/{conversation_id}/chat", 
             headers=get_api_headers(), 
-            json=payload
+            json=payload,
+            timeout=120  # Timeout de 120 secondes pour les réponses longues (RAG)
         )
         return response
     except requests.exceptions.RequestException as e:
-        return None
+        raise e

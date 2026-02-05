@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 from src.frontend.services import chat_client, conversations_client
 
 def render_chat():
@@ -85,6 +86,31 @@ def render_chat():
             for msg in st.session_state.messages:
                 with st.chat_message(msg["role"]):
                     st.markdown(msg["content"])
+
+            # --- Actions de bas de page (Navigation simplifiée pour longues conversations) ---
+            if len(st.session_state.messages) > 2:
+                st.markdown("---")
+                c_end1, c_end2, c_end3 = st.columns([1, 2, 1])
+                with c_end2:
+                    cb1, cb2 = st.columns(2)
+                    with cb1:
+                        # Bouton Clôturer (si pas déjà clos)
+                        if conv_status != "clos":
+                            if st.button("🔒 Clôturer", key="close_conv_btn_bottom", help="Clôturer cette conversation", use_container_width=True):
+                                conversations_client.update_conversation(st.session_state.current_conversation_id, status="clos")
+                                st.toast("Conversation marquée comme close", icon="✅")
+                                st.rerun()
+                        else:
+                            st.info("Conversation close")
+                    
+                    with cb2:
+                        # Bouton Retour
+                        if st.button("⬅️ Retour", key="return_btn_bottom", use_container_width=True):
+                            st.session_state.current_conversation_id = None
+                            st.session_state.messages = []
+                            st.rerun()
+                st.markdown("<br><br>", unsafe_allow_html=True) # Espace pour éviter que ce soit caché par le chat_input
+
     
         # Input utilisateur
         if conv_status == "clos":
@@ -99,33 +125,48 @@ def render_chat():
                 # Appel API
                 with st.chat_message("assistant"):
                     with st.spinner("Réflexion en cours..."):
-                        resp = chat_client.send_chat_message(st.session_state.current_conversation_id, prompt)
-                        if resp and resp.status_code == 200:
-                            data = resp.json()
-                            # Supporte ancien format ("answer") et nouveau format DB ("content")
-                            answer = data.get("content") or data.get("answer") or data.get("response") or "Pas de réponse."
-                            st.markdown(answer)
-                            st.session_state.messages.append({"role": "assistant", "content": answer})
-                        elif resp and resp.status_code == 503:
-                            # Maintenance / Index en cours
-                            try:
-                                maintenance_msg = resp.json().get("detail", "Maintenance en cours.")
-                            except:
-                                maintenance_msg = "Maintenance en cours."
-                            
-                            st.warning(maintenance_msg, icon="⚠️")
-                            st.session_state.messages.append({"role": "assistant", "content": maintenance_msg})
-                        else:
-                            if resp:
+                        try:
+                            resp = chat_client.send_chat_message(st.session_state.current_conversation_id, prompt)
+                            if resp and resp.status_code == 200:
+                                data = resp.json()
+                                # Supporte ancien format ("answer") et nouveau format DB ("content")
+                                answer = data.get("content") or data.get("answer") or data.get("response") or "Pas de réponse."
+                                st.markdown(answer)
+                                st.session_state.messages.append({"role": "assistant", "content": answer})
+                            elif resp and resp.status_code == 503:
+                                # Maintenance / Index en cours
                                 try:
-                                    err_detail = resp.json().get("detail", resp.text)
+                                    maintenance_msg = resp.json().get("detail", "Maintenance en cours.")
                                 except:
-                                    err_detail = resp.text
-                                status_code = resp.status_code
-                            else:
-                                err_detail = "Erreur de connexion (Serveur injoignable ou timeout)"
-                                status_code = "N/A"
+                                    maintenance_msg = "Maintenance en cours."
                                 
-                            err_msg = f"Erreur serveur ({status_code}): {err_detail}"
+                                st.warning(maintenance_msg, icon="⚠️")
+                                st.session_state.messages.append({"role": "assistant", "content": maintenance_msg})
+                            else:
+                                if resp:
+                                    try:
+                                        err_detail = resp.json().get("detail", resp.text)
+                                    except:
+                                        err_detail = resp.text
+                                    status_code = resp.status_code
+                                else:
+                                    err_detail = "Réponse vide"
+                                    status_code = "N/A"
+                                    
+                                err_msg = f"Erreur serveur ({status_code}): {err_detail}"
+                                st.error(err_msg)
+                                st.session_state.messages.append({"role": "assistant", "content": err_msg})
+                        except requests.exceptions.RequestException as e:
+                            if isinstance(e, requests.exceptions.ConnectionError):
+                                err_msg = f"Erreur de connexion : Impossible de joindre le serveur backend. ({e})"
+                            elif isinstance(e, requests.exceptions.Timeout):
+                                err_msg = f"Timeout : Le serveur a mis trop de temps à répondre. ({e})"
+                            else:
+                                err_msg = f"Erreur réseau : {e}"
+                            
+                            st.error(err_msg)
+                            st.session_state.messages.append({"role": "assistant", "content": err_msg})
+                        except Exception as e:
+                            err_msg = f"Erreur inattendue : {e}"
                             st.error(err_msg)
                             st.session_state.messages.append({"role": "assistant", "content": err_msg})

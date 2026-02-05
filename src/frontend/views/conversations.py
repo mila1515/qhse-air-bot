@@ -1,5 +1,6 @@
 import streamlit as st
 from src.frontend.services import conversations_client
+from src.frontend.utils.session import logout
 
 def render_conversations():
     st.markdown("## Historique des Conversations")
@@ -50,5 +51,10 @@ def render_conversations():
                                 st.rerun()
                             else:
                                 st.error("Erreur")
+    elif resp and resp.status_code == 401:
+        st.warning("Votre session a expiré. Veuillez vous reconnecter.")
+        if st.button("Se reconnecter"):
+            logout()
     else:
-        st.error("Impossible de récupérer les conversations.")
+        err_details = f" ({resp.status_code})" if resp else " (Erreur connexion)"
+        st.error(f"Impossible de récupérer les conversations.{err_details}")

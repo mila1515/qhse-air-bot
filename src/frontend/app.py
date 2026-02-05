@@ -32,7 +32,8 @@ def apply_global_styles():
 
         /* --- Global Background --- */
         .stApp {
-            background-color: #F8FAFC !important; /* Gris très clair (SaaS) */
+            background-color: #FFFFFF !important; /* White base */
+            background-image: linear-gradient(to bottom right, #B2DFDB 0%, #FFFFFF 60%, #FFFFFF 100%); /* Light Mint to White fade */
         }
         
         /* --- Header & Sidebar Hide --- */
@@ -61,30 +62,34 @@ def apply_global_styles():
         }
 
         /* --- Buttons --- */
-        /* Primary (Vert #48bb78) */
+        /* Primary (Dark Navy #102027) */
         div.stButton > button[kind="primary"] {
-            background-color: #48bb78 !important; 
+            background-color: #102027 !important; 
             color: white !important;
             border: none !important;
             border-radius: 8px !important;
             font-weight: 600 !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            box-shadow: 0 4px 6px rgba(16, 32, 39, 0.3) !important;
+            transition: all 0.2s ease-in-out !important;
         }
         div.stButton > button[kind="primary"]:hover {
-            background-color: #38a169 !important;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15) !important;
+            background-color: #37474f !important;
+            box-shadow: 0 6px 12px rgba(55, 71, 79, 0.4) !important;
+            transform: translateY(-1px);
         }
 
         /* Secondary (Standard) */
         div.stButton > button[kind="secondary"] {
             background-color: white !important;
-            color: #4a5568 !important;
-            border: 1px solid #cbd5e0 !important;
+            color: #102027 !important;
+            border: 1px solid #102027 !important;
             border-radius: 8px !important;
+            transition: all 0.2s ease-in-out !important;
         }
         div.stButton > button[kind="secondary"]:hover {
-            border-color: #a0aec0 !important;
-            background-color: #f7fafc !important;
+            border-color: #4DB6AC !important;
+            color: #4DB6AC !important;
+            background-color: #E0F2F1 !important;
         }
         
     </style>

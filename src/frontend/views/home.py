@@ -253,11 +253,11 @@ def render_dashboard():
 
         /* Header Section */
         .dash-header {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            padding: 3rem 2rem;
+            background: linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%); /* Fond plus "Air/Clean" */
+            padding: 2.5rem 2rem;
             border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #b2dfdb; /* Teal très clair */
+            box-shadow: 0 4px 12px -2px rgba(0, 105, 92, 0.05);
             margin-bottom: 3rem;
             display: flex;
             justify-content: space-between;
@@ -265,120 +265,137 @@ def render_dashboard():
         }
         
         .dash-welcome h1 {
-            color: #2c3e50;
-            font-size: 2.2rem;
+            color: #004d40; /* Teal Foncé */
+            font-size: 2rem;
             font-weight: 800;
             margin: 0 0 0.5rem 0;
             letter-spacing: -0.5px;
         }
         
         .dash-welcome p {
-            color: #64748b;
-            font-size: 1.1rem;
+            color: #00695c; /* Teal Medium */
+            font-size: 1.05rem;
             margin: 0;
+            opacity: 0.9;
         }
 
         .dash-date {
             text-align: right;
-            color: #94a3b8;
+            color: #546e7a; /* Blue Grey */
             font-size: 0.9rem;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         /* Grid Cards */
         .action-card {
-            background-color: white;
-            border-radius: 12px;
+            background-color: #ffffff;
+            border-radius: 16px;
             padding: 2rem;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            cursor: default; /* Les boutons font l'action */
+            position: relative;
+            overflow: hidden;
+            /* Bordure top colorée subtile */
+            border-top: 4px solid transparent; 
         }
         
         .action-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
-            border-color: #cbd5e1;
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: #b2dfdb;
+            border-top-color: #0d9488; /* Teal Accent au survol */
         }
 
         .card-icon {
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            color: #38b2ac; /* Teal */
-            background: #e6fffa;
-            width: 60px;
-            height: 60px;
+            font-size: 2.5rem;
+            margin-bottom: 1.25rem;
+            color: #0d9488; /* Teal 600 */
+            background: #f0fdfa; /* Teal 50 */
+            width: 70px;
+            height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
+            border-radius: 16px;
+            transition: transform 0.3s ease;
+        }
+        
+        .action-card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+            background: #e0f2f1;
         }
         
         .card-title {
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             font-weight: 700;
-            color: #2d3748;
+            color: #1e293b;
             margin-bottom: 0.75rem;
         }
         
         .card-desc {
             font-size: 0.95rem;
-            color: #718096;
-            line-height: 1.5;
-            margin-bottom: 1.5rem;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 2rem; /* Espace pour les boutons */
             flex-grow: 1;
         }
 
-        /* Stats Section */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
+        /* Boutons Personnalisés via CSS Injection pour Streamlit */
+        /* Cible les boutons Primary (Vert/Teal) */
+        div.stButton > button[kind="primary"] {
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
+            border: none !important;
+            color: white !important;
+            font-weight: 600 !important;
+            padding: 0.6rem 1.5rem !important;
+            border-radius: 10px !important;
+            transition: all 0.2s ease !important;
+            box-shadow: 0 4px 6px -1px rgba(13, 148, 136, 0.3) !important;
         }
-        
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            border-left: 4px solid #38b2ac;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        div.stButton > button[kind="primary"]:hover {
+            box-shadow: 0 10px 15px -3px rgba(13, 148, 136, 0.4) !important;
+            transform: translateY(-2px) !important;
         }
-        
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #2c3e50;
+
+        /* Cible les boutons Secondary (Contour) */
+        div.stButton > button[kind="secondary"] {
+            background: white !important;
+            border: 2px solid #e2e8f0 !important;
+            color: #475569 !important;
+            font-weight: 600 !important;
+            padding: 0.6rem 1.5rem !important;
+            border-radius: 10px !important;
+            transition: all 0.2s ease !important;
         }
-        
-        .stat-label {
-            color: #64748b;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
+        div.stButton > button[kind="secondary"]:hover {
+            border-color: #0d9488 !important;
+            color: #0d9488 !important;
+            background: #f0fdfa !important;
         }
-        
+
         /* Section Titles */
         .section-header {
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             font-weight: 700;
-            color: #4a5568;
+            color: #94a3b8;
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .section-header::after {
             content: "";
             flex-grow: 1;
-            height: 1px;
-            background: #e2e8f0;
+            height: 2px;
+            background: #f1f5f9;
+            border-radius: 2px;
         }
 
     </style>
@@ -407,44 +424,45 @@ def render_dashboard():
     """, unsafe_allow_html=True)
 
     # 2. Quick Stats (Données Réelles)
+    # BLOC SUPPRIMÉ SUR DEMANDE UTILISATEUR
     # Récupération des données réelles via API
-    try:
-        convs_resp = conversations_client.get_conversations()
-        convs_count = len(convs_resp.json()) if convs_resp and convs_resp.status_code == 200 else 0
-    except:
-        convs_count = 0
+    # try:
+    #     convs_resp = conversations_client.get_conversations()
+    #     convs_count = len(convs_resp.json()) if convs_resp and convs_resp.status_code == 200 else 0
+    # except:
+    #     convs_count = 0
         
-    st.markdown('<div class="section-header">VUE D\'ENSEMBLE</div>', unsafe_allow_html=True)
+    # st.markdown('<div class="section-header">VUE D\'ENSEMBLE</div>', unsafe_allow_html=True)
     
-    c_stat1, c_stat2, c_stat3, c_stat4 = st.columns(4)
-    with c_stat1:
-        st.markdown(f"""
-        <div class="stat-card" style="border-left-color: #4299e1;">
-            <div class="stat-value">{convs_count}</div>
-            <div class="stat-label">Conversations</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with c_stat2:
-        st.markdown("""
-        <div class="stat-card" style="border-left-color: #48bb78;">
-            <div class="stat-value">85%</div>
-            <div class="stat-label">Conformité</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with c_stat3:
-        st.markdown("""
-        <div class="stat-card" style="border-left-color: #48bb78;">
-            <div class="stat-value">1500+</div>
-            <div class="stat-label">Sources RAG</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with c_stat4:
-        st.markdown("""
-        <div class="stat-card" style="border-left-color: #9f7aea;">
-            <div class="stat-value">IA</div>
-            <div class="stat-label">Assistant Prêt</div>
-        </div>
-        """, unsafe_allow_html=True)
+    # c_stat1, c_stat2, c_stat3, c_stat4 = st.columns(4)
+    # with c_stat1:
+    #     st.markdown(f"""
+    #     <div class="stat-card" style="border-left-color: #4299e1;">
+    #         <div class="stat-value">{convs_count}</div>
+    #         <div class="stat-label">Conversations</div>
+    #     </div>
+    #     """, unsafe_allow_html=True)
+    # with c_stat2:
+    #     st.markdown("""
+    #     <div class="stat-card" style="border-left-color: #48bb78;">
+    #         <div class="stat-value">85%</div>
+    #         <div class="stat-label">Conformité</div>
+    #     </div>
+    #     """, unsafe_allow_html=True)
+    # with c_stat3:
+    #     st.markdown("""
+    #     <div class="stat-card" style="border-left-color: #48bb78;">
+    #         <div class="stat-value">1500+</div>
+    #         <div class="stat-label">Sources RAG</div>
+    #     </div>
+    #     """, unsafe_allow_html=True)
+    # with c_stat4:
+    #     st.markdown("""
+    #     <div class="stat-card" style="border-left-color: #9f7aea;">
+    #         <div class="stat-value">IA</div>
+    #         <div class="stat-label">Assistant Prêt</div>
+    #     </div>
+    #     """, unsafe_allow_html=True)
 
     st.markdown("<div style='margin-bottom: 3rem;'></div>", unsafe_allow_html=True)
 

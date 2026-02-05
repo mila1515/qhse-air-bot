@@ -55,19 +55,28 @@ def run_waqi_drift():
     # print(f"Rapport de dérive WAQI généré avec succès : {report_path}")
 
     # 6. Sauvegarde dans le Remote Workspace (Service Docker)
-    # URL du service Evidently (accessible depuis l'hôte ou via réseau Docker)
-    EVIDENTLY_SERVICE_URL = "http://localhost:8101" 
-    
-    ws = RemoteWorkspace(EVIDENTLY_SERVICE_URL)
-    project_name = "WAQI Monitoring"
-    existing_projects = ws.search_project(project_name)
-    if existing_projects:
-        project = existing_projects[0]
-    else:
-        project = ws.create_project(project_name)
-    
-    ws.add_run(project.id, report_result)
-    print(f"Rapport envoyé au service Evidently (Projet: '{project_name}') sur {EVIDENTLY_SERVICE_URL}")
+    try:
+        # Utilisation de la variable d'environnement pour Docker (http://qhse_evidently_proxy)
+        # Fallback sur localhost:8102 pour le dev local
+        EVIDENTLY_SERVICE_URL = os.getenv("EVIDENTLY_SERVICE_URL", "http://localhost:8102")
+        
+        ws = RemoteWorkspace(EVIDENTLY_SERVICE_URL)
+        project_name = "WAQI Monitoring"
+        existing_projects = ws.search_project(project_name)
+        if existing_projects:
+            project = existing_projects[0]
+        else:
+            project = ws.create_project(project_name)
+        
+        ws.add_run(project.id, report_result)
+        print(f"Rapport envoyé au service Evidently (Projet: '{project_name}') sur {EVIDENTLY_SERVICE_URL}")
+    except Exception as e:
+        print(f"❌ Erreur lors de l'envoi à Evidently : {e}")
+        # Fallback local
+        os.makedirs(REPORT_DIR, exist_ok=True)
+        report_path = os.path.join(REPORT_DIR, "waqi_drift_report.html")
+        report_result.save_html(report_path)
+        print(f"   Rapport sauvegardé localement : {report_path}")
 
 if __name__ == "__main__":
     run_waqi_drift()

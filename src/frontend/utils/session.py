@@ -75,6 +75,7 @@ def logout():
     st.session_state.user = None
     st.session_state.current_conversation_id = None
     st.session_state.messages = []
+    st.session_state.current_view = "Login"
     
     # Supprimer le cookie
     # Utiliser l'instance stockée dans session_state
@@ -87,6 +88,12 @@ def logout():
         except Exception:
             # En cas d'erreur (ex: KeyError interne au composant), on ignore
             pass
+    
+    # Mettre à jour l'URL pour éviter la persistance de la vue précédente
+    try:
+        st.query_params["view"] = "Login"
+    except Exception:
+        pass
     
     # Rerun pour appliquer les changements
     st.rerun()

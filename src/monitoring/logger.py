@@ -1,4 +1,5 @@
 import sys
+import os
 from loguru import logger
 from pathlib import Path
 
@@ -16,9 +17,13 @@ logger.add(
     level="INFO"
 )
 
+# Récupérer le nom du service depuis les variables d'environnement (défini dans docker-compose)
+service_name = os.getenv("SERVICE_NAME", "app")
+
 # Handler Fichier (Rotation journalière, niveau DEBUG)
+# Chaque service aura son propre fichier de log (api.log, scheduler.log, frontend.log)
 logger.add(
-    LOG_DIR / "app.log",
+    LOG_DIR / f"{service_name}.log",
     rotation="1 day",
     retention="7 days",
     level="DEBUG",

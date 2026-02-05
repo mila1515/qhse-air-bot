@@ -28,6 +28,18 @@ def run_aria_drift():
         df = df.dropna(subset=['date']) # On garde ce qui est datable pour le tri
         df.sort_values(by='date', inplace=True)
 
+    # Échantillonnage pour réduire la taille du payload (évite erreur 413)
+    # On garde 2000 lignes max (1000 ref / 1000 current)
+    if len(df) > 2000:
+        print(f"Dataset volumineux ({len(df)} lignes). Échantillonnage à 2000 lignes.")
+        # On garde les plus récents pour le drift monitoring, ou un sample aléatoire?
+        # Pour le drift temporel, mieux vaut garder une continuité, mais l'aléatoire est plus simple pour la taille.
+        # Ici on prend un sample aléatoire pour simplifier la réduction de taille tout en gardant la représentativité globale.
+        df = df.sample(n=2000, random_state=42)
+        # Re-trier par date après sampling si nécessaire pour la coupure temporelle logique
+        if 'date' in df.columns:
+            df.sort_values(by='date', inplace=True)
+
     # 2. Séparation Référence / Actuel
     split_index = int(len(df) * 0.5)
     reference_data = df.iloc[:split_index]
@@ -47,26 +59,27 @@ def run_aria_drift():
     print("Analyse de la dérive ARIA en cours...")
     report_result = report.run(reference_data=reference_data, current_data=current_data)
 
-    # 5. Sauvegarde du rapport
-    # os.makedirs(REPORT_DIR, exist_ok=True)
-    # report_path = os.path.join(REPORT_DIR, "aria_drift_report.html")
-    # report_result.save_html(report_path)
-    
-    # print(f"Rapport de dérive ARIA généré avec succès : {report_path}")
-
-    # 6. Sauvegarde dans le Remote Workspace (Service Docker)
-    EVIDENTLY_SERVICE_URL = "http://localhost:8101"
-
-    ws = RemoteWorkspace(EVIDENTLY_SERVICE_URL)
-    project_name = "ARIA Monitoring"
-    existing_projects = ws.search_project(project_name)
-    if existing_projects:
-        project = existing_projects[0]
-    else:
-        project = ws.create_project(project_name)
-    
-    ws.add_run(project.id, report_result)
-    print(f"Rapport envoyé au service Evidently (Projet: '{project_name}') sur {EVIDENTLY_SERVICE_URL}")
+    # 5. Tentative d'envoi + sauvegarde locale en fallback
+    os.makedirs(REPORT_DIR, exist_ok=True)
+    report_path = os.path.join(REPORT_DIR, "aria_drift_report.html")
+    try:
+        # 6. Sauvegarde dans le Remote Workspace (Service Docker)
+        # Utilisation de la variable d'environnement pour Docker (http://qhse_evidently_proxy)
+        # Fallback sur localhost:8102 pour le dev local
+        EVIDENTLY_SERVICE_URL = os.getenv("EVIDENTLY_SERVICE_URL", "http://localhost:8102")
+        ws = RemoteWorkspace(EVIDENTLY_SERVICE_URL)
+        project_name = "ARIA Monitoring"
+        existing_projects = ws.search_project(project_name)
+        if existing_projects:
+            project = existing_projects[0]
+        else:
+            project = ws.create_project(project_name)
+        ws.add_run(project.id, report_result)
+        print(f"Rapport envoyé au service Evidently (Projet: '{project_name}') sur {EVIDENTLY_SERVICE_URL}")
+    except Exception as e:
+        # Fallback: sauvegarde locale si l'UI refuse le payload (413)
+        report_result.save_html(report_path)
+        print(f"UI Evidently a refusé le snapshot (raison: {e}). Rapport HTML sauvegardé: {report_path}")
 
 if __name__ == "__main__":
     run_aria_drift()

@@ -1,5 +1,6 @@
 import streamlit as st
 from src.frontend.services import notes_client
+from src.frontend.utils.session import logout
 
 def render_notes():
     # Gestion de la vue détail (Si une note est sélectionnée)
@@ -92,5 +93,10 @@ def render_notes():
                             notes_client.delete_note(note['id'])
                             st.rerun()
 
+    elif resp and resp.status_code == 401:
+        st.warning("Votre session a expiré. Veuillez vous reconnecter.")
+        if st.button("Se reconnecter", key="reconnect_notes"):
+            logout()
     else:
-        st.error("Impossible de charger les notes.")
+        err_details = f" ({resp.status_code})" if resp else " (Erreur connexion)"
+        st.error(f"Impossible de charger les notes.{err_details}")

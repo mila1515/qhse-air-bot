@@ -21,6 +21,12 @@ def run_aria_quality():
 
     df = pd.read_csv(DATA_PATH)
     
+    # Échantillonnage pour réduire la taille du payload (évite erreur 413)
+    # On garde 2000 lignes max pour l'analyse de qualité
+    if len(df) > 2000:
+        print(f"Dataset volumineux ({len(df)} lignes). Échantillonnage à 2000 lignes.")
+        df = df.sample(n=2000, random_state=42)
+
     current_data = df
 
     # 3. Configuration du rapport Evidently
@@ -32,26 +38,27 @@ def run_aria_quality():
     print("Analyse de la qualité des données ARIA en cours...")
     report_result = report.run(reference_data=None, current_data=current_data)
 
-    # 5. Sauvegarde du rapport
-    # os.makedirs(REPORT_DIR, exist_ok=True)
-    # report_path = os.path.join(REPORT_DIR, "aria_quality_report.html")
-    # report_result.save_html(report_path)
-    
-    # print(f"Rapport de qualité ARIA généré avec succès : {report_path}")
-
-    # 6. Sauvegarde dans le Remote Workspace (Service Docker)
-    EVIDENTLY_SERVICE_URL = "http://localhost:8101"
-
-    ws = RemoteWorkspace(EVIDENTLY_SERVICE_URL)
-    project_name = "ARIA Monitoring"
-    existing_projects = ws.search_project(project_name)
-    if existing_projects:
-        project = existing_projects[0]
-    else:
-        project = ws.create_project(project_name)
-    
-    ws.add_run(project.id, report_result)
-    print(f"Rapport envoyé au service Evidently (Projet: '{project_name}') sur {EVIDENTLY_SERVICE_URL}")
+    # 5. Tentative d'envoi + sauvegarde locale en fallback
+    os.makedirs(REPORT_DIR, exist_ok=True)
+    report_path = os.path.join(REPORT_DIR, "aria_quality_report.html")
+    try:
+        # 6. Sauvegarde dans le Remote Workspace (Service Docker)
+        # Utilisation de la variable d'environnement pour Docker (http://qhse_evidently_proxy)
+        # Fallback sur localhost:8102 pour le dev local
+        EVIDENTLY_SERVICE_URL = os.getenv("EVIDENTLY_SERVICE_URL", "http://localhost:8102")
+        ws = RemoteWorkspace(EVIDENTLY_SERVICE_URL)
+        project_name = "ARIA Monitoring"
+        existing_projects = ws.search_project(project_name)
+        if existing_projects:
+            project = existing_projects[0]
+        else:
+            project = ws.create_project(project_name)
+        ws.add_run(project.id, report_result)
+        print(f"Rapport envoyé au service Evidently (Projet: '{project_name}') sur {EVIDENTLY_SERVICE_URL}")
+    except Exception as e:
+        # Fallback: sauvegarde locale si l'UI refuse le payload (413)
+        report_result.save_html(report_path)
+        print(f"UI Evidently a refusé le snapshot (raison: {e}). Rapport HTML sauvegardé: {report_path}")
 
 if __name__ == "__main__":
     run_aria_quality()
