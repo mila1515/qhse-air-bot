@@ -1,7 +1,6 @@
 import os
 import time
-from langchain_openai import AzureChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.retrieval import create_retrieval_chain
 from src.rag.loader.db_exporter import export_db_to_txt
@@ -61,71 +60,53 @@ class RAGPipeline:
         from dotenv import load_dotenv
         load_dotenv() # Ne pas utiliser override=True pour ne pas écraser les variables CI/CD
         
-        azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
-        azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-        google_api_key = os.getenv("GOOGLE_API_KEY")
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
         
         self.llm = None
         self.llm_fallback = None
-
-        # 1. Initialisation Azure OpenAI (LLM Principal)
-        if azure_api_key and azure_endpoint:
+        
+        if openai_api_key:
             try:
-                logger.info("🔷 Initialisation LLM Principal : Azure OpenAI")
-                self.llm = AzureChatOpenAI(
-                    azure_deployment=os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "gpt-4.1-mini"),
-                    openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-12-01-preview"),
-                    azure_endpoint=azure_endpoint,
-                    api_key=azure_api_key,
-                    temperature=0,
-                    request_timeout=30, # Timeout standard avant bascule
-                    max_retries=1 # On limite les retries car on a un fallback
-                )
-                logger.info("✅ LLM Principal (Azure) initialisé.")
-            except Exception as e:
-                logger.warning(f"⚠️ Erreur init Azure OpenAI : {e}")
-
-        # 2. Initialisation Google Gemini (LLM Fallback)
-        if google_api_key:
-            try:
-                logger.info("🔷 Initialisation LLM Fallback : Google Gemini")
-                model_name = "gemini-pro"
-                self.llm_fallback = ChatGoogleGenerativeAI(
-                    model=model_name,
-                    google_api_key=google_api_key,
+                logger.info("🔷 Initialisation LLM Principal : OpenAI Standard")
+                self.llm = ChatOpenAI(
+                    model=os.getenv("OPENAI_MODEL_NAME", "gpt-4o"),
+                    api_key=openai_api_key,
                     temperature=0
                 )
-                logger.info(f"✅ LLM Fallback (Google) initialisé.")
+                logger.info("✅ LLM Principal (OpenAI Standard) initialisé.")
             except Exception as e:
-                logger.warning(f"⚠️ Erreur init Google Gemini : {e}")
+                logger.warning(f"⚠️ Erreur init OpenAI Standard : {e}")
         
-        # Si Azure a échoué mais Google est là, Google devient le principal par défaut
-        if not self.llm and self.llm_fallback:
-             logger.warning("⚠️ Azure indisponible au démarrage. Google Gemini devient le LLM principal.")
-             self.llm = self.llm_fallback
-             self.llm_fallback = None # Pas besoin de fallback si c'est déjà le principal
-
+        if not self.llm and deepseek_api_key:
+            try:
+                logger.info("🔷 Initialisation LLM Secondaire : DeepSeek (via OpenAI API)")
+                self.llm = ChatOpenAI(
+                    model=os.getenv("DEEPSEEK_MODEL_NAME", "deepseek-chat"),
+                    api_key=deepseek_api_key,
+                    base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
+                    temperature=0
+                )
+                logger.info("✅ LLM Secondaire (DeepSeek) initialisé.")
+            except Exception as e:
+                logger.warning(f"⚠️ Erreur init DeepSeek : {e}")
+        
         if not self.llm:
-            logger.error("❌ Aucune configuration LLM valide (Google ou Azure) trouvée.")
+            logger.error("❌ Aucune configuration LLM valide (OpenAI ou DeepSeek) trouvée.")
             raise ValueError("Configuration LLM manquante.")
 
         logger.info("🔗 Initialisation du pipeline RAG...")
         
         # Retriever
-        self.retriever = get_retriever(k=4)
+        # Optimisation : k=3 pour réduire le contexte et accélérer la génération
+        self.retriever = get_retriever(k=3)
         
         # Prompt
         prompt = get_qhse_prompt()
         summary_prompt = get_summary_prompt()
         
         # Chains
-        # Chaîne Principale (Azure par défaut)
         self.combine_docs_chain = create_stuff_documents_chain(self.llm, prompt)
-        
-        # Chaîne de Fallback (Google) - Uniquement si un fallback existe
-        if self.llm_fallback:
-             self.fallback_docs_chain = create_stuff_documents_chain(self.llm_fallback, prompt)
-             logger.info("🛡️  Circuit de secours (Fallback Chain) activé.")
         
         self.summary_chain = create_stuff_documents_chain(self.llm, summary_prompt)
         
@@ -163,10 +144,13 @@ class RAGPipeline:
             summary_keywords = ["résume", "resume", "synthèse", "synthese", "resumer", "résumer", "synthetiser", "synthétiser", "summary", "summarize"]
             is_summary = any(keyword in question.lower() for keyword in summary_keywords)
             
-            # 1. Reformulation (Réactivée)
-            reformulated_question = self.reformulate_question(question)
+            # 1. Reformulation (Désactivée pour performance DeepSeek)
+            # Le modèle DeepSeek est assez intelligent pour comprendre sans reformulation
+            # 1. Reformulation (Désactivée pour performance)
+            # reformulated_question = self.reformulate_question(question)
+            reformulated_question = question # On utilise la question directe
             
-            # 2. Récupération des documents (Retrieval) avec la question REFORMULÉE
+            # 2. Récupération des documents (Retrieval) avec la question ORIGINALE
             logger.info(f"🔍 Recherche vectorielle avec : '{reformulated_question}'")
             docs = self.retriever.invoke(reformulated_question)
             
@@ -182,24 +166,14 @@ class RAGPipeline:
                 # Le prompt QHSE prend {input} et {context}
                 
                 try:
-                    # Tentative 1 : Chaîne Principale (Azure)
+                    # Chaîne Principale (DeepSeek/OpenAI)
                     response = self.combine_docs_chain.invoke({
                         "input": question,  # Question originale pour la réponse
                         "context": docs
                     })
                 except Exception as e_main:
-                    # Si erreur et si un fallback existe
-                    if self.fallback_docs_chain:
-                        logger.warning(f"⚠️ Échec du LLM Principal ({e_main}). Bascule sur le Fallback (Google)...")
-                        RAG_FALLBACK_COUNT.inc() # Incrément de la métrique
-                        response = self.fallback_docs_chain.invoke({
-                            "input": question,
-                            "context": docs
-                        })
-                        logger.info("✅ Réponse générée par le Fallback (Google).")
-                    else:
-                        # Pas de fallback, on remonte l'erreur
-                        raise e_main
+                    logger.error(f"❌ Erreur du LLM Principal : {e_main}")
+                    raise e_main
             
             # Gestion du format de réponse
             answer = response
@@ -212,7 +186,7 @@ class RAGPipeline:
 
         except Exception as e:
             logger.error(f"❌ Erreur RAG : {e}")
-            return f"Je suis désolé, une erreur est survenue lors du traitement de votre demande : {str(e)}"
+            return "⚠️ Le système est actuellement en maintenance ou rencontre une surcharge temporaire. Veuillez réessayer plus tard."
         
         finally:
             # Enregistrement de la latence

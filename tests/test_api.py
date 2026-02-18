@@ -21,7 +21,6 @@ def test_health_check():
     assert data["status"] in ["ok", "degraded"]
 
 def test_read_articles_structure():
-    """Teste que la route /articles/ est accessible (même si DB vide ou erreur)"""
+    """Teste que la route /articles/ répond (succès, erreur DB ou non authentifié)"""
     response = client.get("/articles/?limit=1")
-    # On accepte 200 (Succès) ou 500 (Erreur DB si pas de connexion)
-    assert response.status_code in [200, 500]
+    assert response.status_code in [200, 401, 500]

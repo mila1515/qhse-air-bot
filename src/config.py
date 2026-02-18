@@ -34,6 +34,15 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 heures (avant: 30 min)
 
+    # Standard OpenAI
+    OPENAI_API_KEY: str | None = None
+    OPENAI_MODEL_NAME: str = "gpt-4o"
+
+    # DeepSeek (Compatible OpenAI)
+    DEEPSEEK_API_KEY: str | None = None
+    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
+    DEEPSEEK_MODEL_NAME: str = "deepseek-chat"
+
     @property
     def DATABASE_URL(self) -> str:
         # Priorité à la variable d'environnement complète si elle existe

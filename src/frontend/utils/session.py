@@ -45,11 +45,17 @@ def init_session_state():
                 if user_resp and user_resp.status_code == 200:
                     st.session_state.user = user_resp.json()
                     # Si on vient de restaurer la session, on peut notifier ou juste continuer
-                else:
-                    # Token invalide ou expiré
+                elif user_resp and user_resp.status_code in [401, 403]:
+                    # Token explicitement invalide ou expiré
                     st.session_state.token = None
                     cookie_manager.delete("access_token")
+                else:
+                    # Erreur technique (API down, Timeout, 500...)
+                    # On ne supprime PAS le cookie pour permettre la reconnexion auto au retour du service
+                    st.session_state.token = None
+                    st.warning("⚠️ Serveur indisponible temporairement. Veuillez rafraîchir la page dans quelques instants.")
             except Exception:
+                # Erreur inattendue dans le bloc try
                 st.session_state.token = None
 
 def save_token(token):

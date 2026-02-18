@@ -101,14 +101,15 @@ class DataLoader:
         for _, row in df_recent.iterrows():
             # Gestion des dates
             date_evt = pd.to_datetime(row['date_event'], errors='coerce')
-            if pd.isna(date_evt): date_evt = None
+            if pd.isna(date_evt):
+                date_evt = None
             
             objects.append(AccidentARIA(
                 date_event=date_evt,
                 commune=str(row.get('commune', ''))[:255],
-                departement=str(row.get('départment', ''))[:50], # typo dans CSV d'origine ?
-                type_accident=str(row.get('type_daccident', ''))[:255],
-                matieres=str(row.get('matières', '')),
+                departement=str(row.get('departement', row.get('départment', '')))[:50],
+                type_accident=str(row.get('type_accident', row.get('type_daccident', '')))[:255],
+                matieres=str(row.get('matieres', row.get('matières', ''))),
                 contenu=str(row.get('contenu', '')),
                 causes=str(row.get('causes_profondes', '')),
                 url=str(row.get('url', '')),

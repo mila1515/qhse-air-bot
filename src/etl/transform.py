@@ -74,8 +74,17 @@ class DataTransformer:
             # Les colonnes ARIA peuvent varier, on essaie de normaliser
             # Exemple de colonnes standard ARIA: "Date de l'événement", "Commune", "Résumé"
             
-            # Normalisation des noms de colonnes (minuscule, sans accent, sans espace)
             df.columns = [c.lower().replace(' ', '_').replace("'", "") for c in df.columns]
+            
+            rename_map = {}
+            if 'départment' in df.columns:
+                rename_map['départment'] = 'departement'
+            if 'type_daccident' in df.columns:
+                rename_map['type_daccident'] = 'type_accident'
+            if 'matières' in df.columns:
+                rename_map['matières'] = 'matieres'
+            if rename_map:
+                df.rename(columns=rename_map, inplace=True)
             
             # Gestion des dates (colonne souvent nommée 'date_de_levenement' ou 'date')
             date_col = next((c for c in df.columns if 'date' in c), None)
@@ -87,7 +96,7 @@ class DataTransformer:
             for col in text_cols:
                 df[col] = df[col].astype(str).str.strip()
             
-            # Normalisation Commune (pour jointure future)
+            # Normalisation Commune 
             if 'commune' in df.columns:
                 df['commune'] = df['commune'].astype(str).str.upper().str.strip()
 
@@ -121,13 +130,9 @@ class DataTransformer:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
         
-        # Normalisation Ville (pour jointure future)
-        if 'city' in df.columns:
-             # L'API renvoie 'city' -> map vers 'ville'
-             df.rename(columns={'city': 'ville'}, inplace=True)
-        
-        if 'ville' in df.columns:
-             df['ville'] = df['ville'].astype(str).str.upper().str.strip()
+        # Normalisation Ville 
+        if 'ville_recherchee' in df.columns:
+            df['ville_recherchee'] = df['ville_recherchee'].astype(str).str.upper().str.strip()
 
         # Ajout niveau de risque (Logique simple basée sur AQI)
         # 0-50: Bon, 51-100: Modéré, 101-150: Mauvais pour sensibles, 150+: Mauvais

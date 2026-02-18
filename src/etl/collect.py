@@ -25,8 +25,8 @@ class DataCollector:
         self.raw_dir.mkdir(parents=True, exist_ok=True)
     
     # =========================================================================
-    # SOURCE 1: CODE DU TRAVAIL NUMÉRIQUE (API CDTN)
-    # Remplaçant de l'API précédente
+    # SOURCE 1: CODE DU TRAVAIL NUMÉRIQUE 
+    # 
     # =========================================================================
     
     def collect_code_travail(self) -> pd.DataFrame:
@@ -134,7 +134,7 @@ class DataCollector:
         
         # URLs de départ pour la recherche de guides
         urls = [
-            f"{base_url}/risques/aeration-assainissement-locaux-travail/ce-qu-il-faut-retenir.html",
+            "https://www.inrs.fr/media.html?refINRS=ED+657",
             f"{base_url}/risques/chimiques/ce-qu-il-faut-retenir.html",
             f"{base_url}/risques/bruit/ce-qu-il-faut-retenir.html",
             f"{base_url}/risques/biologiques/ce-qu-il-faut-retenir.html"

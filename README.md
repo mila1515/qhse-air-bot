@@ -18,7 +18,7 @@ Ce projet centralise des données réglementaires et environnementales pour faci
     *   **Métriques** : Stack Prometheus/Grafana pour surveiller la santé système et métier (ETL, RAG).
     *   **Logs** : Journalisation structurée et sécurisée avec Loguru.
 *   **🧠 Assistant IA Résilient (RAG)** :
-    *   **Multi-Provider** : Azure OpenAI (Principal) avec bascule automatique vers Google Gemini (Secours).
+*   **Multi-Provider** : OpenAI Standard (Principal) avec fallback DeepSeek éventuel.
     *   **Mode Déconnecté** : Embeddings locaux si nécessaire.
 
 ## 🛠️ Démarrage Rapide (Docker)
@@ -47,9 +47,9 @@ docker-compose up -d --build
 Le module d'IA générative répond aux questions en se basant sur la documentation collectée. Il est conçu pour la **haute disponibilité**.
 
 ### Stratégie de Fallback (Résilience)
-1.  **Tentative Principale** : Interrogation du modèle **Azure OpenAI (GPT-4o)**.
-2.  **En cas d'erreur** (Timeout, Panne Azure) : Bascule automatique vers **Google Gemini Pro**.
-3.  **Embeddings** : Utilisation d'un modèle local (`all-MiniLM-L6-v2`) si les APIs d'embedding sont indisponibles.
+1.  **Tentative Principale** : Interrogation du modèle **OpenAI Standard** (si une clé `OPENAI_API_KEY` est configurée).
+2.  **Fallback** : Interrogation du modèle **DeepSeek** si la clé `DEEPSEEK_API_KEY` est configurée.
+3.  **Embeddings** : Utilisation d'**OpenAI Embeddings** (`text-embedding-3-small`) si possible, puis d'un modèle local (`all-MiniLM-L6-v2`) si les APIs d'embedding sont indisponibles.
 
 ### Utilisation (CLI)
 Le module RAG peut être testé directement en ligne de commande :

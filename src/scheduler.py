@@ -24,15 +24,15 @@ def ingestion_job():
     except Exception as e:
         logger.error(f"❌ [SCHEDULER] Erreur lors de l'exécution de l'ingestion RAG : {e}")
 
-# Planification ETL à 21:00
-schedule.every().day.at("21:00").do(etl_job)
+# Planification ETL à 10:00
+schedule.every().day.at("10:00").do(etl_job)
 
-# Planification Ingestion RAG à 22:00
-schedule.every().day.at("22:00").do(ingestion_job)
+# Planification Ingestion RAG à 11:00
+schedule.every().day.at("11:00").do(ingestion_job)
 
 logger.info("⏳ Scheduler démarré.")
-logger.info("   - Pipeline ETL : tous les jours à 21:00")
-logger.info("   - Ingestion RAG : tous les jours à 22:00")
+logger.info("   - Pipeline ETL : tous les jours à 10:00")
+logger.info("   - Ingestion RAG : tous les jours à 11:00")
 
 # Boucle infinie pour maintenir le script en vie
 while True:
