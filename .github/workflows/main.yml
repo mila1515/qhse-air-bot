@@ -122,6 +122,7 @@ jobs:
     name: Staging simulation with Docker Compose
     needs: build-and-scan
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: staging
     steps:
       - uses: actions/checkout@v3
@@ -132,10 +133,15 @@ jobs:
           echo "POSTGRES_PASSWORD=qhse_password" >> .env
           echo "POSTGRES_PORT=5432" >> .env
       - name: Start staging stack
-        run: docker compose -f docker-compose.yml up -d postgres api frontend
+        run: |
+          timeout 600 docker compose -f docker-compose.yml up -d postgres api frontend || {
+            echo "Docker compose up timed out"
+            docker compose -f docker-compose.yml logs || true
+            exit 1
+          }
       - name: Wait for API to be ready
         run: |
-          for i in {1..30}; do
+          for i in {1..12}; do
             if curl -sSf http://localhost:8100/health > /dev/null; then
               exit 0
             fi
@@ -144,7 +150,7 @@ jobs:
           exit 1
       - name: Wait for frontend to be ready
         run: |
-          for i in {1..30}; do
+          for i in {1..12}; do
             if curl -sSf http://localhost:8501/ > /dev/null; then
               exit 0
             fi
