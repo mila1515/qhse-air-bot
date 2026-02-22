@@ -132,6 +132,8 @@ jobs:
           echo "POSTGRES_USER=qhse_user" >> .env
           echo "POSTGRES_PASSWORD=qhse_password" >> .env
           echo "POSTGRES_PORT=5432" >> .env
+          echo "POSTGRES_HOST=postgres" >> .env
+          echo "WAQI_API_TOKEN=dummy_token" >> .env
       - name: Start staging stack
         run: |
           timeout 600 docker compose -f docker-compose.yml up -d postgres api frontend || {
