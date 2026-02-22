@@ -71,7 +71,7 @@ Le module RAG peut être testé directement en ligne de commande :
 
 Le projet surveille la *valeur* de la donnée via **Evidently AI** :
 *   **Data Drift** : Détection des dérives statistiques (ex: changement brutal de la qualité de l'air).
-*   **Automatisation** : Un scheduler lance les tests de qualité chaque nuit à 22h00.
+*   **Automatisation** : Un scheduler dédié ([src/scheduler.py](src/scheduler.py)) déclenche chaque jour le pipeline ETL à **10h00** puis l’ingestion RAG (vectorisation) à **11h00**. Les scripts de monitoring Evidently peuvent être raccordés à cette même fenêtre pour générer régulièrement des rapports de qualité et de dérive.
 
 ---
 
@@ -91,4 +91,4 @@ Le projet inclut une suite de tests unitaires et d'intégration (avec Mocks pour
 pytest
 ```
 
-*Projet développé avec Python 3.12, FastAPI, PostgreSQL et Docker.*
+*Projet développé avec Python 3.11, FastAPI, PostgreSQL et Docker (aligné sur le pipeline GitHub Actions).*
