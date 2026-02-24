@@ -3,6 +3,10 @@ import time
 from langchain_openai import ChatOpenAI
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.retrieval import create_retrieval_chain
+from langchain_core.documents import Document
+from src.db.session import SessionLocal
+from src.db.models import MesureWAQI
+from src.rag.loader.db_exporter import format_waqi
 from src.rag.loader.db_exporter import export_db_to_txt
 from src.rag.loader.document_loader import DocumentLoader
 from src.rag.splitter.text_splitter import DocumentSplitter
@@ -114,6 +118,41 @@ class RAGPipeline:
         self.chain = create_retrieval_chain(self.retriever, self.combine_docs_chain)
         logger.info("✅ Pipeline RAG prêt.")
 
+    def _get_realtime_waqi_doc(self, question: str):
+        """Récupère les données WAQI temps réel si la question concerne la qualité de l'air."""
+        question_lower = question.lower()
+        keywords = ["qualité de l'air", "pollution", "waqi", "aqi", "air quality", "indice", "air"]
+        
+        if not any(k in question_lower for k in keywords):
+            return None
+            
+        db = SessionLocal()
+        try:
+            # Chercher si une ville connue est mentionnée
+            cities = db.query(MesureWAQI.ville).distinct().all()
+            found_city = None
+            
+            # Priorité aux villes exactes
+            for (city_name,) in cities:
+                if city_name.lower() in question_lower:
+                    found_city = city_name
+                    break
+            
+            if found_city:
+                measure = db.query(MesureWAQI).filter(MesureWAQI.ville == found_city).order_by(MesureWAQI.date_collecte.desc()).first()
+                if measure:
+                    # On force l'injection en haut de liste
+                    content = f"--- 🚨 DONNÉES TEMPS RÉEL (Date: {measure.date_collecte}) ---\n" + format_waqi(measure)
+                    logger.info(f"⚡ Injection donnée temps réel pour {found_city}")
+                    return Document(page_content=content, metadata={"source": "realtime_db"})
+                    
+        except Exception as e:
+            logger.error(f"Erreur lors de la récupération WAQI temps réel : {e}")
+        finally:
+            db.close()
+            
+        return None
+
     def reformulate_question(self, question: str) -> str:
         """Reformule la question utilisateur pour optimiser la recherche vectorielle."""
         if not self.llm:
@@ -153,6 +192,13 @@ class RAGPipeline:
             # 2. Récupération des documents (Retrieval) avec la question ORIGINALE
             logger.info(f"🔍 Recherche vectorielle avec : '{reformulated_question}'")
             docs = self.retriever.invoke(reformulated_question)
+            
+            # --- AJOUT: Injection de données temps réel ---
+            realtime_doc = self._get_realtime_waqi_doc(question)
+            if realtime_doc:
+                logger.info(f"⚡ Donnée temps réel injectée en priorité")
+                docs.insert(0, realtime_doc)
+            # ----------------------------------------------
             
             # 3. Sélection du prompt et génération
             if is_summary:

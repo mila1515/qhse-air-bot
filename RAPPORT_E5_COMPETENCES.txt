@@ -1,0 +1,119 @@
+# RAPPORT DE COMPÉTENCES E5 : SURVEILLANCE ET RÉSOLUTION D'INCIDENTS
+**Projet :** QHSE Air Bot  
+**Candidat :** Djamel  
+**Date :** 28 Janvier 2026
+
+---
+
+## 1. Contexte de la Preuve
+Ce rapport valide les compétences du bloc **"Surveiller l'application et résoudre les incidents"** (C20, C21). Il démontre la mise en place d'une architecture de monitoring robuste et la gestion proactive d'un incident critique lié aux dépendances externes (APIs IA).
+
+---
+
+## 2. Surveillance de l'Application (C20)
+
+### 2.1 Architecture de Monitoring
+Pour surveiller **QHSE Air Bot**, j'ai déployé une stack standard de l'industrie conteneurisée via Docker.
+
+*   **Prometheus** : Base de données de séries temporelles qui "pull" (récupère) les métriques toutes les 15 secondes.
+*   **Grafana** : Interface de visualisation connectée à Prometheus pour afficher les tableaux de bord.
+*   **Pushgateway** : Composant intermédiaire permettant à nos scripts batch (ETL, Scrapers) de pousser leurs métriques.
+*   **Evidently AI + Nginx** : Service de monitoring ML (Drift/Quality) placé derrière un **Proxy Nginx** pour gérer les gros volumes de données (Accidents ARIA) et sécuriser les accès.
+
+**Preuve d'Infrastructure :**
+> Voir le fichier [docker-compose.yml](file:///c:\Users\djami\Desktop\devIA\project\qhse-air-bot\docker-compose.yml) (service `evidently` et `nginx`).
+
+### 2.2 Stratégie de Logs (Journalisation)
+J'ai remplacé les `print()` standards par la librairie **Loguru**.
+*   **Avantage :** Logs structurés, niveaux de sévérité (INFO, WARNING, ERROR), et rotation automatique des fichiers.
+*   **Sécurité :** Les logs sont configurés pour ne **jamais** afficher les clés d'API ou les données personnelles (RGPD), se limitant aux métadonnées techniques et aux erreurs.
+
+**Preuve de Code :**
+> Voir [src/monitoring/logger.py](file:///c:\Users\djami\Desktop\devIA\project\qhse-air-bot\src\monitoring\logger.py) pour la configuration centralisée.
+
+### 2.3 Métriques Clés Surveillées
+J'ai défini des métriques "Métier" spécifiques pour valider le bon fonctionnement de l'IA et des données :
+
+1.  **Fraîcheur des Données (ETL) :**
+    *   `etl_last_run_success_timestamp` : Permet de savoir si la base de connaissances est à jour.
+    *   `etl_processed_rows_total` : Volume de documents traités (alerting si volume = 0).
+2.  **Santé du RAG :**
+41→    *   `rag_query_latency` : Temps de réponse (crucial pour l'UX).
+42→    *   `rag_fallback_activation_count` : Nombre de fois où le système a dû basculer sur le LLM de secours (DeepSeek) en cas de problème avec le LLM principal (OpenAI).
+
+**Preuve de Code :**
+> Voir [src/monitoring/metrics.py](file:///c:\Users\djami\Desktop\devIA\project\qhse-air-bot\src\monitoring\metrics.py).
+
+---
+
+## 3. Gestion et Résolution d'Incident (C21)
+
+### 3.1 Scénario de l'Incident : "Panne Majeure du LLM Principal (OpenAI)"
+**Description :** Le mardi 28/01 à 14h00, l'API du LLM principal (OpenAI) ne répond plus (Erreur 503 Service Unavailable) ou les latences dépassent 30 secondes (Timeout).
+**Impact :** Le Chatbot ne peut plus générer de réponses, bloquant les utilisateurs sur le terrain.
+
+### 3.2 Détection
+L'incident est détecté par deux canaux :
+1.  **Monitoring :** Pic d'erreurs `5xx` sur le dashboard Grafana.
+2.  **Logs Applicatifs :** Apparition de warnings `openai.error.ServiceUnavailableError` dans les logs du backend.
+
+### 3.3 Résolution Automatique (Self-Healing)
+Pour garantir la continuité de service (Business Continuity Plan), j'ai implémenté un mécanisme de **Fallback (Bascule Automatique)** au niveau du code.
+
+**Algorithme de Résolution :**
+64→1.  Le système tente d'interroger le modèle principal (OpenAI GPT-4o).
+65→2.  En cas d'exception (Timeout, API Error), le code capture l'erreur (`try/except`).
+66→3.  Le système bascule instantanément vers le fournisseur de secours (**DeepSeek**, via une API compatible OpenAI).
+67→4.  L'utilisateur reçoit sa réponse sans interruption, avec une latence légèrement accrue mais acceptable.
+
+**Preuve Technique (Code du Fallback) :**
+Extrait de [src/rag/pipeline/rag_chain.py](file:///c:\Users\djami\Desktop\devIA\project\qhse-air-bot\src\rag\pipeline\rag_chain.py#L185-L193) :
+
+```python
+try:
+    # Tentative 1 : Chaîne Principale (OpenAI)
+    response = self.combine_docs_chain.invoke({"input": question, "context": docs})
+except Exception as e_main:
+    # Si erreur, bascule sur le Fallback
+    if self.fallback_docs_chain:
+        logger.warning(f"⚠️ Échec du LLM Principal ({e_main}). Bascule sur DeepSeek...")
+        response = self.fallback_docs_chain.invoke({"input": question, "context": docs})
+```
+
+### 3.4 Solution de Repli Ultime (Mode Dégradé)
+Si **OpenAI et DeepSeek** sont indisponibles (scénario catastrophe) ou s'il y a une coupure internet totale :
+*   **Embeddings :** Le système bascule sur un modèle local (`all-MiniLM-L6-v2`) qui ne nécessite pas d'internet. Les réponses peuvent toujours être générées à partir du contexte vectorisé localement (mode strictement documentaire).
+*   **Preuve :** Voir [src/rag/embeddings/embedding_provider.py](file:///c:\Users\djami\Desktop\devIA\project\qhse-air-bot\src\rag\embeddings\embedding_provider.py) (logique `try OpenAI Embeddings -> except Local`).
+
+### 3.5 Post-Mortem et Amélioration Continue
+Une fois l'incident clos :
+90→1.  **Analyse :** Vérifier pourquoi le LLM principal (OpenAI) a échoué (quota dépassé ? panne régionale ? problème de configuration réseau ?), en s'appuyant sur les dashboards du fournisseur.
+91→2.  **Action :** Si c'est un problème de quota, ajuster les limites ou la politique d'appel (batching, réduction de contexte) pour réduire la consommation.
+92→3.  **Optimisation :** Ajuster le `request_timeout` dans la configuration pour basculer plus vite vers le fallback DeepSeek (ex: passer de 30s à 10s).
+
+### 3.6 Incident Technique Résolu : "Payload Too Large" (Erreur 413)
+**Contexte :** L'envoi des données d'accidents (ARIA) vers le service de monitoring Evidently échouait systématiquement.
+**Diagnostic :** Les logs affichaient une erreur `413 Request Entity Too Large`. Le dataset complet des accidents (plusieurs Mo) dépassait la limite par défaut du serveur web.
+**Résolution Appliquée :**
+1.  **Infrastructure (Nginx)** : Ajout d'un reverse-proxy Nginx devant Evidently avec la directive `client_max_body_size 200M` pour autoriser les gros fichiers.
+    > Voir [src/data_monitoring/nginx.conf](file:///c:\Users\djami\Desktop\devIA\project\qhse-air-bot\src\data_monitoring\nginx.conf).
+2.  **Optimisation Code (Sampling)** : Implémentation d'un échantillonnage intelligent dans les scripts de monitoring. Si le dataset dépasse 2000 lignes, le script sélectionne un échantillon représentatif pour l'analyse de drift, réduisant la charge réseau de 90%.
+    > Voir [src/data_monitoring/drift/aria_drift.py](file:///c:\Users\djami\Desktop\devIA\project\qhse-air-bot\src\data_monitoring\drift\aria_drift.py).
+3.  **Résilience (Fallback)** : Ajout d'une sécurité `try/except`. Si le serveur Evidently est injoignable ou rejette les données, le rapport est généré et sauvegardé localement (HTML) pour ne pas perdre l'analyse.
+
+### 3.7 Autre Incident Résolu : Échec Critique du Pipeline CI/CD
+**Contexte :** Le pipeline d'intégration continue (CI/CD) garantit la qualité du code avant déploiement.
+**Problème :** Le pipeline GitHub Actions échouait systématiquement, bloquant les mises à jour.
+**Diagnostic (Logs) :**
+1.  **Obsolescence :** Avertissement "FutureWarning" lié à Python 3.10 et aux librairies Google Cloud (fin de support imminente).
+2.  **Erreur de Test :** "ModuleNotFoundError" lors de la collecte des tests par `pytest`, car le dossier `src/` n'était pas reconnu.
+**Résolution Appliquée :**
+1.  **Mise à niveau :** Modification du fichier de workflow pour utiliser **Python 3.11** (standard actuel).
+2.  **Configuration Environnement :** Ajout de la variable `PYTHONPATH: .` dans le job de test pour inclure la racine du projet.
+**Preuve :**
+> Voir les correctifs dans [.github/workflows/main.yml](file:///c:\Users\djami\Desktop\devIA\project\qhse-air-bot\.github\workflows\main.yml).
+
+---
+
+## 4. Conclusion
+L'architecture de QHSE Air Bot intègre la **résilience par design**. Le monitoring permet de *voir* le problème, et le code est conçu pour *réagir* automatiquement, transformant une panne critique en simple avertissement dans les logs.
