@@ -9,6 +9,7 @@ from src.etl.collect import DataCollector
 from src.etl.transform import DataTransformer
 from src.etl.load import DataLoader
 from src.monitoring.logger import logger
+from src.monitoring.metrics import push_metrics, record_etl_success
 from src.data_monitoring.drift.waqi_drift import run_waqi_drift
 from src.data_monitoring.drift.aria_drift import run_aria_drift
 from src.data_monitoring.quality.waqi_quality import run_waqi_quality
@@ -60,6 +61,7 @@ def run_pipeline():
         loader.load_waqi()
         loader.load_aria()
         loader.close()
+        record_etl_success()
         logger.info("✅ [ETL] CHARGEMENT terminé.")
     except Exception as e:
         logger.error(f"❌ [ETL] Échec CHARGEMENT : {e}")
@@ -87,6 +89,9 @@ def run_pipeline():
 
     duration = time.time() - start_time
     logger.info(f"🎉 Pipeline complet terminé avec succès en {duration:.2f} secondes.")
+    
+    # Envoi des métriques à Prometheus via Pushgateway
+    push_metrics()
 
 if __name__ == "__main__":
     run_pipeline()
