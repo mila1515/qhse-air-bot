@@ -127,23 +127,35 @@ L’intégration se fait via le service `src/frontend/services/chat_client.py`.
 ### A. Métriques choisies
 
 - **Performance RAG** :
-  - `rag_query_latency_seconds` : Temps de réponse moyen.
-  - `rag_fallback_activation_total` : Nombre de bascules vers le LLM de secours.
+  - `rag_query_latency_seconds` : Temps de réponse moyen du RAG.
+  - `rag_fallback_activation_total` : Nombre de bascules vers le LLM de secours (OpenAI -> Local/DeepSeek).
+  - `db_connection_status` : Disponibilité de la base PostgreSQL (1=UP, 0=DOWN).
 - **Qualité des données** :
-  - `etl_last_run_success_timestamp` : Fraîcheur des données WAQI.
-  - Drift : Surveillance de la distribution des scores AQI via Evidently.
+  - `etl_last_run_success_timestamp` : Fraîcheur des données WAQI (Timestamp Unix).
+  - `air_quality_index_value` : Dernière valeur AQI collectée par ville.
 
-### B. Outils utilisés
+### B. Outils et Implémentation
 
-- **Prometheus** : Collecte les métriques exposées par l'API.
-- **Grafana** (simulé/prévu) : Visualisation des tableaux de bord.
-- **Evidently** : Rapports de qualité de données et de dérive (Data Drift).
+- **Prometheus** :
+  - Collecte les métriques exposées sur l'endpoint `/metrics` de l'API.
+  - Intervalle de scraping configuré à 5s dans `prometheus.yml`.
+
+- **Grafana (Visualisation)** :
+  - **Provisioning Automatique** : Configuration "Zero-Touch" via Docker volumes.
+    - `datasources.yml` : Connexion automatique à Prometheus.
+    - `dashboards.yml` : Chargement automatique du tableau de bord "QHSE Monitoring".
+  - **Dashboard QHSE** : Visualisation temps réel de la latence RAG, des erreurs et de la qualité de l'air.
+
+- **Evidently AI (Data Drift & Quality)** :
+  - **Rapports (Reports)** : Génération automatique de rapports HTML (Drift & Quality) à chaque exécution du pipeline ETL.
+  - **Dashboard Projet** : Interface centralisée pour suivre l'évolution de la qualité des données (WAQI / ARIA) dans le temps.
+  - **Architecture** : Service Docker dédié (`evidently`) recevant les snapshots des scripts Python via l'API interne.
 
 ### C. Architecture monitoring
 
 Les métriques sont calculées à deux niveaux :
-1. **Applicatif** : Middleware FastAPI pour les codes HTTP et latences.
-2. **Métier** : Le pipeline RAG met à jour des `Gauge` et `Counter` Prometheus à chaque requête.
+1.  **Applicatif** : Middleware FastAPI pour les codes HTTP et latences.
+2.  **Métier** : Le pipeline RAG met à jour des `Gauge` et `Counter` Prometheus à chaque requête.
 
 ### D. Tests environnement bac à sable
 
