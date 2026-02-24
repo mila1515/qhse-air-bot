@@ -39,16 +39,16 @@ AIR_QUALITY_INDEX = Gauge(
 )
 
 # 4. Métriques RAG (Performance & Fallback)
+# Ces métriques vivent dans l'API (processus long), elles doivent utiliser le registre par défaut
+# pour être exposées sur /metrics (et non le registre custom de l'ETL)
 RAG_QUERY_LATENCY = Gauge(
     'rag_query_latency_seconds',
-    'Temps de réponse du RAG en secondes',
-    registry=registry
+    'Temps de réponse du RAG en secondes'
 )
 
 RAG_FALLBACK_COUNT = Counter(
     'rag_fallback_activation_total',
-    'Nombre de bascules sur le LLM de secours',
-    registry=registry
+    'Nombre de bascules sur le LLM de secours'
 )
 
 def push_metrics():
@@ -65,7 +65,7 @@ def push_metrics():
         logger.info(f"📈 Métriques poussées vers Pushgateway ({gateway_url})")
     except Exception as e:
         # En local sans docker, ça échouera souvent, on log juste un warning
-        logger.warning(f"⚠️ Impossible de pousser les métriques vers Pushgateway: {e}")
+        logger.warning(f"⚠️ Impossible de pousser les métriques vers Pushgateway ({gateway_url}): {e}")
 
 def record_etl_success():
     """Enregistre le succès de l'ETL"""
