@@ -60,13 +60,17 @@ Grafana permet de créer des tableaux de bord visuels à partir des données de 
 *   **URL** : [http://localhost:3000](http://localhost:3000)
 *   **Identifiants par défaut** : `admin` / `admin`
 
-### 🚀 Guide Rapide
-1.  **Connexion** : Connectez-vous avec les identifiants ci-dessus.
-2.  **Data Source** : Une source de données "Prometheus" doit être configurée (URL: `http://prometheus:9090`).
-3.  **Dashboards** : Vous pouvez créer des panneaux pour visualiser :
-    *   *Taux d'erreur API* (Graphique des codes 500).
-    *   *Fraîcheur des données* (Jauge basée sur `etl_last_run_success_timestamp`).
-    *   *Qualité de l'air* (Carte ou tableau basé sur `air_quality_index_value`).
+### 🚀 Configuration Automatique ("Zero-Touch")
+Le déploiement Grafana est entièrement automatisé via Docker :
+1.  **Provisioning** : Les fichiers de configuration sont montés dynamiquement dans le conteneur.
+    *   `grafana/provisioning/datasources/datasource.yml` : Connecte automatiquement Prometheus.
+    *   `grafana/provisioning/dashboards/dashboard.yml` : Charge automatiquement les tableaux de bord.
+2.  **Dashboards Prêts à l'emploi** :
+    *   **QHSE Monitoring Dashboard** : Un tableau de bord complet est disponible dès le démarrage.
+        *   *Statut BDD* : Indicateur vert/rouge de la connexion PostgreSQL.
+        *   *Latence RAG* : Graphique temporel de la vitesse de réponse de l'IA.
+        *   *Qualité Air* : Courbe d'évolution de l'indice AQI.
+        *   *Santé ETL* : Date de la dernière exécution réussie.
 
 ---
 
@@ -74,7 +78,7 @@ Grafana permet de créer des tableaux de bord visuels à partir des données de 
 
 Evidently est différent de Prometheus. Il ne regarde pas si le serveur "répond", mais si les **données** ont changé de nature (Data Drift). C'est crucial pour l'IA et les statistiques.
 
-*   **URL** : [http://localhost:8101](http://localhost:8101)
+*   **URL** : [http://localhost:8101](http://localhost:8101) (Proxy Nginx)
 *   **Scripts** : `src/data_monitoring/`
 
 ### 🧠 C'est quoi le "Data Drift" ?
@@ -89,8 +93,10 @@ Le Data Drift se produit quand les données actuelles ne ressemblent plus aux do
 
 ### 📈 Comment lire les résultats ?
 1.  Allez sur l'interface Evidently ([http://localhost:8101](http://localhost:8101)).
-2.  Ouvrez le projet **"ARIA Monitoring"** ou **"WAQI Monitoring"**.
-3.  Cliquez sur le dernier rapport généré.
+2.  **Projets** : Sélectionnez **"ARIA Monitoring"** ou **"WAQI Monitoring"**.
+3.  **Rapports (Reports)** :
+    *   Cliquez sur l'onglet **"Reports"** (le Dashboard d'accueil peut être vide si aucun panneau n'est configuré).
+    *   Cliquez sur **"View"** pour ouvrir un rapport détaillé.
 4.  **Quoi regarder ?**
     *   **Dataset Drift** : Si "Detected", cela signifie que globalement, les données ont changé.
     *   **Column Drift** : Regardez quelles colonnes spécifiques ont dérivé.
