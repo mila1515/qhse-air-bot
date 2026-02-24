@@ -2,6 +2,7 @@ import os
 import time
 from langchain_openai import ChatOpenAI
 from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains.retrieval import create_retrieval_chain
 from langchain_core.documents import Document
 from src.db.session import SessionLocal
 from src.db.models import MesureWAQI
