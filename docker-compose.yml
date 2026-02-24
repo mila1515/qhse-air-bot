@@ -35,6 +35,11 @@ services:
       - ./logs:/app/logs
       - ./src:/app/src
     command: streamlit run src/frontend/app.py --server.port 8501 --server.address 0.0.0.0
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - qhse_net
 
@@ -55,6 +60,8 @@ services:
       - ./data:/app/data
       - ./src:/app/src
     command: python src/scheduler.py
+    healthcheck:
+      disable: true
     networks:
       - qhse_net
 
