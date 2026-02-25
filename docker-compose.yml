@@ -52,9 +52,11 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - SERVICE_NAME=scheduler
       - EVIDENTLY_SERVICE_URL=http://qhse_evidently_proxy:80
+      - PUSHGATEWAY_URL=qhse_pushgateway:9091
     depends_on:
       - postgres
       - evidently
+      - pushgateway
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
