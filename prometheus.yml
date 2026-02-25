@@ -5,10 +5,10 @@ scrape_configs:
   - job_name: 'qhse-api'
     scrape_interval: 5s
     static_configs:
-      - targets: ['api:8000']  # Communication interne Docker
+      - targets: ['qhse_api:8000']  # Communication interne Docker
 
   - job_name: 'pushgateway'
     scrape_interval: 5s
     honor_labels: true
     static_configs:
-      - targets: ['pushgateway:9091']
+      - targets: ['qhse_pushgateway:9091']
