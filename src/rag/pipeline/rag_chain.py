@@ -67,13 +67,14 @@ class RAGPipeline:
         openai_api_key = os.getenv("OPENAI_API_KEY")
         deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
         
-        self.llm = None
+        self.llm_primary = None
         self.llm_fallback = None
         
+        # 1. Configuration OpenAI (Priorité 1)
         if openai_api_key:
             try:
                 logger.info("🔷 Initialisation LLM Principal : OpenAI Standard")
-                self.llm = ChatOpenAI(
+                self.llm_primary = ChatOpenAI(
                     model=os.getenv("OPENAI_MODEL_NAME", "gpt-4o"),
                     api_key=openai_api_key,
                     temperature=0
@@ -82,22 +83,33 @@ class RAGPipeline:
             except Exception as e:
                 logger.warning(f"⚠️ Erreur init OpenAI Standard : {e}")
         
-        if not self.llm and deepseek_api_key:
+        # 2. Configuration DeepSeek (Priorité 2 ou Fallback)
+        if deepseek_api_key:
             try:
-                logger.info("🔷 Initialisation LLM Secondaire : DeepSeek (via OpenAI API)")
-                self.llm = ChatOpenAI(
+                llm_deepseek = ChatOpenAI(
                     model=os.getenv("DEEPSEEK_MODEL_NAME", "deepseek-chat"),
                     api_key=deepseek_api_key,
                     base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
                     temperature=0
                 )
-                logger.info("✅ LLM Secondaire (DeepSeek) initialisé.")
+                
+                if self.llm_primary is None:
+                    logger.info("🔷 Initialisation LLM Principal : DeepSeek")
+                    self.llm_primary = llm_deepseek
+                else:
+                    logger.info("🛡️ Initialisation LLM Fallback : DeepSeek")
+                    self.llm_fallback = llm_deepseek
+                    
+                logger.info("✅ LLM DeepSeek initialisé.")
             except Exception as e:
                 logger.warning(f"⚠️ Erreur init DeepSeek : {e}")
         
-        if not self.llm:
+        if not self.llm_primary:
             logger.error("❌ Aucune configuration LLM valide (OpenAI ou DeepSeek) trouvée.")
             raise ValueError("Configuration LLM manquante.")
+            
+        # Compatibilité ascendante
+        self.llm = self.llm_primary
 
         logger.info("🔗 Initialisation du pipeline RAG...")
         
@@ -111,6 +123,10 @@ class RAGPipeline:
         
         # Chains
         self.combine_docs_chain = create_stuff_documents_chain(self.llm, prompt)
+        
+        if self.llm_fallback:
+            self.fallback_docs_chain = create_stuff_documents_chain(self.llm_fallback, prompt)
+            logger.info("✅ Chaîne de fallback initialisée.")
         
         self.summary_chain = create_stuff_documents_chain(self.llm, summary_prompt)
         
@@ -219,7 +235,21 @@ class RAGPipeline:
                     })
                 except Exception as e_main:
                     logger.error(f"❌ Erreur du LLM Principal : {e_main}")
-                    raise e_main
+                    
+                    if self.fallback_docs_chain:
+                        logger.warning("🛡️ Bascule vers le LLM de secours (Fallback)...")
+                        RAG_FALLBACK_COUNT.inc()
+                        try:
+                            response = self.fallback_docs_chain.invoke({
+                                "input": question,
+                                "context": docs
+                            })
+                            logger.info("✅ Réponse générée par le LLM de secours.")
+                        except Exception as e_fallback:
+                            logger.error(f"❌ Erreur du LLM de secours : {e_fallback}")
+                            raise e_fallback # Si le fallback échoue aussi, on remonte l'erreur
+                    else:
+                        raise e_main
             
             # Gestion du format de réponse
             answer = response

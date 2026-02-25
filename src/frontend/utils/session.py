@@ -42,20 +42,25 @@ def init_session_state():
             from src.frontend.services import auth_client
             try:
                 user_resp = auth_client.get_current_user()
-                if user_resp and user_resp.status_code == 200:
+                if user_resp is not None and user_resp.status_code == 200:
                     st.session_state.user = user_resp.json()
                     # Si on vient de restaurer la session, on peut notifier ou juste continuer
-                elif user_resp and user_resp.status_code in [401, 403]:
-                    # Token explicitement invalide ou expiré
+                elif user_resp is not None and user_resp.status_code in [401, 403, 422]:
+                    # Token explicitement invalide ou expiré (ou malformé 422)
                     st.session_state.token = None
                     cookie_manager.delete("access_token")
+                    # Force rerun pour nettoyer l'interface
+                    st.rerun()
                 else:
-                    # Erreur technique (API down, Timeout, 500...)
+                    # Erreur technique (API down, Timeout, 500...)     
                     # On ne supprime PAS le cookie pour permettre la reconnexion auto au retour du service
                     st.session_state.token = None
-                    st.warning("⚠️ Serveur indisponible temporairement. Veuillez rafraîchir la page dans quelques instants.")
-            except Exception:
+                    error_msg = f"Code: {user_resp.status_code}" if user_resp is not None else "Pas de réponse"
+                    print(f"DEBUG SESSION: Erreur récupération user. {error_msg}")
+                    st.warning(f"⚠️ Serveur indisponible temporairement ({error_msg}). Veuillez rafraîchir la page dans quelques instants.")
+            except Exception as e:
                 # Erreur inattendue dans le bloc try
+                print(f"DEBUG SESSION: Exception inattendue: {e}")
                 st.session_state.token = None
 
 def save_token(token):

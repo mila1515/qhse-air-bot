@@ -34,4 +34,5 @@ def get_current_user():
         response = requests.get(f"{API_URL}/auth/me", headers=get_api_headers())
         return response
     except requests.exceptions.RequestException as e:
+        print(f"DEBUG AUTH: Erreur get_current_user: {e}")
         return None
