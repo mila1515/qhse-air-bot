@@ -57,15 +57,36 @@ def render_login():
             margin-top: 0;
         }
 
-        /* Style des inputs */
+        /* --- FIX: Boutons Radio (Navigation) en BLEU --- */
+        div[role="radiogroup"] label div[data-testid="stMarkdownContainer"] p {
+            color: #0277bd !important; /* Bleu demandé */
+            font-weight: 700 !important;
+            font-size: 1.1rem !important;
+        }
+        /* Fallback pour structure différente */
+        div[role="radiogroup"] p {
+            color: #0277bd !important;
+        }
+
+        /* --- FIX: Champs de saisie (Inputs) --- */
+        /* Force le fond blanc et le texte noir */
         .stTextInput > div > div > input {
+            background-color: #ffffff !important; /* Fond Blanc */
+            color: #000000 !important; /* Texte Noir */
             border-radius: 6px;
             border: 1px solid #cfd8dc;
             padding: 0.5rem 1rem;
         }
         .stTextInput > div > div > input:focus {
-            border-color: #81c784;
-            box-shadow: 0 0 0 1px #81c784;
+            border-color: #0277bd !important; /* Bordure Bleue au focus */
+            box-shadow: 0 0 0 1px #0277bd !important;
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+        /* Labels des inputs (Email, Password...) en Bleu foncé pour lisibilité */
+        .stTextInput label p {
+            color: #01579b !important;
+            font-weight: 600 !important;
         }
 
         /* Boutons */

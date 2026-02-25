@@ -91,6 +91,21 @@ def apply_global_styles():
             color: #4DB6AC !important;
             background-color: #E0F2F1 !important;
         }
+
+        /* --- Global Input Styles (Fix visibility issues) --- */
+        /* Force fond blanc et texte noir partout (Profile, Login, etc.) */
+        .stTextInput input {
+            background-color: #ffffff !important;
+            color: #102027 !important; /* Texte Noir/Bleu Nuit */
+            border: 1px solid #cfd8dc !important;
+        }
+        .stTextInput input:focus {
+             border-color: #0277bd !important;
+             box-shadow: 0 0 0 1px #0277bd !important;
+        }
+        .stTextInput input::placeholder {
+            color: #90a4ae !important; /* Placeholder gris visible */
+        }
         
     </style>
     """, unsafe_allow_html=True)
