@@ -27,7 +27,13 @@ def apply_global_styles():
 
         html, body, [class*="css"] {
             font-family: 'Inter', sans-serif;
-            color: #37474f;
+            color: #102027 !important; /* Force Dark Text globally */
+        }
+
+        /* --- Text Visibility Fix (Force Dark Text on White Background) --- */
+        /* Targets headers, paragraphs, labels to ensure they are visible even if Streamlit is in Dark Mode */
+        h1, h2, h3, h4, h5, h6, p, li, label, .stMarkdown, .stText, [data-testid="stMarkdownContainer"] p {
+            color: #102027 !important;
         }
 
         /* --- Global Background --- */
@@ -71,6 +77,11 @@ def apply_global_styles():
             font-weight: 600 !important;
             box-shadow: 0 4px 6px rgba(16, 32, 39, 0.3) !important;
             transition: all 0.2s ease-in-out !important;
+        }
+        /* Force text inside primary button to be white (overriding global p style) */
+        div.stButton > button[kind="primary"] p, 
+        div.stButton > button[kind="primary"] div {
+             color: white !important;
         }
         div.stButton > button[kind="primary"]:hover {
             background-color: #37474f !important;
