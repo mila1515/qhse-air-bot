@@ -68,17 +68,32 @@ def apply_global_styles():
         }
 
         /* --- Buttons --- */
-        /* Primary (Dark Navy #102027) */
+        /* Target ALL buttons first to ensure a baseline */
+        div.stButton > button {
+            background-color: #FFFFFF !important; /* Default to White */
+            color: #102027 !important; /* Default to Dark Text */
+            border: 1px solid #cfd8dc !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            transition: all 0.2s ease-in-out !important;
+        }
+        div.stButton > button:hover {
+            border-color: #4DB6AC !important;
+            color: #4DB6AC !important;
+            background-color: #E0F2F1 !important;
+        }
+        div.stButton > button p {
+            color: #102027 !important; /* Ensure text inside is dark by default */
+        }
+
+        /* Primary (Dark Navy #102027) - Specific Override */
         div.stButton > button[kind="primary"] {
             background-color: #102027 !important; 
             color: white !important;
             border: none !important;
-            border-radius: 8px !important;
-            font-weight: 600 !important;
             box-shadow: 0 4px 6px rgba(16, 32, 39, 0.3) !important;
-            transition: all 0.2s ease-in-out !important;
         }
-        /* Force text inside primary button to be white (overriding global p style) */
+        /* Force text inside primary button to be white */
         div.stButton > button[kind="primary"] p, 
         div.stButton > button[kind="primary"] div {
              color: white !important;
@@ -87,15 +102,17 @@ def apply_global_styles():
             background-color: #37474f !important;
             box-shadow: 0 6px 12px rgba(55, 71, 79, 0.4) !important;
             transform: translateY(-1px);
+            color: white !important; /* Keep text white on hover */
+        }
+        div.stButton > button[kind="primary"]:hover p {
+            color: white !important;
         }
 
-        /* Secondary (Standard) */
+        /* Secondary (Standard) - Redundant if we style base button, but kept for specificity */
         div.stButton > button[kind="secondary"] {
             background-color: white !important;
             color: #102027 !important;
             border: 1px solid #102027 !important;
-            border-radius: 8px !important;
-            transition: all 0.2s ease-in-out !important;
         }
         div.stButton > button[kind="secondary"]:hover {
             border-color: #4DB6AC !important;
@@ -105,17 +122,25 @@ def apply_global_styles():
 
         /* --- Global Input Styles (Fix visibility issues) --- */
         /* Force fond blanc et texte noir partout (Profile, Login, etc.) */
-        .stTextInput input {
+        /* We use a very specific selector to override Streamlit defaults */
+        .stTextInput input, .stTextInput > div > div > input {
             background-color: #ffffff !important;
             color: #102027 !important; /* Texte Noir/Bleu Nuit */
             border: 1px solid #cfd8dc !important;
+            caret-color: #102027 !important; /* Cursor color */
         }
-        .stTextInput input:focus {
+        .stTextInput input:focus, .stTextInput > div > div > input:focus {
              border-color: #0277bd !important;
              box-shadow: 0 0 0 1px #0277bd !important;
         }
         .stTextInput input::placeholder {
             color: #90a4ae !important; /* Placeholder gris visible */
+            opacity: 1 !important;
+        }
+        /* Fix label color for inputs */
+        .stTextInput label, .stTextInput label p {
+            color: #102027 !important;
+            font-weight: 600 !important;
         }
         
     </style>
