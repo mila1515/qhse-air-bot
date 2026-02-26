@@ -25,6 +25,7 @@ def apply_global_styles():
         /* Import Font */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+        /* --- GLOBAL THEME FORCE (Light Mode) --- */
         html, body, [class*="css"] {
             font-family: 'Inter', sans-serif;
             color: #102027 !important; /* Force Dark Text globally */
@@ -67,62 +68,101 @@ def apply_global_styles():
             max-width: 1200px;
         }
 
-        /* --- Buttons --- */
-        /* Target ALL buttons first to ensure a baseline */
-        div.stButton > button {
+        /* --- Buttons (NUCLEAR OPTION: NO BLACK BACKGROUNDS EVER) --- */
+        /* Target ALL buttons generic to ensure a baseline */
+        div.stButton > button, button {
             background-color: #FFFFFF !important; /* Default to White */
             color: #102027 !important; /* Default to Dark Text */
             border: 1px solid #cfd8dc !important;
             border-radius: 8px !important;
             font-weight: 600 !important;
             transition: all 0.2s ease-in-out !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
         }
-        div.stButton > button:hover {
+        
+        /* Hover State */
+        div.stButton > button:hover, button:hover {
             border-color: #4DB6AC !important;
             color: #4DB6AC !important;
-            background-color: #E0F2F1 !important;
+            background-color: #E0F2F1 !important; /* Light Teal Tint */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
         }
-        div.stButton > button p {
-            color: #102027 !important; /* Ensure text inside is dark by default */
+        
+        /* Active/Focus State (Clicking) - CRITICAL FIX for "Black Background" */
+        div.stButton > button:active, button:active,
+        div.stButton > button:focus:not(:active), button:focus:not(:active) {
+            background-color: #FFFFFF !important;
+            color: #00897B !important;
+            border-color: #00897B !important;
+            box-shadow: 0 0 0 2px rgba(0, 137, 123, 0.2) !important;
+            outline: none !important;
         }
 
-        /* Primary (Teal/Mint Theme) - Replaces Dark Navy to avoid "Black" look */
+        /* Text inside buttons */
+        div.stButton > button p {
+            color: #102027 !important; 
+        }
+        div.stButton > button:hover p {
+            color: #4DB6AC !important;
+        }
+
+        /* --- Primary Buttons (Teal/Mint Theme) --- */
         div.stButton > button[kind="primary"] {
-            background-color: #00897B !important; /* Teal 600 - Visible & Branded */
+            background-color: #00897B !important; /* Teal 600 */
             color: white !important;
-            border: none !important;
+            border: 1px solid #00897B !important;
             box-shadow: 0 4px 6px rgba(0, 137, 123, 0.3) !important;
         }
-        /* Force text inside primary button to be white */
+        
+        /* Primary Text */
         div.stButton > button[kind="primary"] p, 
         div.stButton > button[kind="primary"] div {
              color: white !important;
         }
+        
+        /* Primary Hover */
         div.stButton > button[kind="primary"]:hover {
             background-color: #00796B !important; /* Teal 700 */
+            border-color: #00796B !important;
             box-shadow: 0 6px 12px rgba(0, 121, 107, 0.4) !important;
             transform: translateY(-1px);
-            color: white !important; /* Keep text white on hover */
+            color: white !important; 
         }
         div.stButton > button[kind="primary"]:hover p {
             color: white !important;
         }
 
-        /* Secondary (Standard) - Redundant if we style base button, but kept for specificity */
+        /* Primary Active/Focus - Ensure it stays Teal, NOT Black */
+        div.stButton > button[kind="primary"]:active,
+        div.stButton > button[kind="primary"]:focus:not(:active) {
+            background-color: #00695C !important; /* Teal 800 */
+            border-color: #00695C !important;
+            color: white !important;
+            box-shadow: 0 0 0 3px rgba(0, 137, 123, 0.4) !important;
+        }
+
+        /* --- Secondary Buttons (Explicitly White) --- */
         div.stButton > button[kind="secondary"] {
             background-color: white !important;
-            color: #102027 !important;
-            border: 1px solid #cfd8dc !important;
+            color: #0277bd !important; /* Light Blue Text */
+            border: 1px solid #b3e5fc !important;
+        }
+        div.stButton > button[kind="secondary"] p {
+            color: #0277bd !important;
         }
         div.stButton > button[kind="secondary"]:hover {
-            border-color: #4DB6AC !important;
-            color: #4DB6AC !important;
-            background-color: #E0F2F1 !important;
+            background-color: #e1f5fe !important; /* Very Light Blue */
+            border-color: #0277bd !important;
+        }
+        div.stButton > button[kind="secondary"]:active,
+        div.stButton > button[kind="secondary"]:focus:not(:active) {
+            background-color: #b3e5fc !important;
+            color: #01579b !important;
+            box-shadow: 0 0 0 2px rgba(3, 169, 244, 0.3) !important;
         }
 
         /* --- Global Input Styles (Fix visibility issues) --- */
         /* Force fond blanc et texte noir partout (Profile, Login, etc.) */
-        /* We use a very specific selector to override Streamlit defaults */
         .stTextInput input, 
         .stTextInput > div > div > input,
         .stTextArea textarea,
@@ -131,20 +171,29 @@ def apply_global_styles():
             color: #102027 !important; /* Texte Noir/Bleu Nuit */
             border: 1px solid #cfd8dc !important;
             caret-color: #102027 !important; /* Cursor color */
+            border-radius: 6px !important;
         }
+        
+        /* Focus state for inputs */
         .stTextInput input:focus, 
         .stTextInput > div > div > input:focus,
-        .stTextArea textarea:focus {
+        .stTextArea textarea:focus,
+        .stSelectbox > div[data-baseweb="select"] > div:focus-within {
              border-color: #00897B !important;
              box-shadow: 0 0 0 1px #00897B !important;
+             background-color: #ffffff !important;
+             color: #102027 !important;
         }
+
+        /* Placeholder Visibility */
         .stTextInput input::placeholder,
         .stTextArea textarea::placeholder {
             color: #90a4ae !important; /* Placeholder gris visible */
             opacity: 1 !important;
             -webkit-text-fill-color: #90a4ae !important;
         }
-        /* Fix label color for inputs */
+        
+        /* Label Colors */
         .stTextInput label, .stTextInput label p, 
         .stTextArea label, .stTextArea label p,
         .stSelectbox label, .stSelectbox label p {
@@ -152,6 +201,43 @@ def apply_global_styles():
             font-weight: 600 !important;
         }
         
+        /* --- Login Specific Global Styles --- */
+        /* Card Effect */
+        .auth-card {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #f0f2f6;
+            margin-top: 2rem;
+        }
+        .auth-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #102027 !important;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: 2rem;
+            margin-top: 0;
+        }
+
+        /* --- Radio Button (Login Toggle) Fix --- */
+        /* Force Text Color */
+        div[role="radiogroup"] label div[data-testid="stMarkdownContainer"] p {
+            color: #0277bd !important; /* Blue for visibility */
+            font-weight: 700 !important;
+            font-size: 1.1rem !important;
+        }
+        div[role="radiogroup"] p {
+             color: #0277bd !important;
+        }
+        /* Center Radio Group */
+        div.stRadio > div[role="radiogroup"] {
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
     </style>
     """, unsafe_allow_html=True)
 
