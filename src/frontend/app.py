@@ -86,12 +86,12 @@ def apply_global_styles():
             color: #102027 !important; /* Ensure text inside is dark by default */
         }
 
-        /* Primary (Dark Navy #102027) - Specific Override */
+        /* Primary (Teal/Mint Theme) - Replaces Dark Navy to avoid "Black" look */
         div.stButton > button[kind="primary"] {
-            background-color: #102027 !important; 
+            background-color: #00897B !important; /* Teal 600 - Visible & Branded */
             color: white !important;
             border: none !important;
-            box-shadow: 0 4px 6px rgba(16, 32, 39, 0.3) !important;
+            box-shadow: 0 4px 6px rgba(0, 137, 123, 0.3) !important;
         }
         /* Force text inside primary button to be white */
         div.stButton > button[kind="primary"] p, 
@@ -99,8 +99,8 @@ def apply_global_styles():
              color: white !important;
         }
         div.stButton > button[kind="primary"]:hover {
-            background-color: #37474f !important;
-            box-shadow: 0 6px 12px rgba(55, 71, 79, 0.4) !important;
+            background-color: #00796B !important; /* Teal 700 */
+            box-shadow: 0 6px 12px rgba(0, 121, 107, 0.4) !important;
             transform: translateY(-1px);
             color: white !important; /* Keep text white on hover */
         }
@@ -112,7 +112,7 @@ def apply_global_styles():
         div.stButton > button[kind="secondary"] {
             background-color: white !important;
             color: #102027 !important;
-            border: 1px solid #102027 !important;
+            border: 1px solid #cfd8dc !important;
         }
         div.stButton > button[kind="secondary"]:hover {
             border-color: #4DB6AC !important;
@@ -123,22 +123,31 @@ def apply_global_styles():
         /* --- Global Input Styles (Fix visibility issues) --- */
         /* Force fond blanc et texte noir partout (Profile, Login, etc.) */
         /* We use a very specific selector to override Streamlit defaults */
-        .stTextInput input, .stTextInput > div > div > input {
+        .stTextInput input, 
+        .stTextInput > div > div > input,
+        .stTextArea textarea,
+        .stSelectbox > div > div > div {
             background-color: #ffffff !important;
             color: #102027 !important; /* Texte Noir/Bleu Nuit */
             border: 1px solid #cfd8dc !important;
             caret-color: #102027 !important; /* Cursor color */
         }
-        .stTextInput input:focus, .stTextInput > div > div > input:focus {
-             border-color: #0277bd !important;
-             box-shadow: 0 0 0 1px #0277bd !important;
+        .stTextInput input:focus, 
+        .stTextInput > div > div > input:focus,
+        .stTextArea textarea:focus {
+             border-color: #00897B !important;
+             box-shadow: 0 0 0 1px #00897B !important;
         }
-        .stTextInput input::placeholder {
+        .stTextInput input::placeholder,
+        .stTextArea textarea::placeholder {
             color: #90a4ae !important; /* Placeholder gris visible */
             opacity: 1 !important;
+            -webkit-text-fill-color: #90a4ae !important;
         }
         /* Fix label color for inputs */
-        .stTextInput label, .stTextInput label p {
+        .stTextInput label, .stTextInput label p, 
+        .stTextArea label, .stTextArea label p,
+        .stSelectbox label, .stSelectbox label p {
             color: #102027 !important;
             font-weight: 600 !important;
         }

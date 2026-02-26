@@ -70,21 +70,29 @@ def render_login():
 
         /* --- FIX: Champs de saisie (Inputs) --- */
         /* Force le fond blanc et le texte noir */
+        .stTextInput input, 
         .stTextInput > div > div > input {
             background-color: #ffffff !important; /* Fond Blanc */
-            color: #000000 !important; /* Texte Noir */
-            border-radius: 6px;
-            border: 1px solid #cfd8dc;
+            color: #102027 !important; /* Texte Noir/Bleu Nuit */
+            border-radius: 6px !important;
+            border: 1px solid #cfd8dc !important;
             padding: 0.5rem 1rem;
+            caret-color: #102027 !important;
         }
+        .stTextInput input:focus, 
         .stTextInput > div > div > input:focus {
             border-color: #0277bd !important; /* Bordure Bleue au focus */
             box-shadow: 0 0 0 1px #0277bd !important;
             background-color: #ffffff !important;
-            color: #000000 !important;
+            color: #102027 !important;
+        }
+        .stTextInput input::placeholder {
+            color: #90a4ae !important;
+            opacity: 1 !important;
+            -webkit-text-fill-color: #90a4ae !important;
         }
         /* Labels des inputs (Email, Password...) en Bleu foncé pour lisibilité */
-        .stTextInput label p {
+        .stTextInput label, .stTextInput label p {
             color: #01579b !important;
             font-weight: 600 !important;
         }
