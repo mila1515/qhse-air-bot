@@ -233,6 +233,11 @@ def render_dashboard():
     """
     # Récupération du nom de l'utilisateur
     user = st.session_state.get("user", {})
+    
+    # Sécurisation : si user est None, on met un dict vide
+    if user is None:
+        user = {}
+        
     email = user.get("email", "")
     if email:
         # Extraction propre du nom (ex: jean.dupont -> Jean Dupont)
