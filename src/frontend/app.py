@@ -141,27 +141,41 @@ def apply_global_styles():
             box-shadow: 0 0 0 3px rgba(0, 137, 123, 0.4) !important;
         }
 
-        /* --- Secondary Buttons (Explicitly White) --- */
-        div.stButton > button[kind="secondary"] {
-            background-color: white !important;
-            color: #0277bd !important; /* Light Blue Text */
-            border: 1px solid #b3e5fc !important;
+        /* --- Secondary & Tertiary Buttons (Light Blue Background, Black Text) --- */
+        div.stButton > button[kind="secondary"],
+        div.stButton > button[kind="tertiary"] {
+            background-color: #E1F5FE !important; /* Light Blue 50 */
+            color: #102027 !important; /* Black Text */
+            border: 1px solid #B3E5FC !important; /* Light Blue Border */
         }
-        div.stButton > button[kind="secondary"] p {
-            color: #0277bd !important;
+        div.stButton > button[kind="secondary"] p,
+        div.stButton > button[kind="tertiary"] p {
+            color: #102027 !important; /* Force Black Text */
         }
-        div.stButton > button[kind="secondary"]:hover {
-            background-color: #e1f5fe !important; /* Very Light Blue */
-            border-color: #0277bd !important;
+        div.stButton > button[kind="secondary"]:hover,
+        div.stButton > button[kind="tertiary"]:hover {
+            background-color: #B3E5FC !important; /* Darker Light Blue on Hover */
+            border-color: #81D4FA !important;
+            color: #102027 !important;
         }
         div.stButton > button[kind="secondary"]:active,
-        div.stButton > button[kind="secondary"]:focus:not(:active) {
-            background-color: #b3e5fc !important;
-            color: #01579b !important;
+        div.stButton > button[kind="secondary"]:focus:not(:active),
+        div.stButton > button[kind="tertiary"]:active,
+        div.stButton > button[kind="tertiary"]:focus:not(:active) {
+            background-color: #81D4FA !important; /* Even Darker on Active */
+            color: #102027 !important;
             box-shadow: 0 0 0 2px rgba(3, 169, 244, 0.3) !important;
         }
 
         /* --- Global Input Styles (Fix visibility issues) --- */
+        /* FORCE INPUT COLORS - FINAL FALLBACK */
+        input[type="text"], input[type="password"], input[type="email"], textarea {
+             color: #102027 !important;
+             background-color: #ffffff !important;
+             -webkit-text-fill-color: #102027 !important;
+             caret-color: #102027 !important;
+        }
+
         /* Force fond blanc et texte noir partout (Profile, Login, etc.) */
         .stTextInput input, 
         .stTextInput > div > div > input,
@@ -173,6 +187,37 @@ def apply_global_styles():
             caret-color: #102027 !important; /* Cursor color */
             border-radius: 6px !important;
         }
+
+        .stTextInput div[data-baseweb="input"] {
+            background-color: #ffffff !important;
+            border-radius: 6px !important;
+        }
+
+        .stTextInput div[data-baseweb="input"] > div {
+            background-color: transparent !important;
+        }
+
+        .stTextInput div[data-baseweb="input"] button {
+            background-color: transparent !important;
+            color: #102027 !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Fix for the container wrapping the eye icon */
+        .stTextInput div[data-baseweb="input"] > div:nth-last-child(1) {
+            background-color: transparent !important;
+        }
+
+        .stTextInput div[data-baseweb="input"] button:hover {
+            background-color: #E0F2F1 !important;
+        }
+
+        .stTextInput div[data-baseweb="input"] svg,
+        .stTextInput div[data-baseweb="input"] svg * {
+            fill: #102027 !important;
+            color: #102027 !important;
+        }
         
         /* Focus state for inputs */
         .stTextInput input:focus, 
@@ -183,6 +228,19 @@ def apply_global_styles():
              box-shadow: 0 0 0 1px #00897B !important;
              background-color: #ffffff !important;
              color: #102027 !important;
+        }
+
+        /* Disabled Input Styles - Force Dark Text */
+        .stTextInput input:disabled,
+        .stTextInput > div > div > input:disabled,
+        .stTextArea textarea:disabled,
+        .stSelectbox > div > div > div[aria-disabled="true"],
+        input:disabled {
+            background-color: #f1f5f9 !important; /* Slight grey background to indicate disabled */
+            color: #102027 !important; /* Force Dark Text */
+            opacity: 1 !important; /* Prevent browser default opacity reduction */
+            -webkit-text-fill-color: #102027 !important; /* Webkit fix */
+            cursor: not-allowed !important;
         }
 
         /* Placeholder Visibility */
@@ -236,6 +294,34 @@ def apply_global_styles():
         div.stRadio > div[role="radiogroup"] {
             justify-content: center;
             margin-bottom: 1rem;
+        }
+
+        /* --- Expander / Accordion Styles --- */
+        /* Fix: Expander header becoming black */
+        div[data-testid="stExpander"] > details > summary {
+            background-color: #f8fafc !important; /* Light Grey-Blue */
+            color: #102027 !important; /* Dark Text */
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+            transition: all 0.2s ease !important;
+        }
+
+        div[data-testid="stExpander"] > details > summary:hover {
+            background-color: #e0f2f1 !important; /* Light Teal Hover */
+            color: #00695c !important; /* Teal Text */
+            border-color: #80cbc4 !important;
+        }
+
+        div[data-testid="stExpander"] > details > summary p,
+        div[data-testid="stExpander"] > details > summary span,
+        div[data-testid="stExpander"] > details > summary svg {
+            color: inherit !important;
+            fill: currentColor !important;
+        }
+
+        /* Content inside expander */
+        div[data-testid="stExpander"] > details > div {
+             border-color: #e2e8f0 !important;
         }
 
     </style>

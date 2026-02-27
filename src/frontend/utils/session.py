@@ -20,6 +20,27 @@ def init_session_state():
     st.session_state.cookie_manager = get_cookie_manager()
     cookie_manager = st.session_state.cookie_manager
     
+    # 0. Si on vient de se déconnecter (indicateur dans l'URL), on FORCE le nettoyage et on ne restaure rien.
+    if st.query_params.get("logged_out") == "true":
+        # On s'assure que le token session est bien None
+        st.session_state.token = None
+        st.session_state.user = None
+        
+        # On tente à nouveau de supprimer le cookie si jamais il a survécu
+        try:
+             cookie_manager.delete("access_token")
+        except:
+             pass
+             
+        # On ne va PAS plus loin (pas de restauration)
+        # Mais on initialise quand même les variables de base pour éviter les KeyError ailleurs
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+        if "current_view" not in st.session_state:
+            st.session_state.current_view = "Login"
+            
+        return
+
     # 1. Initialiser les variables de base si elles n'existent pas
     if "token" not in st.session_state:
         st.session_state.token = None
@@ -82,29 +103,30 @@ def get_api_headers():
 
 def logout():
     """Déconnecte l'utilisateur et nettoie la session."""
+    # 1. Supprimer le cookie AVANT de nettoyer session_state pour s'assurer que l'instance est là
+    if "cookie_manager" in st.session_state:
+        cookie_manager = st.session_state.cookie_manager
+        try:
+            # On tente de supprimer le cookie 'access_token'
+            cookie_manager.delete("access_token")
+        except Exception as e:
+            print(f"DEBUG LOGOUT: Erreur suppression cookie: {e}")
+    
+    # 2. Nettoyer session_state
     st.session_state.token = None
     st.session_state.user = None
     st.session_state.current_conversation_id = None
     st.session_state.messages = []
     st.session_state.current_view = "Login"
     
-    # Supprimer le cookie
-    # Utiliser l'instance stockée dans session_state
-    if "cookie_manager" in st.session_state:
-        cookie_manager = st.session_state.cookie_manager
-        try:
-            # Vérifier si le cookie existe avant de supprimer pour éviter KeyError
-            if cookie_manager.get("access_token"):
-                cookie_manager.delete("access_token")
-        except Exception:
-            # En cas d'erreur (ex: KeyError interne au composant), on ignore
-            pass
-    
-    # Mettre à jour l'URL pour éviter la persistance de la vue précédente
+    # 3. Mettre à jour l'URL pour éviter la persistance de la vue précédente
     try:
+        st.query_params.clear()
         st.query_params["view"] = "Login"
+        # Ajout d'un indicateur explicite pour que le prochain run sache qu'on vient de sortir
+        st.query_params["logged_out"] = "true"
     except Exception:
         pass
     
-    # Rerun pour appliquer les changements
+    # 4. Rerun pour appliquer les changements
     st.rerun()
