@@ -14,11 +14,15 @@ Ce projet centralise des données réglementaires et environnementales pour faci
     *   **Retours d'Expérience** : Historique des accidents industriels (Base ARIA).
     *   **Temps Réel** : Qualité de l'air et polluants (API WAQI).
 *   **🔌 API REST Performante** : Construite avec **FastAPI**, documentée automatiquement via Swagger UI.
+*   **💻 Interface Utilisateur Moderne** :
+    *   Application **Streamlit** avec thème personnalisé "Mint to White".
+    *   Mode **Clair (Light)** forcé pour une lisibilité optimale.
+    *   Authentification sécurisée (JWT) avec gestion de session et cookies.
 *   **📊 Observabilité & Monitoring** :
     *   **Métriques** : Stack Prometheus/Grafana pour surveiller la santé système et métier (ETL, RAG).
     *   **Logs** : Journalisation structurée et sécurisée avec Loguru.
 *   **🧠 Assistant IA Résilient (RAG)** :
-*   **Multi-Provider** : OpenAI Standard (Principal) avec fallback DeepSeek éventuel.
+    *   **Multi-Provider** : OpenAI Standard (Principal) avec fallback DeepSeek éventuel.
     *   **Mode Déconnecté** : Embeddings locaux si nécessaire.
 
 ## 🛠️ Démarrage Rapide (Docker)
@@ -67,7 +71,7 @@ Le module RAG peut être testé directement en ligne de commande :
 
 ---
 
-## �️‍♂️ Qualité des Données (Evidently AI)
+## 🕵️‍♂️ Qualité des Données (Evidently AI)
 
 Le projet surveille la *valeur* de la donnée via **Evidently AI** :
 *   **Data Drift** : Détection des dérives statistiques (ex: changement brutal de la qualité de l'air).
@@ -77,8 +81,10 @@ Le projet surveille la *valeur* de la donnée via **Evidently AI** :
 
 ## 🔒 Sécurité
 
+*   **Authentification** : Gestion de session robuste avec tokens JWT et cookies sécurisés (HttpOnly).
 *   **Gestion des Secrets** : Aucune clé d'API n'est stockée dans le code. Tout passe par un fichier `.env` non versionné.
 *   **Logs Anonymisés** : Les logs applicatifs sont filtrés pour ne jamais exposer de données sensibles (RGPD, Clés).
+*   **Git Security** : Vérification des pushes pour éviter les fuites de secrets.
 
 ---
 
@@ -91,4 +97,4 @@ Le projet inclut une suite de tests unitaires et d'intégration (avec Mocks pour
 pytest
 ```
 
-*Projet développé avec Python 3.11, FastAPI, PostgreSQL et Docker (aligné sur le pipeline GitHub Actions).*
+*Projet développé avec Python 3.11, FastAPI, Streamlit, PostgreSQL et Docker (aligné sur le pipeline GitHub Actions).*
