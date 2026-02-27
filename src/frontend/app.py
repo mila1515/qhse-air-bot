@@ -173,6 +173,37 @@ def apply_global_styles():
             caret-color: #102027 !important; /* Cursor color */
             border-radius: 6px !important;
         }
+
+        .stTextInput div[data-baseweb="input"] {
+            background-color: #ffffff !important;
+            border-radius: 6px !important;
+        }
+
+        .stTextInput div[data-baseweb="input"] > div {
+            background-color: transparent !important;
+        }
+
+        .stTextInput div[data-baseweb="input"] button {
+            background-color: transparent !important;
+            color: #102027 !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Fix for the container wrapping the eye icon */
+        .stTextInput div[data-baseweb="input"] > div:nth-last-child(1) {
+            background-color: transparent !important;
+        }
+
+        .stTextInput div[data-baseweb="input"] button:hover {
+            background-color: #E0F2F1 !important;
+        }
+
+        .stTextInput div[data-baseweb="input"] svg,
+        .stTextInput div[data-baseweb="input"] svg * {
+            fill: #102027 !important;
+            color: #102027 !important;
+        }
         
         /* Focus state for inputs */
         .stTextInput input:focus, 

@@ -88,9 +88,21 @@ def render_navbar():
             padding-right: 0.75rem !important;
         }
 
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button p,
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button div,
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button span {
+            color: #102027 !important;
+        }
+
         div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button:hover {
             background-color: rgba(255, 255, 255, 0.5) !important; /* Fond blanc semi-transparent au survol */
             color: #000000 !important; /* Noir au survol */
+        }
+
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button:hover p,
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button:hover div,
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button:hover span {
+            color: #000000 !important;
         }
         
         /* Force le style même pour les boutons Primary (qui sont blancs par défaut) */
@@ -98,9 +110,34 @@ def render_navbar():
             color: #102027 !important;
             background-color: transparent !important;
         }
+
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button[kind="primary"] p,
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button[kind="primary"] div,
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button[kind="primary"] span {
+            color: #102027 !important;
+        }
+
         div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button[kind="primary"]:hover {
             color: #00796B !important; /* Darker Teal au survol pour lisibilité */
             background-color: #f1f5f9 !important;
+        }
+
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button:active,
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button:focus:not(:active),
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button[kind="primary"]:active,
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button[kind="primary"]:focus:not(:active) {
+            background-color: rgba(255, 255, 255, 0.5) !important;
+            color: #102027 !important;
+            box-shadow: none !important;
+        }
+
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button:active p,
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button:active div,
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button:active span,
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button:focus:not(:active) p,
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button:focus:not(:active) div,
+        div[data-testid="stHorizontalBlock"]:has(div.navbar-marker) button:focus:not(:active) span {
+            color: #102027 !important;
         }
 
         /* 7. Gap custom pour le menu public */
