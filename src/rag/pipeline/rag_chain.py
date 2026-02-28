@@ -16,7 +16,7 @@ from src.rag.prompts.qhse_prompts import get_qhse_prompt
 from src.rag.prompts.reformulation_prompt import get_reformulation_prompt
 from src.rag.prompts.summary_prompt import get_summary_prompt
 from src.monitoring.logger import logger
-from src.monitoring.metrics import RAG_QUERY_LATENCY, RAG_FALLBACK_COUNT
+from src.monitoring.metrics import RAG_QUERY_LATENCY, RAG_FALLBACK_COUNT, RAG_RETRIEVAL_SCORE
 
 class RAGPipeline:
     def __init__(self):
@@ -207,7 +207,29 @@ class RAGPipeline:
             
             # 2. Récupération des documents (Retrieval) avec la question ORIGINALE
             logger.info(f"🔍 Recherche vectorielle avec : '{reformulated_question}'")
-            docs = self.retriever.invoke(reformulated_question)
+            
+            # Utilisation directe du vectorstore pour récupérer les scores de similarité
+            try:
+                # On suppose que le retriever est un VectorStoreRetriever
+                k_val = self.retriever.search_kwargs.get("k", 3)
+                docs_and_scores = self.retriever.vectorstore.similarity_search_with_score(reformulated_question, k=k_val)
+                
+                # Séparation des docs et des scores
+                docs = [doc for doc, score in docs_and_scores]
+                scores = [score for doc, score in docs_and_scores]
+                
+                # Calcul de la moyenne des scores (L2 Distance : Plus bas = Meilleur)
+                if scores:
+                    avg_score = sum(scores) / len(scores)
+                    RAG_RETRIEVAL_SCORE.set(avg_score)
+                    logger.info(f"📊 Score moyen de retrieval (L2 Distance): {avg_score:.4f}")
+                else:
+                    RAG_RETRIEVAL_SCORE.set(0) # Pas de docs
+                    
+            except AttributeError:
+                # Fallback si le retriever n'est pas standard ou mocké
+                logger.warning("⚠️ Impossible de récupérer les scores (retriever non standard). Utilisation de invoke().")
+                docs = self.retriever.invoke(reformulated_question)
             
             # --- AJOUT: Injection de données temps réel ---
             realtime_doc = self._get_realtime_waqi_doc(question)

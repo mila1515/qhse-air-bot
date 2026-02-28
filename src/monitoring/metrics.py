@@ -51,6 +51,11 @@ RAG_FALLBACK_COUNT = Counter(
     'Nombre de bascules sur le LLM de secours'
 )
 
+RAG_RETRIEVAL_SCORE = Gauge(
+    'rag_retrieval_score_avg',
+    'Score moyen de similarité (Distance L2: Plus bas = Meilleur)'
+)
+
 def push_metrics():
     """Pousse les métriques vers la Pushgateway (si configurée)"""
     # URL de la Pushgateway (par défaut localhost:9091)
