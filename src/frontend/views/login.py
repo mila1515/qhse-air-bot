@@ -69,7 +69,7 @@ def render_login():
                 
                 # Bouton "Se connecter" (Vert / Primary)
                 submit_login = st.form_submit_button("Se connecter", type="primary")
-                
+
                 if submit_login:
                     if email and password:
                         with st.spinner("Connexion en cours..."):
@@ -77,18 +77,23 @@ def render_login():
                             if response and response.status_code == 200:
                                 data = response.json()
                                 save_token(data.get("access_token"))
-                                
+
                                 # Récupérer user info
                                 user_resp = auth_client.get_current_user()
                                 if user_resp and user_resp.status_code == 200:
                                     st.session_state.user = user_resp.json()
-                                
+
                                 st.success("Connexion réussie !")
-                                st.rerun() 
+                                st.rerun()
                             else:
-                                st.error("Identifiants incorrects.")
+                                st.error("Identifiants incorrects. Vérifiez votre email et mot de passe.")
                     else:
                         st.warning("Veuillez remplir tous les champs.")
+            
+            # Aide à la connexion (Dev)
+            st.markdown("<br>", unsafe_allow_html=True)
+            with st.expander("ℹ️ Aide à la connexion (Dev Mode)", expanded=False):
+                st.info("Compte Admin par défaut : **admin@gmail.com** / **admin**")
 
             # LIEN SWITCH MODE
             st.markdown("<div style='margin-top: 1rem; text-align: center;'>", unsafe_allow_html=True)
