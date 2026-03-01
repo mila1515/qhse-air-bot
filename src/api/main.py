@@ -4,15 +4,16 @@ from sqlalchemy import text
 
 from src.db.session import engine, SessionLocal
 from src.db.models import Base
+from src.db.init_db import init_db
 from src.api import endpoints, auth, conversations, notes
 from src.monitoring.api_metrics import DB_CONNECTION_STATUS
+from src.monitoring.logger import logger
 
 # Création des tables (si pas encore fait)
 try:
     Base.metadata.create_all(bind=engine)
 except Exception as e:
     # On loggue juste un warning pour ne pas bloquer les tests si la DB n'est pas là
-    from src.monitoring.logger import logger
     logger.warning(f"⚠️ Impossible de créer les tables au démarrage (DB inaccessible ?) : {e}")
 
 app = FastAPI(
@@ -20,6 +21,12 @@ app = FastAPI(
     description="API REST pour consulter les données QHSE (Qualité Air, Réglementation, Accidents)",
     version="1.0.0"
 )
+
+# Initialisation des données par défaut au démarrage
+@app.on_event("startup")
+def startup_event():
+    logger.info("🚀 Démarrage de l'API : Initialisation des données...")
+    init_db()
 
 # Instrumentation Prometheus (Métriques API)
 instrumentator = Instrumentator().instrument(app)
