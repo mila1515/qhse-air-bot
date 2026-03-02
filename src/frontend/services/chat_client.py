@@ -1,54 +1,34 @@
 import httpx
-from src.config import get_settings
+from src.frontend.utils.session import API_URL, get_api_headers
 from src.monitoring.logger import logger
 
-settings = get_settings()
+# Timeout étendu pour les réponses RAG (120s)
+TIMEOUT = 120.0
 
-class ChatClient:
-    def __init__(self):
-        self.api_url = f"http://localhost:8000/api/v1/rag/chat"
-        # Timeout étendu pour les réponses RAG (120s)
-        self.timeout = 120.0
-
-    def send_chat_message(self, message: str, token: str) -> dict:
-        """Envoie un message au backend RAG."""
-        try:
-            with httpx.Client(timeout=self.timeout) as client:
-                response = client.post(
-                    self.api_url,
-                    json={"question": message},
-                    headers={"Authorization": f"Bearer {token}"}
-                )
-                
-                if response.status_code == 200:
-                    return response.json()
-                elif response.status_code == 401:
-                    return {
-                        "answer": "🔒 Votre session a expiré. Veuillez vous reconnecter.",
-                        "sources": []
-                    }
-                else:
-                    logger.error(f"Erreur API ({response.status_code}): {response.text}")
-                    return {
-                        "answer": f"⚠️ Erreur serveur ({response.status_code}). Veuillez réessayer.",
-                        "sources": []
-                    }
-
-        except httpx.ReadTimeout:
-            logger.error("❌ Timeout lors de la requête API.")
-            return {
-                "answer": "⚠️ Le serveur met trop de temps à répondre (Timeout > 120s).\n\n"
-                          "Cela peut arriver si :\n"
-                          "- La question est très complexe\n"
-                          "- Le serveur est surchargé\n"
-                          "- Le modèle IA est en cours d'initialisation\n\n"
-                          "👉 Veuillez réessayer dans quelques instants ou reformuler votre question.",
-                "sources": []
-            }
-        except (httpx.ConnectError, httpx.RequestError) as e:
-            logger.error(f"❌ Impossible de se connecter à l'API : {e}")
-            return {
-                "answer": "🔌 Impossible de joindre le serveur API.\n\n"
-                          "Vérifiez que l'API est bien lancée (`uvicorn src.api.main:app`).",
-                "sources": []
-            }
+def send_chat_message(conversation_id: int, message: str) -> httpx.Response:
+    """
+    Envoie un message au backend pour une conversation donnée.
+    Retourne l'objet Response brut (httpx) pour que l'appelant gère le status_code et le json().
+    """
+    url = f"{API_URL}/conversations/{conversation_id}/chat"
+    headers = get_api_headers()
+    
+    # On utilise un client context manager pour s'assurer que la connexion est fermée
+    # Mais comme on veut retourner la réponse, on ne peut pas utiliser 'with' ici facilement 
+    # si on veut streamer ou lire après.
+    # Cependant, httpx.post est un raccourci qui utilise un client temporaire.
+    # Pour le timeout custom, on doit passer timeout=...
+    
+    try:
+        response = httpx.post(
+            url,
+            json={"question": message},
+            headers=headers,
+            timeout=TIMEOUT
+        )
+        return response
+    except httpx.RequestError as e:
+        # On laisse remonter l'exception pour que la vue la gère (ex: affichage erreur réseau)
+        # Ou on log ici avant de relancer
+        logger.error(f"Erreur lors de l'envoi du message chat: {e}")
+        raise e
