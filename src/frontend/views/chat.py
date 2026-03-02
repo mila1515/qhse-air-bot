@@ -157,7 +157,7 @@ def render_chat():
                                 err_msg = f"Erreur serveur ({status_code}): {err_detail}"
                                 st.error(err_msg)
                                 st.session_state.messages.append({"role": "assistant", "content": err_msg})
-                        except (requests.exceptions.Timeout, httpx.ReadTimeout):
+                        except (requests.exceptions.Timeout, httpx.TimeoutException):
                             err_msg = (
                                 "⚠️ **Délai d'attente dépassé**\n\n"
                                 "Le serveur met trop de temps à répondre (> 120s).\n"
@@ -169,8 +169,8 @@ def render_chat():
                             )
                             st.warning(err_msg, icon="⏳")
                             st.session_state.messages.append({"role": "assistant", "content": err_msg})
-                        except requests.exceptions.RequestException as e:
-                            if isinstance(e, requests.exceptions.ConnectionError):
+                        except (requests.exceptions.RequestException, httpx.RequestError) as e:
+                            if isinstance(e, (requests.exceptions.ConnectionError, httpx.ConnectError)):
                                 err_msg = "🔌 **Erreur de connexion** : Impossible de joindre le serveur backend."
                             else:
                                 err_msg = f"❌ Erreur réseau : {e}"
