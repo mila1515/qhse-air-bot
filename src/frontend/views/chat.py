@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import httpx
 from src.frontend.services import chat_client, conversations_client
 
 def render_chat():
