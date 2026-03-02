@@ -74,7 +74,7 @@ class VectorStoreManager:
             logger.error(f"❌ Erreur création VectorStore : {e}")
             raise e
 
-    def get_retriever(self, k: int = 4):
+    def get_retriever(self, k: int = 3):
         """Charge l'index local et retourne un retriever."""
         try:
             index_path = os.path.join(self.vectorstore_dir, f"{self.index_name}.faiss")

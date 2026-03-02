@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import httpx
 from src.frontend.services import chat_client, conversations_client
 
 def render_chat():
@@ -156,13 +157,23 @@ def render_chat():
                                 err_msg = f"Erreur serveur ({status_code}): {err_detail}"
                                 st.error(err_msg)
                                 st.session_state.messages.append({"role": "assistant", "content": err_msg})
+                        except (requests.exceptions.Timeout, httpx.ReadTimeout):
+                            err_msg = (
+                                "⚠️ **Délai d'attente dépassé**\n\n"
+                                "Le serveur met trop de temps à répondre (> 120s).\n"
+                                "Cela peut arriver si :\n"
+                                "- La question est très complexe\n"
+                                "- Le serveur est surchargé\n"
+                                "- Le modèle IA est en cours d'initialisation\n\n"
+                                "👉 *Veuillez réessayer dans quelques instants ou reformuler votre question.*"
+                            )
+                            st.warning(err_msg, icon="⏳")
+                            st.session_state.messages.append({"role": "assistant", "content": err_msg})
                         except requests.exceptions.RequestException as e:
                             if isinstance(e, requests.exceptions.ConnectionError):
-                                err_msg = f"Erreur de connexion : Impossible de joindre le serveur backend. ({e})"
-                            elif isinstance(e, requests.exceptions.Timeout):
-                                err_msg = f"Timeout : Le serveur a mis trop de temps à répondre. ({e})"
+                                err_msg = "🔌 **Erreur de connexion** : Impossible de joindre le serveur backend."
                             else:
-                                err_msg = f"Erreur réseau : {e}"
+                                err_msg = f"❌ Erreur réseau : {e}"
                             
                             st.error(err_msg)
                             st.session_state.messages.append({"role": "assistant", "content": err_msg})

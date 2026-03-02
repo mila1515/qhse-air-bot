@@ -53,6 +53,7 @@ services:
       - SERVICE_NAME=scheduler
       - EVIDENTLY_SERVICE_URL=http://qhse_evidently_proxy:80
       - PUSHGATEWAY_URL=qhse_pushgateway:9091
+      - TZ=Europe/Paris
     depends_on:
       - postgres
       - evidently

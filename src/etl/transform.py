@@ -89,7 +89,9 @@ class DataTransformer:
             # Gestion des dates (colonne souvent nommée 'date_de_levenement' ou 'date')
             date_col = next((c for c in df.columns if 'date' in c), None)
             if date_col:
-                df['date_event'] = pd.to_datetime(df[date_col], errors='coerce', dayfirst=True)
+                df['date_event'] = pd.to_datetime(df[date_col], errors='coerce')
+                # Trier par date décroissante pour avoir les plus récents en premier
+                df = df.sort_values(by='date_event', ascending=False)
             
             # Nettoyage texte
             text_cols = [c for c in df.columns if df[c].dtype == 'object']

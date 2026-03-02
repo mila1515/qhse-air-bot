@@ -27,12 +27,12 @@ def ingestion_job():
 # Planification ETL à 10:00
 schedule.every().day.at("10:00").do(etl_job)
 
-# Planification Ingestion RAG à 11:00
-schedule.every().day.at("11:00").do(ingestion_job)
+# Planification Ingestion RAG à 10:30
+schedule.every().day.at("10:30").do(ingestion_job)
 
 logger.info("⏳ Scheduler démarré.")
 logger.info("   - Pipeline ETL : tous les jours à 10:00")
-logger.info("   - Ingestion RAG : tous les jours à 11:00")
+logger.info("   - Ingestion RAG : tous les jours à 10:30")
 
 # Boucle infinie pour maintenir le script en vie
 while True:

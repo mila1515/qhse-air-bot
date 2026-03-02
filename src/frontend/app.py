@@ -69,7 +69,6 @@ def apply_global_styles():
         }
 
         /* --- Buttons (NUCLEAR OPTION: NO BLACK BACKGROUNDS EVER) --- */
-        /* Target ALL buttons generic to ensure a baseline */
         div.stButton > button, button {
             background-color: #FFFFFF !important; /* Default to White */
             color: #102027 !important; /* Default to Dark Text */
@@ -78,6 +77,21 @@ def apply_global_styles():
             font-weight: 600 !important;
             transition: all 0.2s ease-in-out !important;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+        }
+
+        /* --- Primary Buttons (Green) --- */
+        div.stButton > button[kind="primary"] {
+            background-color: #48BB78 !important; /* Vert Émeraude */
+            color: #FFFFFF !important; /* White Text */
+            border: none !important;
+            box-shadow: 0 4px 6px -1px rgba(72, 187, 120, 0.4) !important;
+        }
+
+        /* --- Secondary Buttons (Outline) --- */
+        div.stButton > button[kind="secondary"] {
+            background-color: #FFFFFF !important;
+            color: #546E7A !important;
+            border: 1px solid #B0BEC5 !important;
         }
         
         /* Hover State */
@@ -168,12 +182,25 @@ def apply_global_styles():
         }
 
         /* --- Global Input Styles (Fix visibility issues) --- */
-        /* FORCE INPUT COLORS - FINAL FALLBACK */
         input[type="text"], input[type="password"], input[type="email"], textarea {
-             color: #102027 !important;
-             background-color: #ffffff !important;
-             -webkit-text-fill-color: #102027 !important;
-             caret-color: #102027 !important;
+             color: #000000 !important; /* Pure Black */
+             background-color: #F8F9FA !important; /* Light Gray for contrast against white */
+             border: 1px solid #90A4AE !important; /* Visible Border */
+             -webkit-text-fill-color: #000000 !important;
+             caret-color: #000000 !important;
+             font-weight: 500 !important;
+        }
+        
+        /* Placeholder Visibility */
+        ::placeholder {
+            color: #546E7A !important; /* Blue Grey 600 */
+            opacity: 1 !important;
+        }
+
+        /* Labels Visibility */
+        label, .st-emotion-cache-16idsys p {
+            color: #102027 !important;
+            font-weight: 600 !important;
         }
 
         /* Force fond blanc et texte noir partout (Profile, Login, etc.) */

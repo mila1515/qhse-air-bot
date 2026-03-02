@@ -250,9 +250,9 @@ class RAGPipeline:
                 # Le prompt QHSE prend {input} et {context}
                 
                 try:
-                    # Chaîne Principale (DeepSeek/OpenAI)
+                    # Chaîne Principale (OpenAI)
                     response = self.combine_docs_chain.invoke({
-                        "input": question,  # Question originale pour la réponse
+                        "input": question,  # Question  pour la réponse
                         "context": docs
                     })
                 except Exception as e_main:
