@@ -90,10 +90,7 @@ def render_login():
                     else:
                         st.warning("Veuillez remplir tous les champs.")
             
-            # Aide à la connexion (Dev)
-            st.markdown("<br>", unsafe_allow_html=True)
-            with st.expander("ℹ️ Aide à la connexion (Dev Mode)", expanded=False):
-                st.info("Compte Admin par défaut : **admin@gmail.com** / **admin**")
+
 
             # LIEN SWITCH MODE
             st.markdown("<div style='margin-top: 1rem; text-align: center;'>", unsafe_allow_html=True)
