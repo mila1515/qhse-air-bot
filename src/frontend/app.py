@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from src.frontend.utils.session import init_session_state, logout
-from src.frontend.views import login, chat, conversations, notes, home, about, profile
+from src.frontend.views import login, chat, conversations, notes, home, about, profile, analytics
 from src.frontend.views.components import render_navbar
 
 # Configuration de la page
@@ -426,6 +426,8 @@ def main():
              notes.render_notes()
         elif st.session_state.current_view == "Profile":
              profile.render_profile()
+        elif st.session_state.current_view == "Analytics":
+             analytics.render_analytics()
         elif st.session_state.current_view == "About":
              about.render_about()
         else:

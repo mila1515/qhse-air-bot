@@ -174,9 +174,9 @@ def render_navbar():
     with c_content:
         if st.session_state.get("token"): 
             # --- Mode Connecté ---
-            # On groupe tout : Accueil, Chat, Hist, Notes, Profil
-            # Répartition équilibrée sur 5 colonnes
-            c1, c2, c3, c4, c5 = st.columns(5) 
+            # On groupe tout : Accueil, Discussion, Historique, Notes, Analyses, Profil
+            # Répartition équilibrée sur 6 colonnes
+            c1, c2, c3, c4, c5, c6 = st.columns(6) 
             current = st.session_state.get("current_view", "Home") 
              
             with c1: 
@@ -200,6 +200,11 @@ def render_navbar():
                          use_container_width=True, 
                          on_click=navigate_to, args=("Notes",)) 
             with c5: 
+                st.button("Analyses", key="nav_analytics",  
+                         type="primary" if current == "Analytics" else "secondary",  
+                         use_container_width=True, 
+                         on_click=navigate_to, args=("Analytics",)) 
+            with c6: 
                 st.button("Profil", key="nav_profile", type="secondary",  
                          use_container_width=True, 
                          on_click=navigate_to, args=("Profile",))

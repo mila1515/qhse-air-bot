@@ -1,94 +1,148 @@
-# QHSE Air Bot 🌍
+# QHSE Air Bot
 
-**Assistant intelligent pour l'analyse et le monitoring des données QHSE (Qualité, Hygiène, Sécurité, Environnement).**
-
-Ce projet centralise des données réglementaires et environnementales pour faciliter la prise de décision et la surveillance des risques. Il combine une architecture ETL robuste, un assistant IA résilient et un monitoring complet.
+### Plateforme d’analyse de données environnementales (ETL + IA + Dashboard)
 
 ---
 
-## 🚀 Fonctionnalités Principales
+## Description du projet
 
-*   **📡 Collecte Multi-Sources (ETL)** :
-    *   **Réglementation** : Articles du Code du Travail (Scraping).
-    *   **Prévention** : Guides et brochures de l'INRS.
-    *   **Retours d'Expérience** : Historique des accidents industriels (Base ARIA).
-    *   **Temps Réel** : Qualité de l'air et polluants (API WAQI).
-*   **🔌 API REST Performante** : Construite avec **FastAPI**, documentée automatiquement via Swagger UI.
-*   **📊 Observabilité & Monitoring** :
-    *   **Métriques** : Stack Prometheus/Grafana pour surveiller la santé système et métier (ETL, RAG).
-    *   **Logs** : Journalisation structurée et sécurisée avec Loguru.
-*   **🧠 Assistant IA Résilient (RAG)** :
-*   **Multi-Provider** : OpenAI Standard (Principal) avec fallback DeepSeek éventuel.
-    *   **Mode Déconnecté** : Embeddings locaux si nécessaire.
+QHSE Air Bot est une plateforme d’analyse de données environnementales qui centralise, traite et exploite des données liées à la qualité de l’air et aux risques QHSE.
+Le projet combine un pipeline ETL multi-sources, une API REST, un assistant IA basé sur RAG, un dashboard analytique et une stack de monitoring, dans une architecture locale reproductible via Docker.
 
-## 🛠️ Démarrage Rapide (Docker)
+---
 
-Le projet est entièrement conteneurisé pour un déploiement facile et reproductible.
+## Architecture globale
 
-### 1. Lancer l'application
+- ETL (data ingestion) : collecte multi-sources (scraping + API + open data)
+- API FastAPI : exposition des données et services applicatifs
+- Assistant IA (RAG) : question-réponse sur données internes
+- Dashboard Streamlit : visualisation et suivi des KPIs QHSE
+- Monitoring : Prometheus / Grafana + qualité/dérive (Evidently)
+- Exécution locale : Docker Compose (services isolés)
+
+---
+
+## Fonctionnalités principales
+
+### Collecte et traitement des données (ETL)
+
+- Scraping de données réglementaires : Code du Travail, INRS
+- Données environnementales : qualité de l’air (WAQI)
+- Retours d’expérience : incidents/accidents industriels (ARIA)
+- Structuration, nettoyage et chargement en base PostgreSQL
+
+### Assistant IA (RAG)
+
+- Question-réponse basé sur les données internes collectées
+- Modèles LLM : OpenAI, avec DeepSeek en fallback (si configuré)
+- Recherche sémantique : embeddings + index FAISS
+- Mode dégradé : embeddings locaux en cas d’indisponibilité API
+
+### Dashboard analytique (Streamlit)
+
+- Intégré dans la même application Streamlit (onglet Analyses)
+- KPIs : AQI moyen, PM2.5 moyen, risque prédominant, nombre total de mesures
+- Graphiques : évolution temporelle de l’AQI, comparaison des polluants (PM2.5, PM10, NO2, O3), répartition des risques
+- Filtres : par ville et par période
+- Objectif : support à la décision QHSE
+
+### Monitoring & qualité
+
+- Suivi système et métriques : Prometheus
+- Tableaux de bord : Grafana
+- Qualité des données / drift : Evidently
+- Logs structurés : Loguru
+
+---
+
+## API REST
+
+API développée avec FastAPI :
+
+- Endpoints documentés via Swagger
+- Accès aux données issues de l’ETL
+- Services applicatifs utilisés par l’application
+
+---
+
+## Stack technique
+
+- Python 3.11
+- FastAPI
+- PostgreSQL
+- Streamlit
+- Docker / Docker Compose
+- FAISS (vector search)
+- LLM (OpenAI / DeepSeek)
+- Prometheus / Grafana
+- Evidently
+
+---
+
+## Installation et exécution
+
+### 1) Lancer le projet
+
 ```bash
 docker-compose up -d --build
 ```
-*Cela démarre l'API, la Base de données, le Frontend et toute la stack de monitoring.*
 
-### 2. Accéder aux Interfaces
-| Service | URL | Description |
-| :--- | :--- | :--- |
-| **Frontend App** | [http://localhost:8501](http://localhost:8501) | Interface Utilisateur (Streamlit) |
-| **Documentation API** | [http://localhost:8100/docs](http://localhost:8100/docs) | Tester les endpoints en direct |
-| **Grafana** | [http://localhost:3000](http://localhost:3000) | Visualiser les tableaux de bord (Monitoring) |
-| **Prometheus** | [http://localhost:9090](http://localhost:9090) | Explorer les métriques brutes |
-| **Evidently UI** | [http://localhost:8101](http://localhost:8101) | Dashboard Qualité des Données (Data Drift) |
+### 2) Accès aux interfaces
 
----
+| Service | URL |
+| --- | --- |
+| Frontend Streamlit | http://localhost:8501 |
+| API Swagger | http://localhost:8100/docs |
+| Grafana | http://localhost:3000 |
+| Prometheus | http://localhost:9090 |
+| Evidently UI | http://localhost:8101 |
 
-## 🤖 Architecture RAG (Retrieval-Augmented Generation)
+### 3) Connexion (compte par défaut)
 
-Le module d'IA générative répond aux questions en se basant sur la documentation collectée. Il est conçu pour la **haute disponibilité**.
+- Email : `admin@gmail.com`
+- Mot de passe : `admin`
 
-### Stratégie de Fallback (Résilience)
-1.  **Tentative Principale** : Interrogation du modèle **OpenAI Standard** (si une clé `OPENAI_API_KEY` est configurée).
-2.  **Fallback** : Interrogation du modèle **DeepSeek** si la clé `DEEPSEEK_API_KEY` est configurée.
-3.  **Embeddings** : Utilisation d'**OpenAI Embeddings** (`text-embedding-3-small`) si possible, puis d'un modèle local (`all-MiniLM-L6-v2`) si les APIs d'embedding sont indisponibles.
-
-### Utilisation (CLI)
-Le module RAG peut être testé directement en ligne de commande :
-
-1.  **Ingestion des données** (À lancer après l'ETL) :
-    Exporte les données SQL et crée l'index vectoriel (FAISS).
-    ```bash
-    python src/rag/main.py --ingest
-    ```
-
-2.  **Poser une question** :
-    ```bash
-    python src/rag/main.py --query "Quelles sont les procédures en cas d'incendie ?"
-    ```
-
----
-
-## �️‍♂️ Qualité des Données (Evidently AI)
-
-Le projet surveille la *valeur* de la donnée via **Evidently AI** :
-*   **Data Drift** : Détection des dérives statistiques (ex: changement brutal de la qualité de l'air).
-*   **Automatisation** : Un scheduler dédié ([src/scheduler.py](src/scheduler.py)) déclenche chaque jour le pipeline ETL à **10h00** puis l’ingestion RAG (vectorisation) à **11h00**. Les scripts de monitoring Evidently peuvent être raccordés à cette même fenêtre pour générer régulièrement des rapports de qualité et de dérive.
-
----
-
-## 🔒 Sécurité
-
-*   **Gestion des Secrets** : Aucune clé d'API n'est stockée dans le code. Tout passe par un fichier `.env` non versionné.
-*   **Logs Anonymisés** : Les logs applicatifs sont filtrés pour ne jamais exposer de données sensibles (RGPD, Clés).
-
----
-
-## 🧪 Tests
-
-Le projet inclut une suite de tests unitaires et d'intégration (avec Mocks pour les APIs externes).
+### 4) Lancer le pipeline ETL (si besoin)
 
 ```bash
-# Lancer les tests
+docker exec qhse_scheduler python src/etl/pipeline.py
+```
+
+---
+
+## Module IA (RAG)
+
+### Ingestion des données
+
+```bash
+python src/rag/main.py --ingest
+```
+
+### Requête IA
+
+```bash
+python src/rag/main.py --query "Quelles sont les procédures en cas d'incendie ?"
+```
+
+---
+
+## Sécurité et bonnes pratiques
+
+- Gestion des secrets via `.env` (non versionné)
+- Aucune clé API exposée dans le code
+- Logs structurés, avec attention à la non-exposition de données sensibles
+- Tests unitaires et d’intégration avec pytest
+
+---
+
+## Tests
+
+```bash
 pytest
 ```
 
-*Projet développé avec Python 3.11, FastAPI, PostgreSQL et Docker (aligné sur le pipeline GitHub Actions).*
+---
+
+## Objectif du projet
+
+Projet reproduisant une architecture simplifiée de pipeline data industriel orienté QHSE.
