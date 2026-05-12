@@ -130,13 +130,26 @@ class DataLoader:
 
         logger.info("💾 Chargement WAQI en BDD...")
         df = pd.read_csv(input_file)
+        df = df.replace({"aqi": {"-": None, "": None}})
+
+        def safe_aqi(value):
+            if value is None or (isinstance(value, float) and pd.isna(value)):
+                return None
+            try:
+                aqi_int = int(float(value))
+            except Exception:
+                return None
+            if aqi_int < 0 or aqi_int > 500:
+                return None
+            return aqi_int
         
         objects = []
         for _, row in df.iterrows():
+            aqi_value = safe_aqi(row.get('aqi'))
             objects.append(MesureWAQI(
                 ville=row['ville_recherchee'],
                 station=row['station_nom'],
-                aqi=row['aqi'],
+                aqi=aqi_value,
                 niveau_risque=row['niveau_risque'],
                 conseil_qhse=row['conseil_qhse'],
                 pm25=row['pm25'] if pd.notna(row['pm25']) else None,
@@ -147,7 +160,8 @@ class DataLoader:
             ))
             
             # Mise à jour métrique AQI temps réel
-            update_aqi_gauge(row['ville_recherchee'], row['aqi'])
+            if aqi_value is not None:
+                update_aqi_gauge(row['ville_recherchee'], aqi_value)
             
         self.db.add_all(objects)
         self.db.commit()
