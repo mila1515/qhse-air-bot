@@ -37,6 +37,7 @@ Le projet combine un pipeline ETL multi-sources, une API REST, un assistant IA b
 - Modèles LLM : OpenAI, avec DeepSeek en fallback (si configuré)
 - Recherche sémantique : embeddings + index FAISS
 - Mode dégradé : embeddings locaux en cas d’indisponibilité API
+![1779280730758](image/README/1779280730758.png)
 
 ### Dashboard analytique (Streamlit)
 
@@ -45,12 +46,17 @@ Le projet combine un pipeline ETL multi-sources, une API REST, un assistant IA b
 - Graphiques : évolution temporelle de l’AQI, comparaison des polluants (PM2.5, PM10, NO2, O3), répartition des risques
 - Filtres : par ville et par période
 - Objectif : support à la décision QHSE
+![1779279895340](image/README/1779279895340.png)
 
 ### Monitoring & qualité
 
+- Objectif : suivre l’état de la plateforme (ETL, API, base) et détecter rapidement les erreurs ou dérives de données.
 - Suivi système et métriques : Prometheus
 - Tableaux de bord : Grafana
+![1779281012904](image/README/1779281012904.png)
+
 - Qualité des données / drift : Evidently
+
 - Logs structurés : Loguru
 
 ---

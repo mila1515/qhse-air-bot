@@ -193,6 +193,18 @@ cython_debug/
 cache/
 data/
 
+# Local debug / scratch scripts (do not commit)
+/check_db.py
+/debug_conn.py
+/dashboard_qhse.py
+/test_rag_injection.py
+/scripts/check_*.py
+/scripts/clean_tables.py
+
+# IDE terminal shell integration artifacts
+*shellIntegration.ps1*
+appoutvsworkbenchcontribterminal*
+
 # Ruff stuff:
 .ruff_cache/
 
