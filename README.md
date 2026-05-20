@@ -34,7 +34,7 @@ Le projet combine un pipeline ETL multi-sources, une API REST, un assistant IA b
 ### Assistant IA (RAG)
 
 - Question-réponse basé sur les données internes collectées
-- Modèles LLM : OpenAI, avec DeepSeek en fallback (si configuré)
+- Modèles LLM : OpenAI, avec DeepSeek en fallback
 - Recherche sémantique : embeddings + index FAISS
 - Mode dégradé : embeddings locaux en cas d’indisponibilité API
 ![1779280730758](image/README/1779280730758.png)
