@@ -46,7 +46,7 @@ Le projet combine un pipeline ETL multi-sources, une API REST, un assistant IA b
 - Graphiques : évolution temporelle de l’AQI, comparaison des polluants (PM2.5, PM10, NO2, O3), répartition des risques
 - Filtres : par ville et par période
 - Objectif : support à la décision QHSE
-![1779279895340](image/README/1779279895340.png)
+![1779281763688](image/README/1779281763688.png)
 
 ### Monitoring & qualité
 
