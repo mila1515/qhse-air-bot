@@ -103,10 +103,6 @@ docker-compose up -d --build
 | Prometheus | http://localhost:9090 |
 | Evidently UI | http://localhost:8101 |
 
-### 3) Connexion (compte par défaut)
-
-- Email : `admin@gmail.com`
-- Mot de passe : `admin`
 
 ### 4) Lancer le pipeline ETL (si besoin)
 
